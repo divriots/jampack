@@ -12,9 +12,7 @@
   "repository": "divriots/jampack",
   "files": [
     "/bin",
-    "/dist",
-    "/npm-shrinkwrap.json",
-    "/oclif.manifest.json"
+    "/dist"
   ],
   "dependencies": {
     "@oclif/core": "^1.13.10",
