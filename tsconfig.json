@@ -2,7 +2,7 @@
   "compilerOptions": {
     "declaration": true,
     "importHelpers": true,
-    "module": "commonjs",
+    "module": "Node16",
     "outDir": "dist",
     "rootDir": "src",
     "strict": true,

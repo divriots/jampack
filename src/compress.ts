@@ -4,7 +4,7 @@ import * as path from 'path';
 import { optimize as svgo } from "svgo";
 import { minify as htmlminifier } from 'html-minifier-terser';
 import { minify as csso } from "csso";
-import { formatBytes } from './utils';
+import { formatBytes } from './utils.js';
 import { table, TableUserConfig } from 'table';
 
 type Result = {
@@ -118,7 +118,7 @@ const processFile = async (file: string, stats: Stats): Promise<Result> => {
       else {
         writeData = (newData as any).data;
       }
-    }  
+    }
     else if (file.endsWith('.html') || file.endsWith('.htm')) {
       const data = await fs.readFile(file);
       const newData = await htmlminifier(data.toString(), { minifyCSS: true, minifyJS: true, sortClassName: true, sortAttributes: true});

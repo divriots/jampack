@@ -1,5 +1,6 @@
 import { Command } from 'commander';
-import { compress } from './compress';
+import { compress } from './compress.js';
+import { optimize } from './optimize.js';
 
 const program = new Command();
 
@@ -14,7 +15,8 @@ program.command('pack')
   .description('todo')
   .argument('<dir>', 'Directory to pack')
   .action(async (str, options) => {
-    await compress(str)
+    await optimize(str);
+    //await compress(str);
   });
 
 program.parse();

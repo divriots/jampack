@@ -9,6 +9,7 @@
   "homepage": "https://github.com/divriots/jampack",
   "license": "MIT",
   "main": "dist/index.js",
+  "type": "module",
   "repository": "divriots/jampack",
   "files": [
     "/bin",
@@ -22,6 +23,7 @@
     "@types/table": "^6.3.2",
     "commander": "^9.4.0",
     "csso": "^5.0.5",
+    "globby": "^13.1.2",
     "html-minifier-terser": "^7.0.0",
     "svgo": "^2.8.0",
     "table": "^6.8.0"
