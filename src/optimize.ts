@@ -5,5 +5,8 @@ export async function optimize(dir: string): Promise<void> {
   console.log(`Optimizing...`);
   
   const paths = await globby(path.join(dir, '**/*.{htm,html}'));
-  console.log(paths);
+  
+  paths.forEach(file => {
+    console.log(file);
+  });
 }
