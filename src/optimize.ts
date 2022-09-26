@@ -252,8 +252,6 @@ function setImageSize(img: cheerio.Cheerio, meta: sharp.Metadata): number[] {
 }
 
 export async function optimize(dir: string): Promise<Result[]> {
-  console.log(`Optimizing...`);
-
   const paths = await globby('**/*.{htm,html}', { cwd: dir });
 
   // Sequential async
