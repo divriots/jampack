@@ -209,9 +209,7 @@ const processDirectory = async (directoryPath: string): Promise<Result[]> => {
     return files.filter((file) => file.length).flat(1); // Remove empty dir and flat it all
 };
 
-export async function compress(dir: string, initResult: Result[]): Promise<void> {
-  console.log(`Compressing...`);
-  
+export async function compress(dir: string, initResult: Result[]): Promise<void> {  
   beginProgress(initResult);
   await processDirectory(dir);
   endProgress();
