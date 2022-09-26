@@ -15,6 +15,7 @@ specifiers:
   csso: ^5.0.5
   globby: ^13.1.2
   html-minifier-terser: ^7.0.0
+  mini-svg-data-uri: ^1.4.4
   sharp: ^0.31.0
   shx: ^0.3.3
   svgo: ^2.8.0
@@ -37,6 +38,7 @@ dependencies:
   csso: 5.0.5
   globby: 13.1.2
   html-minifier-terser: 7.0.0
+  mini-svg-data-uri: 1.4.4
   sharp: 0.31.0
   svgo: 2.8.0
   table: 6.8.0
@@ -944,6 +946,11 @@ packages:
   /mimic-response/3.1.0:
     resolution: {integrity: sha512-z0yWI+4FDrrweS8Zmt4Ej5HdJmky15+L2e6Wgn3+iK5fWzb6T3fhNFq2+MeTRb064c6Wr4N/wv0DzQTjNzHNGQ==}
     engines: {node: '>=10'}
+    dev: false
+
+  /mini-svg-data-uri/1.4.4:
+    resolution: {integrity: sha512-r9deDe9p5FJUPZAk3A59wGH7Ii9YrjjWw0jmw/liSbHl2CHiyXj6FcDXDu2K3TjVAXqiJdaw3xxwlZZr9E6nHg==}
+    hasBin: true
     dev: false
 
   /minimatch/3.1.2:

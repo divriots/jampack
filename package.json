@@ -29,6 +29,7 @@
     "csso": "^5.0.5",
     "globby": "^13.1.2",
     "html-minifier-terser": "^7.0.0",
+    "mini-svg-data-uri": "^1.4.4",
     "sharp": "^0.31.0",
     "svgo": "^2.8.0",
     "table": "^6.8.0"

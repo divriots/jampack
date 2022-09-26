@@ -7,6 +7,7 @@ import sharp from "sharp";
 import options from './options.js';
 import { compressImage } from './compress.js';
 import type { Result } from './types.js';
+import svgToMiniDataURI from 'mini-svg-data-uri';
 
 const compressedImages: string[] = [];
 const compressedResults: Result[] = [];
@@ -122,7 +123,7 @@ async function processImage(dir: string, file: string, $: cheerio.Root, imgEleme
       case 'svg':
         const compressedData = await compressImage(originalData, {});
         const svgEmbed = (compressedData && compressedData.length < originalData.length) ? compressedData : originalData;
-        datauri = `data:image/svg+xml;utf8,${svgEmbed}`;
+        datauri = svgToMiniDataURI(svgEmbed.toString());
         break;
       case 'jpg':
       case 'jpeg':
@@ -138,8 +139,6 @@ async function processImage(dir: string, file: string, $: cheerio.Root, imgEleme
       isEmbed = true;
       img.removeAttr('loading');
       img.removeAttr('decoding');
-      img.removeAttr('width');
-      img.removeAttr('height');
     }
   }
 
