@@ -1,17 +1,14 @@
 import { Stats } from 'fs';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { globby } from 'globby';
 import { optimize as svgo } from "svgo";
 import { minify as htmlminifier } from 'html-minifier-terser';
 import { minify as csso } from "csso";
 import { formatBytes } from './utils.js';
 import { table, TableUserConfig } from 'table';
-
-type Result = {
-  file: string;
-  originalSize: number;
-  compressedSize: number;
-}
+import sharp from 'sharp';
+import type { Result } from './types.js';
 
 type Summary = {
   nbFiles: number;
@@ -25,9 +22,10 @@ type State = {
   detailsByExtension: Record<string, Summary>;
 }
 
-var state: State;
+let state: State;
+let compressedFiles: string[] = [];
 
-const beginProgress = (): void => {
+const beginProgress = (initResults: Result[]): void => {
   state = {
     total: {
       nbFiles: 0,
@@ -37,9 +35,14 @@ const beginProgress = (): void => {
     },
     detailsByExtension: {},
   }
+
+  initResults.forEach( r=> {
+    addProgress(r);
+    compressedFiles.push(r.file);
+   } );
 }
 
-const printProgress = (r: Result): void => {
+const addProgress = (r: Result): void => {
   const isCompressed = r.compressedSize < r.originalSize ? 1 : 0;
 
   state.total.nbFiles++;
@@ -64,6 +67,10 @@ const printProgress = (r: Result): void => {
     summary.dataLenUncompressed += r.originalSize;
     summary.dataLenCompressed += r.compressedSize;
   }
+}
+
+const printProgress = (r: Result): void => {
+  addProgress(r);
 
   process.stdout.clearLine(0);
   process.stdout.cursorTo(0);
@@ -105,31 +112,36 @@ const processFile = async (file: string, stats: Stats): Promise<Result> => {
     compressedSize: stats.size
   }
 
-  var writeData = undefined;
+  let writeData: Buffer | string | undefined = undefined;
 
   try {
-    if (file.endsWith('.svg')) {
-      const data = await fs.readFile(file);
-      const newData = svgo(data, {});
-      if (newData.error || newData.modernError) {
-        // nok
-        console.log( `Error svg ${file} ${newData}`)
+    const ext = path.extname(file);
+
+    switch(ext) {
+      case '.svg':
+      case '.png':
+      case '.jpg':
+      case '.jpeg':
+      case '.webp':
+      case '.gif':
+        const newImageData = await compressImageFile(file);
+        if (newImageData && newImageData.length < result.originalSize) {
+          writeData = newImageData;
+        }
+        break;
+    case '.html':
+    case '.htm':
+      const htmldata = await fs.readFile(file);
+      const newhtmlData = await htmlminifier(htmldata.toString(), { minifyCSS: true, minifyJS: true, sortClassName: true, sortAttributes: true});
+      writeData = newhtmlData;
+      break;
+    case '.css':
+      const cssdata = await fs.readFile(file);
+      const newcssData = await csso(cssdata.toString()).css;
+      if (newcssData) {
+        writeData = newcssData;
       }
-      else {
-        writeData = (newData as any).data;
-      }
-    }
-    else if (file.endsWith('.html') || file.endsWith('.htm')) {
-      const data = await fs.readFile(file);
-      const newData = await htmlminifier(data.toString(), { minifyCSS: true, minifyJS: true, sortClassName: true, sortAttributes: true});
-      writeData = newData;
-    }
-    else if (file.endsWith('.css')) {
-      const data = await fs.readFile(file);
-      const newData = await csso(data.toString()).css;
-      if (newData) {
-        writeData = newData;
-      }
+      break;
     }
   }
   catch(e) {
@@ -148,6 +160,35 @@ const processFile = async (file: string, stats: Stats): Promise<Result> => {
   return result;
 }
 
+export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions ): Promise<Buffer | undefined> => {
+
+  const sharpFile = await sharp(data);
+  const meta = await sharpFile.metadata();
+
+  switch(meta.format) {
+    case 'svg':
+      const newData = svgo(data, {});
+      if (newData.error || newData.modernError) {
+        console.log( `Error processing svg ${data}`);
+        return undefined;
+      }
+      return Buffer.from(newData.data, 'utf8');
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'webp':
+    case 'gif':
+      return await sharpFile.resize(resize).toBuffer();
+  }
+
+  return undefined;
+}
+
+const compressImageFile = async (file: string): Promise<Buffer | string | undefined> => {
+  const buffer = await fs.readFile(file);
+  return compressImage(buffer, {});
+}
+
 const processDirectory = async (directoryPath: string): Promise<Result[]> => {
     const filesInDirectory = await fs.readdir(directoryPath);
     const files = await Promise.all(
@@ -158,6 +199,9 @@ const processDirectory = async (directoryPath: string): Promise<Result[]> => {
             if (stats.isDirectory()) {
                 return processDirectory(filePath);
             } else {
+                if (compressedFiles.includes(filePath)) {
+                  return [];
+                }
                 return [await processFile(filePath, stats)];
             }
         })
@@ -165,10 +209,10 @@ const processDirectory = async (directoryPath: string): Promise<Result[]> => {
     return files.filter((file) => file.length).flat(1); // Remove empty dir and flat it all
 };
 
-export async function compress(dir: string): Promise<void> {
+export async function compress(dir: string, initResult: Result[]): Promise<void> {
   console.log(`Compressing...`);
   
-  beginProgress();
+  beginProgress(initResult);
   await processDirectory(dir);
   endProgress();
 

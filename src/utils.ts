@@ -1,3 +1,6 @@
+import * as url from 'url';
+import * as path from 'path';
+
 export function formatBytes(bytes:number, decimals = 2) {
   if (!+bytes) return '0 Bytes'
 
@@ -8,4 +11,23 @@ export function formatBytes(bytes:number, decimals = 2) {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
+
+export function isLocal(src: string) {
+  const u = url.parse(src);
+  return !u.host;
+}
+
+export function translateSrc(projectRoot: string, htmlRelativePath: string, src: string) {
+  if (!isLocal(src)) {
+    throw new Error('Source should be local');
+  }
+
+  const srcAbsolutePath = path.join(projectRoot, src.startsWith('/') ? '' : htmlRelativePath, src);
+
+  return srcAbsolutePath;
+}
+
+export function isNumeric(value: string) {
+  return /^\d+$/.test(value);
 }

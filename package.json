@@ -16,15 +16,19 @@
     "/dist"
   ],
   "dependencies": {
+    "@types/cheerio": "^0.22.31",
     "@types/commander": "^2.12.2",
     "@types/csso": "^5.0.0",
     "@types/html-minifier-terser": "^7.0.0",
+    "@types/sharp": "^0.31.0",
     "@types/svgo": "^2.6.4",
     "@types/table": "^6.3.2",
+    "cheerio": "0.22.0",
     "commander": "^9.4.0",
     "csso": "^5.0.5",
     "globby": "^13.1.2",
     "html-minifier-terser": "^7.0.0",
+    "sharp": "^0.31.0",
     "svgo": "^2.8.0",
     "table": "^6.8.0"
   },

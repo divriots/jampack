@@ -15,8 +15,8 @@ program.command('pack')
   .description('todo')
   .argument('<dir>', 'Directory to pack')
   .action(async (str, options) => {
-    await optimize(str);
-    //await compress(str);
+    const compressedResults = await optimize(str);
+    await compress(str, compressedResults);
   });
 
 program.parse();
