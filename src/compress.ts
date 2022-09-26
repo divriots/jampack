@@ -1,14 +1,15 @@
 import { Stats } from 'fs';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { globby } from 'globby';
 import { optimize as svgo } from "svgo";
 import { minify as htmlminifier } from 'html-minifier-terser';
 import { minify as csso } from "csso";
 import { formatBytes } from './utils.js';
 import { table, TableUserConfig } from 'table';
 import sharp from 'sharp';
+import swc from '@swc/core';
 import type { Result } from './types.js';
+
 
 type Summary = {
   nbFiles: number;
@@ -129,19 +130,26 @@ const processFile = async (file: string, stats: Stats): Promise<Result> => {
           writeData = newImageData;
         }
         break;
-    case '.html':
-    case '.htm':
-      const htmldata = await fs.readFile(file);
-      const newhtmlData = await htmlminifier(htmldata.toString(), { minifyCSS: true, minifyJS: true, sortClassName: true, sortAttributes: true});
-      writeData = newhtmlData;
-      break;
-    case '.css':
-      const cssdata = await fs.readFile(file);
-      const newcssData = await csso(cssdata.toString()).css;
-      if (newcssData) {
-        writeData = newcssData;
-      }
-      break;
+      case '.html':
+      case '.htm':
+        const htmldata = await fs.readFile(file);
+        const newhtmlData = await htmlminifier(htmldata.toString(), { minifyCSS: true, minifyJS: true, sortClassName: true, sortAttributes: true});
+        writeData = newhtmlData;
+        break;
+      case '.css':
+        const cssdata = await fs.readFile(file);
+        const newcssData = await csso(cssdata.toString()).css;
+        if (newcssData) {
+          writeData = newcssData;
+        }
+        break;
+      case '.js':
+        const jsdata = await fs.readFile(file);
+        const newjsresult = await swc.minify(jsdata.toString(), { compress: true, mangle: true });
+        if (newjsresult.code && newjsresult.code.length < jsdata.length) {
+          writeData = newjsresult.code;
+        }
+        break;
     }
   }
   catch(e) {
