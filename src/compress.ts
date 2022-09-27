@@ -73,7 +73,6 @@ const addProgress = (r: Result): void => {
 const printProgress = (r: Result): void => {
   addProgress(r);
 
-  process.stdout.clearLine(0);
   process.stdout.cursorTo(0);
   process.stdout.write(`${state.total.nbFiles} files | ${formatBytes(state.total.dataLenUncompressed)} → ${formatBytes(state.total.dataLenCompressed)}`);
 }
