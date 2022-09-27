@@ -198,7 +198,7 @@ function setImageSize(img: cheerio.Cheerio, meta: sharp.Metadata): number[] {
   } 
   if (height !== undefined) {
     if (!isNumeric(height)) {
-      console.warn(`Invalid width attribute "${height}" - overriding`);
+      console.warn(`Invalid height attribute "${height}" - overriding`);
       height = undefined;
     }
   } 

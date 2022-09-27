@@ -72,13 +72,14 @@ const addProgress = (r: Result): void => {
 const printProgress = (r: Result): void => {
   addProgress(r);
   const msg = `${state.total.nbFiles} files | ${formatBytes(state.total.dataLenUncompressed)} → ${formatBytes(state.total.dataLenCompressed)}`;
-  if (!process.stdout.cursorTo) {
-    // In CI we don't have access to cursorTo
+  if (!process.stdout.clearLine || !process.stdout.cursorTo) {
+    // In CI we don't have access to clearLine or cursorTo
     console.log(msg);
   }
   else {
+    process.stdout.clearLine(0);
     process.stdout.cursorTo(0);
-    process.stdout.write(msg); 
+    process.stdout.write(msg);
   }
 }
 
@@ -135,11 +136,11 @@ const processFile = async (file: string, stats: Stats): Promise<Result> => {
         }
         break;
       case '.html':
-      case '.htm':
-        const htmldata = await fs.readFile(file);
-        const newhtmlData = await htmlminifier(htmldata.toString(), { minifyCSS: true, minifyJS: true, sortClassName: true, sortAttributes: true});
-        writeData = newhtmlData;
-        break;
+        case '.htm':
+          const htmldata = await fs.readFile(file);
+          const newhtmlData = await htmlminifier(htmldata.toString(), { minifyCSS: true, minifyJS: true, sortClassName: true, sortAttributes: true});
+          writeData = newhtmlData;
+          break;
       case '.css':
         const cssdata = await fs.readFile(file);
         const newcssData = await csso(cssdata.toString()).css;
