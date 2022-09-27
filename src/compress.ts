@@ -10,7 +10,6 @@ import sharp from 'sharp';
 import swc from '@swc/core';
 import type { Result } from './types.js';
 
-
 type Summary = {
   nbFiles: number;
   nbFilesCompressed: number;
@@ -72,9 +71,15 @@ const addProgress = (r: Result): void => {
 
 const printProgress = (r: Result): void => {
   addProgress(r);
-
-  process.stdout.cursorTo(0);
-  process.stdout.write(`${state.total.nbFiles} files | ${formatBytes(state.total.dataLenUncompressed)} → ${formatBytes(state.total.dataLenCompressed)}`);
+  const msg = `${state.total.nbFiles} files | ${formatBytes(state.total.dataLenUncompressed)} → ${formatBytes(state.total.dataLenCompressed)}`;
+  if (!process.stdout.cursorTo) {
+    // In CI we don't have access to cursorTo
+    console.log(msg);
+  }
+  else {
+    process.stdout.cursorTo(0);
+    process.stdout.write(msg); 
+  }
 }
 
 const endProgress = (): void => {
