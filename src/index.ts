@@ -15,14 +15,21 @@ program
 program.command('pack', { isDefault: true})
   .description('todo')
   .argument('<dir>', 'Directory to pack')
+  .option('--nowrite', 'No write')
+  .option('--onlycompress', 'Only compress')
+  .option('--onlyoptim', 'Only optimize')
   .action(async (str, options) => {
     let compressedResults: Result[] = [];
 
-    console.log(`PASS 1 - Optimizing...`);
-    compressedResults = await optimize(str);
+    if (!options.onlycompress) {
+      console.log(`PASS 1 - Optimizing...`);
+      compressedResults = await optimize(str);  
+    } 
     
-    console.log(`PASS 2 - Compressing...`);
-    await compress(str, compressedResults);
+    if (!options.onlyoptim) {
+      console.log(`PASS 2 - Compressing...`);
+      await compress(str, compressedResults);  
+    }
   });
 
 program.parse();

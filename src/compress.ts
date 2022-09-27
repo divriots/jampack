@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import { Stats } from 'fs';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -165,7 +166,7 @@ const processFile = async (file: string, stats: Stats): Promise<Result> => {
   // Writedata
   if (writeData && writeData.length < result.originalSize) {
     result.compressedSize = writeData.length;
-    await fs.writeFile(file, writeData);
+    //await fs.writeFile(file, writeData);
   }
 
   printProgress(result);
@@ -191,7 +192,7 @@ export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions ):
     case 'jpeg':
     case 'webp':
     case 'gif':
-      return await sharpFile.resize(resize).toBuffer();
+      return await sharpFile.resize( {...resize, withoutEnlargement: true} ).toBuffer();
   }
 
   return undefined;

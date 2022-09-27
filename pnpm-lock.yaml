@@ -10,6 +10,7 @@ specifiers:
   '@types/sharp': ^0.31.0
   '@types/svgo': ^2.6.4
   '@types/table': ^6.3.2
+  chalk: ^5.0.1
   cheerio: 0.22.0
   commander: ^9.4.0
   csso: ^5.0.5
@@ -33,6 +34,7 @@ dependencies:
   '@types/sharp': 0.31.0
   '@types/svgo': 2.6.4
   '@types/table': 6.3.2
+  chalk: 5.0.1
   cheerio: 0.22.0
   commander: 9.4.0
   csso: 5.0.5
@@ -428,6 +430,11 @@ packages:
     dependencies:
       pascal-case: 3.1.2
       tslib: 2.4.0
+    dev: false
+
+  /chalk/5.0.1:
+    resolution: {integrity: sha512-Fo07WOYGqMfCWHOzSXOt2CxDbC6skS/jO9ynEcmpANMoPrD+W1r1K6Vx7iNm+AQmETU1Xr2t+n8nzkV9t6xh3w==}
+    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
     dev: false
 
   /cheerio/0.22.0:

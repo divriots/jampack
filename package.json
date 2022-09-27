@@ -24,6 +24,7 @@
     "@types/sharp": "^0.31.0",
     "@types/svgo": "^2.6.4",
     "@types/table": "^6.3.2",
+    "chalk": "^5.0.1",
     "cheerio": "0.22.0",
     "commander": "^9.4.0",
     "csso": "^5.0.5",
