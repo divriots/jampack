@@ -26,7 +26,7 @@
     "@types/table": "^6.3.2",
     "chalk": "^5.0.1",
     "cheerio": "0.22.0",
-    "commander": "^9.4.0",
+    "commander": "^9.4.1",
     "csso": "^5.0.5",
     "globby": "^13.1.2",
     "html-minifier-terser": "^7.0.0",
