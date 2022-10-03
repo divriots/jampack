@@ -110,9 +110,6 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
 
   /*
    * Embed small images
-   *
-   * Note: This check is done pre-compression so more opportunities could
-   * be done if done post compression.
    */
   let isEmbed = false;
   if (originalData.length <= options.image.embed_size) {
@@ -134,8 +131,8 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
     }
 
     if (datauri) {
-      img.attr('src', datauri);
       isEmbed = true;
+      img.attr('src', datauri);
       img.removeAttr('loading');
       img.removeAttr('decoding');
     }

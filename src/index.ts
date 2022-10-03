@@ -38,13 +38,18 @@ program.command('pack', { isDefault: true})
     globalState.dir = dir;
     globalState.args = options;
 
+    if (!options.onlyoptim) {
+      console.log(kleur.bgGreen(kleur.black(`\n PASS 1 - Compressing embeddables `)));
+      await compress("**/*.{css,svg}");
+    }
+
     if (!options.onlycomp) {
-      console.log(kleur.bgGreen(kleur.black(` PASS 1 - Optimizing `)));
+      console.log(kleur.bgGreen(kleur.black(`\n PASS 2 - Optimizing `)));
       await optimize();
     } 
     
     if (!options.onlyoptim) {
-      console.log(kleur.bgGreen(kleur.black(` PASS 2 - Compressing `)));
+      console.log(kleur.bgGreen(kleur.black(`\n PASS 3 - Compressing the rest`)));
       await compress("**/*");
     }
 
