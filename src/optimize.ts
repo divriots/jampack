@@ -6,16 +6,13 @@ import { isLocal, isNumeric, translateSrc } from './utils.js';
 import sharp from "sharp";
 import options from './options.js';
 import { compressImage } from './compress.js';
-import type { Result } from './types.js';
 import svgToMiniDataURI from 'mini-svg-data-uri';
+import globalState from './state.js';
 
-const compressedImages: string[] = [];
-const compressedResults: Result[] = [];
-
-async function analyse(dir: string, file: string): Promise<void> {
+async function analyse(file: string): Promise<void> {
   console.log('Processing ' + file);
 
-  const html = (await fs.readFile(path.join(dir, file))).toString();
+  const html = (await fs.readFile(path.join(globalState.dir, file))).toString();
   const $ = cheerio.load(html, {});
 
   const imgs = $('img');
@@ -27,13 +24,15 @@ async function analyse(dir: string, file: string): Promise<void> {
   // Process images sequentially
   await imgsArray.reduce(async (previousPromise, imgElement) => {
       await previousPromise;
-      return processImage(dir, file, $, imgElement);
+      return processImage(file, $, imgElement);
     }, Promise.resolve());
 
-  await fs.writeFile(path.join(dir, file), $.html());
+  if (!globalState.args.nowrite) {
+    await fs.writeFile(path.join(globalState.dir, file), $.html());
+  }
 }
 
-async function processImage(dir: string, file: string, $: cheerio.Root, imgElement: cheerio.Element) {
+async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.Element) {
   const img = $(imgElement);
 
   /*
@@ -94,7 +93,7 @@ async function processImage(dir: string, file: string, $: cheerio.Root, imgEleme
   /*
    * Loading image
    */
-  const absoluteImgPath = translateSrc(dir, path.dirname(file), attrib_src);
+  const absoluteImgPath = translateSrc(globalState.dir, path.dirname(file), attrib_src);
 
   // file exists?
   try {
@@ -159,7 +158,7 @@ async function processImage(dir: string, file: string, $: cheerio.Root, imgEleme
   /*
    * Compress image
    */
-  if (compressedImages.includes(absoluteImgPath)) {
+  if (globalState.compressedFiles.includes(absoluteImgPath)) {
     // Image already compressed. Skip.
     return;
   }
@@ -169,9 +168,12 @@ async function processImage(dir: string, file: string, $: cheerio.Root, imgEleme
 
   const newImage = await compressImage(originalData, {width: w, height: h});
   if (newImage && newImage.length < originalData.length) {
-    fs.writeFile(absoluteImgPath, newImage);
-    compressedImages.push(absoluteImgPath);
-    compressedResults.push({ file: absoluteImgPath, originalSize: originalData.length, compressedSize: newImage.length });
+
+    if (!globalState.args.nowrite) {
+      fs.writeFile(absoluteImgPath, newImage);
+    }
+    globalState.compressedFiles.push(absoluteImgPath);
+    globalState.compressedFilesResult.push({ file: absoluteImgPath, originalSize: originalData.length, compressedSize: newImage.length });
   }
 
   const attr_srcset = img.attr('srcset');
@@ -250,14 +252,12 @@ function setImageSize(img: cheerio.Cheerio, meta: sharp.Metadata): number[] {
   throw new Error('Unexpected issue when resolving image sizes')
 }
 
-export async function optimize(dir: string): Promise<Result[]> {
-  const paths = await globby('**/*.{htm,html}', { cwd: dir });
+export async function optimize(): Promise<void> {
+  const paths = await globby('**/*.{htm,html}', { cwd: globalState.dir });
 
   // Sequential async
   await paths.reduce(async (previousPromise, item) => {
       await previousPromise;
-      return analyse(dir, item);
+      return analyse(item);
     }, Promise.resolve());
-
-  return compressedResults;
 }

@@ -3,7 +3,22 @@
 import { Command } from 'commander';
 import { compress } from './compress.js';
 import { optimize } from './optimize.js';
-import { Result } from './types.js';
+import kleur from 'kleur';
+import globalState from './state.js';
+import { table, TableUserConfig } from 'table';
+import { formatBytes } from './utils.js';
+import { exit } from 'process';
+
+const logo = `     __                                    __    
+    |__|____    _____ ___________    ____ |  | __
+    |  \\__  \\  /     \\\\____ \\__  \\ _/ ___\\|  |/ /
+    |  |/ __ \\|  Y Y  \\  |_> > __ \\\\  \\___|    < 
+/\\__|  (____  /__|_|  /   __(____  /\\___  >__|_ \\
+\\______|    \\/      \\/|  |       \\/     \\/     \\/
+                      |__| by ‹div›RIOTS (c)2022
+`;
+
+console.log(logo);
 
 const program = new Command();
 
@@ -16,20 +31,48 @@ program.command('pack', { isDefault: true})
   .description('todo')
   .argument('<dir>', 'Directory to pack')
   .option('--nowrite', 'No write')
-  .option('--onlycompress', 'Only compress')
+  .option('--onlycomp', 'Only compress')
   .option('--onlyoptim', 'Only optimize')
-  .action(async (str, options) => {
-    let compressedResults: Result[] = [];
+  .action(async (dir, options) => {
 
-    if (!options.onlycompress) {
-      console.log(`PASS 1 - Optimizing...`);
-      compressedResults = await optimize(str);  
+    globalState.dir = dir;
+    globalState.args = options;
+
+    if (!options.onlycomp) {
+      console.log(kleur.bgGreen(kleur.black(` PASS 1 - Optimizing `)));
+      await optimize();
     } 
     
     if (!options.onlyoptim) {
-      console.log(`PASS 2 - Compressing...`);
-      await compress(str, compressedResults);  
+      console.log(kleur.bgGreen(kleur.black(` PASS 2 - Compressing `)));
+      await compress();
     }
+
+    printDetails();
   });
 
 program.parse();
+
+function printDetails() {
+  const dataTable: any[] = [['Extension', 'Files', 'Compressed', 'Original', 'Compressed', 'Gain']];
+  const config: TableUserConfig = {
+    columns: [
+      { alignment: 'left' },
+      { alignment: 'right' },
+      { alignment: 'right' },
+      { alignment: 'right' },
+      { alignment: 'right' }
+    ],
+  };
+
+  Object.entries(globalState.summaryByExtension).forEach(([ext, summary]) => {
+    if (summary.dataLenCompressed < summary.dataLenUncompressed) {
+      const row = [ ext, summary.nbFiles, summary.nbFilesCompressed, formatBytes(summary.dataLenUncompressed), formatBytes(summary.dataLenCompressed), '-'+formatBytes(summary.dataLenUncompressed - summary.dataLenCompressed) ];
+      dataTable.push(row);  
+    }
+  });
+  const total = [ 'Total', globalState.summary.nbFiles, globalState.summary.nbFilesCompressed, formatBytes(globalState.summary.dataLenUncompressed), formatBytes(globalState.summary.dataLenCompressed), '-'+formatBytes(globalState.summary.dataLenUncompressed - globalState.summary.dataLenCompressed)];
+  dataTable.push(total);
+
+  console.log(table(dataTable, config));
+}

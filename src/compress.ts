@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import { Stats } from 'fs';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -6,54 +5,24 @@ import { optimize as svgo } from "svgo";
 import { minify as htmlminifier } from 'html-minifier-terser';
 import { minify as csso } from "csso";
 import { formatBytes } from './utils.js';
-import { table, TableUserConfig } from 'table';
 import sharp from 'sharp';
 import swc from '@swc/core';
-import type { Result } from './types.js';
+import globalState, { Result } from './state.js';
 
-type Summary = {
-  nbFiles: number;
-  nbFilesCompressed: number;
-  dataLenUncompressed: number;
-  dataLenCompressed: number;
-}
-
-type State = {
-  total: Summary;
-  detailsByExtension: Record<string, Summary>;
-}
-
-let state: State;
-let compressedFiles: string[] = [];
-
-const beginProgress = (initResults: Result[]): void => {
-  state = {
-    total: {
-      nbFiles: 0,
-      nbFilesCompressed: 0,
-      dataLenUncompressed: 0,
-      dataLenCompressed: 0
-    },
-    detailsByExtension: {},
-  }
-
-  initResults.forEach( r=> {
-    addProgress(r);
-    compressedFiles.push(r.file);
-   } );
+const beginProgress = (): void => {
 }
 
 const addProgress = (r: Result): void => {
   const isCompressed = r.compressedSize < r.originalSize ? 1 : 0;
 
-  state.total.nbFiles++;
-  state.total.nbFilesCompressed += isCompressed;
-  state.total.dataLenUncompressed += r.originalSize;
-  state.total.dataLenCompressed += r.compressedSize;
+  globalState.summary.nbFiles++;
+  globalState.summary.nbFilesCompressed += isCompressed;
+  globalState.summary.dataLenUncompressed += r.originalSize;
+  globalState.summary.dataLenCompressed += r.compressedSize;
   
   const ext = path.extname(r.file);
   if(ext) {
-    var summary = state.detailsByExtension[ext];
+    var summary = globalState.summaryByExtension[ext];
     if (!summary) {
       summary = {
         nbFiles: 0,
@@ -61,7 +30,7 @@ const addProgress = (r: Result): void => {
         dataLenUncompressed: 0,
         dataLenCompressed: 0
       }
-      state.detailsByExtension[ext] = summary;
+      globalState.summaryByExtension[ext] = summary;
     }
     summary.nbFiles++;
     summary.nbFilesCompressed += isCompressed;
@@ -72,7 +41,7 @@ const addProgress = (r: Result): void => {
 
 const printProgress = (r: Result): void => {
   addProgress(r);
-  const msg = `${state.total.nbFiles} files | ${formatBytes(state.total.dataLenUncompressed)} → ${formatBytes(state.total.dataLenCompressed)}`;
+  const msg = `${globalState.summary.nbFiles} files | ${formatBytes(globalState.summary.dataLenUncompressed)} → ${formatBytes(globalState.summary.dataLenCompressed)}`;
   if (!process.stdout.clearLine || !process.stdout.cursorTo) {
     // In CI we don't have access to clearLine or cursorTo
     console.log(msg);
@@ -86,30 +55,6 @@ const printProgress = (r: Result): void => {
 
 const endProgress = (): void => {
   process.stdout.write('\n');
-}
-
-const printDetails = () => {
-  const dataTable: any[] = [['Extension', 'Files', 'Compressed', 'Original', 'Compressed', 'Gain']];
-  const config: TableUserConfig = {
-    columns: [
-      { alignment: 'left' },
-      { alignment: 'right' },
-      { alignment: 'right' },
-      { alignment: 'right' },
-      { alignment: 'right' }
-    ],
-  };
-
-  Object.entries(state.detailsByExtension).forEach(([ext, summary]) => {
-    if (summary.dataLenCompressed < summary.dataLenUncompressed) {
-      const row = [ ext, summary.nbFiles, summary.nbFilesCompressed, formatBytes(summary.dataLenUncompressed), formatBytes(summary.dataLenCompressed), '-'+formatBytes(summary.dataLenUncompressed - summary.dataLenCompressed) ];
-      dataTable.push(row);  
-    }
-  });
-  const total = [ 'Total', state.total.nbFiles, state.total.nbFilesCompressed, formatBytes(state.total.dataLenUncompressed), formatBytes(state.total.dataLenCompressed), '-'+formatBytes(state.total.dataLenUncompressed - state.total.dataLenCompressed)];
-  dataTable.push(total);
-
-  console.log(table(dataTable, config));
 }
 
 const processFile = async (file: string, stats: Stats): Promise<Result> => {
@@ -160,13 +105,16 @@ const processFile = async (file: string, stats: Stats): Promise<Result> => {
   }
   catch(e) {
     // console error for the moment
+    console.error(`\n${file}`);
     console.error(e);
   }
 
   // Writedata
   if (writeData && writeData.length < result.originalSize) {
     result.compressedSize = writeData.length;
-    //await fs.writeFile(file, writeData);
+    if (!globalState.args.nowrite) {
+      await fs.writeFile(file, writeData);
+    }
   }
 
   printProgress(result);
@@ -176,7 +124,7 @@ const processFile = async (file: string, stats: Stats): Promise<Result> => {
 
 export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions ): Promise<Buffer | undefined> => {
 
-  const sharpFile = await sharp(data);
+  const sharpFile = await sharp(data, { animated: true });
   const meta = await sharpFile.metadata();
 
   switch(meta.format) {
@@ -213,7 +161,7 @@ const processDirectory = async (directoryPath: string): Promise<Result[]> => {
             if (stats.isDirectory()) {
                 return processDirectory(filePath);
             } else {
-                if (compressedFiles.includes(filePath)) {
+                if (globalState.compressedFiles.includes(filePath)) {
                   return [];
                 }
                 return [await processFile(filePath, stats)];
@@ -223,10 +171,8 @@ const processDirectory = async (directoryPath: string): Promise<Result[]> => {
     return files.filter((file) => file.length).flat(1); // Remove empty dir and flat it all
 };
 
-export async function compress(dir: string, initResult: Result[]): Promise<void> {  
-  beginProgress(initResult);
-  await processDirectory(dir);
+export async function compress(): Promise<void> {  
+  beginProgress();
+  await processDirectory(globalState.dir);
   endProgress();
-
-  printDetails();
 }
