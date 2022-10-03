@@ -110,9 +110,14 @@ const processFile = async (file: string, stats: Stats): Promise<void> => {
     console.error(e);
   }
 
+  // Mark as processed
+  globalState.compressedFiles.push(file);
+  globalState.compressedFilesResult.push(result);
+
   // Writedata
   if (writeData && writeData.length < result.originalSize) {
     result.compressedSize = writeData.length;
+    
     if (!globalState.args.nowrite) {
       await fs.writeFile(file, writeData);
     }
@@ -153,13 +158,16 @@ const compressImageFile = async (file: string): Promise<Buffer | string | undefi
 export async function compress(glob: string): Promise<void> {  
   beginProgress();
   
-  const paths = await globby(glob, { cwd: globalState.dir });
+  const paths = await globby(glob, { cwd: globalState.dir, absolute: true });
 
   // "Parallel" processing
-  await Promise.all(paths.map(async f => {
-    const file = path.join(globalState.dir, f);
-    await processFile(file, await fs.stat(file));
+  await Promise.all(paths.map(async file => {
+    if (!globalState.compressedFiles.includes(file)) {
+      await processFile(file, await fs.stat(file));
+    }
   }));
 
   endProgress();
+
+  console.log(paths.length);
 }

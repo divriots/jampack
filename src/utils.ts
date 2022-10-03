@@ -24,8 +24,7 @@ export function translateSrc(projectRoot: string, htmlRelativePath: string, src:
   }
 
   const srcAbsolutePath = path.join(projectRoot, src.startsWith('/') ? '' : htmlRelativePath, src);
-
-  return srcAbsolutePath;
+  return path.resolve(srcAbsolutePath);
 }
 
 export function isNumeric(value: string) {

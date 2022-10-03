@@ -169,6 +169,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
     if (!globalState.args.nowrite) {
       fs.writeFile(absoluteImgPath, newImage);
     }
+
     globalState.compressedFiles.push(absoluteImgPath);
     globalState.compressedFilesResult.push({ file: absoluteImgPath, originalSize: originalData.length, compressedSize: newImage.length });
   }
@@ -179,6 +180,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
   }
   else {
     // Generate image set
+    // TODO
   }
 }
 

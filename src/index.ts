@@ -40,7 +40,7 @@ program.command('pack', { isDefault: true})
 
     if (!options.onlyoptim) {
       console.log(kleur.bgGreen(kleur.black(`\n PASS 1 - Compressing embeddables `)));
-      await compress("**/*.{css,svg}");
+      await compress("**/*.{css,svg,js}");
     }
 
     if (!options.onlycomp) {
@@ -50,7 +50,7 @@ program.command('pack', { isDefault: true})
     
     if (!options.onlyoptim) {
       console.log(kleur.bgGreen(kleur.black(`\n PASS 3 - Compressing the rest`)));
-      await compress("**/*");
+      await compress("**/**");
     }
 
     printDetails();
