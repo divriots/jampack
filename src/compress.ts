@@ -8,6 +8,7 @@ import { formatBytes } from './utils.js';
 import sharp from 'sharp';
 import swc from '@swc/core';
 import globalState, { Result } from './state.js';
+import { globby } from 'globby';
 
 const beginProgress = (): void => {
 }
@@ -57,7 +58,7 @@ const endProgress = (): void => {
   process.stdout.write('\n');
 }
 
-const processFile = async (file: string, stats: Stats): Promise<Result> => {
+const processFile = async (file: string, stats: Stats): Promise<void> => {
   const result = {
     file,
     originalSize: stats.size,
@@ -118,8 +119,6 @@ const processFile = async (file: string, stats: Stats): Promise<Result> => {
   }
 
   printProgress(result);
-
-  return result;
 }
 
 export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions ): Promise<Buffer | undefined> => {
@@ -151,28 +150,16 @@ const compressImageFile = async (file: string): Promise<Buffer | string | undefi
   return compressImage(buffer, {});
 }
 
-const processDirectory = async (directoryPath: string): Promise<Result[]> => {
-    const filesInDirectory = await fs.readdir(directoryPath);
-    const files = await Promise.all(
-        filesInDirectory.map(async (file: string) => {
-            const filePath = path.join(directoryPath, file);
-            const stats = await fs.stat(filePath);
-            
-            if (stats.isDirectory()) {
-                return processDirectory(filePath);
-            } else {
-                if (globalState.compressedFiles.includes(filePath)) {
-                  return [];
-                }
-                return [await processFile(filePath, stats)];
-            }
-        })
-    );
-    return files.filter((file) => file.length).flat(1); // Remove empty dir and flat it all
-};
-
-export async function compress(): Promise<void> {  
+export async function compress(glob: string): Promise<void> {  
   beginProgress();
-  await processDirectory(globalState.dir);
+  
+  const paths = await globby(glob, { cwd: globalState.dir });
+
+  // "Parallel" processing
+  await Promise.all(paths.map(async f => {
+    const file = path.join(globalState.dir, f);
+    await processFile(file, await fs.stat(file));
+  }));
+
   endProgress();
 }

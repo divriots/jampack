@@ -45,7 +45,7 @@ program.command('pack', { isDefault: true})
     
     if (!options.onlyoptim) {
       console.log(kleur.bgGreen(kleur.black(` PASS 2 - Compressing `)));
-      await compress();
+      await compress("**/*");
     }
 
     printDetails();
@@ -54,11 +54,10 @@ program.command('pack', { isDefault: true})
 program.parse();
 
 function printDetails() {
-  const dataTable: any[] = [['Extension', 'Files', 'Compressed', 'Original', 'Compressed', 'Gain']];
+  const dataTable: any[] = [['Extension', 'Compressed', 'Original', 'Compressed', 'Gain']];
   const config: TableUserConfig = {
     columns: [
       { alignment: 'left' },
-      { alignment: 'right' },
       { alignment: 'right' },
       { alignment: 'right' },
       { alignment: 'right' }
@@ -67,11 +66,11 @@ function printDetails() {
 
   Object.entries(globalState.summaryByExtension).forEach(([ext, summary]) => {
     if (summary.dataLenCompressed < summary.dataLenUncompressed) {
-      const row = [ ext, summary.nbFiles, summary.nbFilesCompressed, formatBytes(summary.dataLenUncompressed), formatBytes(summary.dataLenCompressed), '-'+formatBytes(summary.dataLenUncompressed - summary.dataLenCompressed) ];
+      const row = [ ext,  `${summary.nbFilesCompressed} / ${summary.nbFiles}`, formatBytes(summary.dataLenUncompressed), formatBytes(summary.dataLenCompressed), '-'+formatBytes(summary.dataLenUncompressed - summary.dataLenCompressed) ];
       dataTable.push(row);  
     }
   });
-  const total = [ 'Total', globalState.summary.nbFiles, globalState.summary.nbFilesCompressed, formatBytes(globalState.summary.dataLenUncompressed), formatBytes(globalState.summary.dataLenCompressed), '-'+formatBytes(globalState.summary.dataLenUncompressed - globalState.summary.dataLenCompressed)];
+  const total = [ 'Total', `${globalState.summary.nbFilesCompressed} / ${globalState.summary.nbFiles}`, formatBytes(globalState.summary.dataLenUncompressed), formatBytes(globalState.summary.dataLenCompressed), '-'+formatBytes(globalState.summary.dataLenUncompressed - globalState.summary.dataLenCompressed)];
   dataTable.push(total);
 
   console.log(table(dataTable, config));
