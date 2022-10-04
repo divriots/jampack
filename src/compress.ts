@@ -13,35 +13,7 @@ import { globby } from 'globby';
 const beginProgress = (): void => {
 }
 
-const addProgress = (r: Result): void => {
-  const isCompressed = r.compressedSize < r.originalSize ? 1 : 0;
-
-  globalState.summary.nbFiles++;
-  globalState.summary.nbFilesCompressed += isCompressed;
-  globalState.summary.dataLenUncompressed += r.originalSize;
-  globalState.summary.dataLenCompressed += r.compressedSize;
-  
-  const ext = path.extname(r.file);
-  if(ext) {
-    var summary = globalState.summaryByExtension[ext];
-    if (!summary) {
-      summary = {
-        nbFiles: 0,
-        nbFilesCompressed: 0,
-        dataLenUncompressed: 0,
-        dataLenCompressed: 0
-      }
-      globalState.summaryByExtension[ext] = summary;
-    }
-    summary.nbFiles++;
-    summary.nbFilesCompressed += isCompressed;
-    summary.dataLenUncompressed += r.originalSize;
-    summary.dataLenCompressed += r.compressedSize;
-  }
-}
-
-const printProgress = (r: Result): void => {
-  addProgress(r);
+const printProgress = (): void => {
   const msg = `${globalState.summary.nbFiles} files | ${formatBytes(globalState.summary.dataLenUncompressed)} → ${formatBytes(globalState.summary.dataLenCompressed)}`;
   if (!process.stdout.clearLine || !process.stdout.cursorTo) {
     // In CI we don't have access to clearLine or cursorTo
@@ -110,10 +82,6 @@ const processFile = async (file: string, stats: Stats): Promise<void> => {
     console.error(e);
   }
 
-  // Mark as processed
-  globalState.compressedFiles.push(file);
-  globalState.compressedFilesResult.push(result);
-
   // Writedata
   if (writeData && writeData.length < result.originalSize) {
     result.compressedSize = writeData.length;
@@ -123,7 +91,9 @@ const processFile = async (file: string, stats: Stats): Promise<void> => {
     }
   }
 
-  printProgress(result);
+  globalState.addFile(result);
+
+  printProgress();
 }
 
 export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions ): Promise<Buffer | undefined> => {

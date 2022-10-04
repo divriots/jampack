@@ -7,7 +7,7 @@ import sharp from "sharp";
 import options from './options.js';
 import { compressImage } from './compress.js';
 import svgToMiniDataURI from 'mini-svg-data-uri';
-import globalState from './state.js';
+import globalState, { Result } from './state.js';
 
 async function analyse(file: string): Promise<void> {
   console.log('Processing ' + file);
@@ -34,7 +34,7 @@ async function analyse(file: string): Promise<void> {
 
 async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.Element) {
   const img = $(imgElement);
-
+  
   /*
    * Attribute 'alt'
    */ 
@@ -126,7 +126,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
       case 'png':
       case 'webp':
       case 'gif':
-        // TODO
+       // TODO
         break;
     }
 
@@ -155,28 +155,33 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
   /*
    * Compress image
    */
-  if (globalState.compressedFiles.includes(absoluteImgPath)) {
-    // Image already compressed. Skip.
-    return;
-  }
 
-  const fileWidth = meta.width;
-  const fileHeight = meta.height;
-
-  const newImage = await compressImage(originalData, {width: w, height: h});
-  if (newImage && newImage.length < originalData.length) {
-
-    if (!globalState.args.nowrite) {
-      fs.writeFile(absoluteImgPath, newImage);
+  if (!globalState.compressedFiles.includes(absoluteImgPath)) {
+    // Image not already compressed before
+    
+    const result: Result = {
+      file: absoluteImgPath,
+      originalSize: originalData.length,
+      compressedSize: originalData.length
+    }
+    
+    const newImage = await compressImage(originalData, {width: w, height: h});
+    if (newImage && newImage.length < originalData.length) {
+  
+      if (!globalState.args.nowrite) {
+        fs.writeFile(absoluteImgPath, newImage);
+      }
+  
+      result.compressedSize = newImage.length;
     }
 
-    globalState.compressedFiles.push(absoluteImgPath);
-    globalState.compressedFilesResult.push({ file: absoluteImgPath, originalSize: originalData.length, compressedSize: newImage.length });
+    globalState.addFile(result);
   }
 
   const attr_srcset = img.attr('srcset');
   if (attr_srcset) {
-    // If srcset is set, don't touch it
+    // If srcset is set, don't touch it.
+    // Just compress files
   }
   else {
     // Generate image set
