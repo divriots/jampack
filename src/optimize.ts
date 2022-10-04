@@ -8,6 +8,7 @@ import options from './options.js';
 import { compressImage } from './compress.js';
 import svgToMiniDataURI from 'mini-svg-data-uri';
 import globalState, { Result } from './state.js';
+import { exit } from 'process';
 
 async function analyse(file: string): Promise<void> {
   console.log('Processing ' + file);
@@ -192,7 +193,9 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
   }
   catch(e) {
     console.error('Error while processing image');
-    console.error(e);    
+    console.error(e);
+    // exit here until we cover all the issues
+    exit(1);
   }
 }
 
