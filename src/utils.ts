@@ -10,7 +10,7 @@ export function formatBytes(bytes:number, decimals = 2) {
 
   const i = Math.floor(Math.log(bytes) / Math.log(k))
 
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+  return `${(bytes / Math.pow(k, i)).toFixed(dm)} ${sizes[i]}`
 }
 
 export function isLocal(src: string) {

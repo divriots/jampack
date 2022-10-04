@@ -14,10 +14,11 @@ const beginProgress = (): void => {
 }
 
 const printProgress = (): void => {
-  const msg = `${globalState.summary.nbFiles} files | ${formatBytes(globalState.summary.dataLenUncompressed)} → ${formatBytes(globalState.summary.dataLenCompressed)}`;
+  const gain = globalState.summary.dataLenUncompressed-globalState.summary.dataLenCompressed;
+  const msg = `${globalState.summary.nbFiles} files | ${formatBytes(globalState.summary.dataLenUncompressed)} → ${formatBytes(globalState.summary.dataLenCompressed)} | -${formatBytes(gain)} `;
   if (!process.stdout.clearLine || !process.stdout.cursorTo) {
     // In CI we don't have access to clearLine or cursorTo
-    console.log(msg);
+    // Just don't log any progress
   }
   else {
     process.stdout.clearLine(0);
@@ -138,6 +139,4 @@ export async function compress(glob: string): Promise<void> {
   }));
 
   endProgress();
-
-  console.log(paths.length);
 }

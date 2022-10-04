@@ -38,7 +38,7 @@ program.command('pack', { isDefault: true})
     globalState.dir = dir;
     globalState.args = options;
 
-    if (!options.onlyoptim) {
+    if (!options.onlyoptim && !options.onlycomp) {
       console.log(kleur.bgGreen(kleur.black(`\n PASS 1 - Compressing embeddables `)));
       await compress("**/*.{css,svg,js}");
     }

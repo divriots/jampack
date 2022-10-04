@@ -32,160 +32,167 @@ async function analyse(file: string): Promise<void> {
   }
 }
 
-async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.Element) {
-  const img = $(imgElement);
-  
-  /*
-   * Attribute 'alt'
-   */ 
-  const attrib_alt = img.attr('alt');
-  if (attrib_alt === undefined) {
-    console.warn('<img> has no alt attribute - adding an empty but you should fix it');
-    img.attr('alt', "");
-  }
-
-  /*
-   * Attribute 'src'
-   */
-  const attrib_src = img.attr('src');
-  console.log(`- Image ${attrib_src}`);
-  if (!attrib_src)
-  {
-    console.warn('<img> has no src attribute');
-    return;
-  }
-
-  if (attrib_src.startsWith('data:')) {
-    // Data URI image
-    // TODO: try to compress it
-    return;
-  }
-
-  if (!isLocal(attrib_src)) {
-    // Image not local, don't touch it
-    return;
-  }
-
-  /*
-   * Attribute 'loading'
-   */
-  const attr_loading = img.attr('loading');
-  switch(attr_loading) {
-    case undefined:
-      // Go lazy by default
-      img.attr('loading', 'lazy');
-      break;
-    case 'eager':
-      img.removeAttr('loading');
-      break;
-    case 'lazy':
-      // Don't touch it
-      break;
-    default:
-      console.warn(`Invalid loading attribute ${attr_loading}`)
-  }
-  
-  /*
-   * Attribute 'decoding'
-   */
-  img.attr('decoding', 'async');
-  
-  /*
-   * Loading image
-   */
-  const absoluteImgPath = translateSrc(globalState.dir, path.dirname(file), attrib_src);
-
-  // file exists?
+async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.Element) : Promise<void> {
   try {
-    const stats = await fs.stat(absoluteImgPath);
+
+    const img = $(imgElement);
+    
+    /*
+    * Attribute 'alt'
+    */ 
+    const attrib_alt = img.attr('alt');
+    if (attrib_alt === undefined) {
+      console.warn('<img> has no alt attribute - adding an empty but you should fix it');
+      img.attr('alt', "");
+    }
+
+    /*
+    * Attribute 'src'
+    */
+    const attrib_src = img.attr('src');
+    console.log(`- Image ${attrib_src}`);
+    if (!attrib_src)
+    {
+      console.warn('<img> has no src attribute');
+      return;
+    }
+
+    if (attrib_src.startsWith('data:')) {
+      // Data URI image
+      // TODO: try to compress it
+      return;
+    }
+
+    if (!isLocal(attrib_src)) {
+      // Image not local, don't touch it
+      return;
+    }
+
+    /*
+    * Attribute 'loading'
+    */
+    const attr_loading = img.attr('loading');
+    switch(attr_loading) {
+      case undefined:
+        // Go lazy by default
+        img.attr('loading', 'lazy');
+        break;
+      case 'eager':
+        img.removeAttr('loading');
+        break;
+      case 'lazy':
+        // Don't touch it
+        break;
+      default:
+        console.warn(`Invalid loading attribute ${attr_loading}`)
+    }
+    
+    /*
+    * Attribute 'decoding'
+    */
+    img.attr('decoding', 'async');
+    
+    /*
+    * Loading image
+    */
+    const absoluteImgPath = translateSrc(globalState.dir, path.dirname(file), attrib_src);
+
+    // file exists?
+    try {
+      const stats = await fs.stat(absoluteImgPath);
+    }
+    catch(e) {
+      console.error(`Missing img ${absoluteImgPath}`);
+      return;
+    }
+    
+    const sharpFile = sharp(absoluteImgPath);
+    const meta = await sharpFile.metadata();
+    const originalData = await fs.readFile(absoluteImgPath);
+
+    /*
+    * Embed small images
+    */
+    let isEmbed = false;
+    if (originalData.length <= options.image.embed_size) {
+      let datauri = undefined;
+
+      switch(meta.format) {
+        case 'svg':
+          const compressedData = await compressImage(originalData, {});
+          const svgEmbed = (compressedData && compressedData.length < originalData.length) ? compressedData : originalData;
+          datauri = svgToMiniDataURI(svgEmbed.toString());
+          break;
+        case 'jpg':
+        case 'jpeg':
+        case 'png':
+        case 'webp':
+        case 'gif':
+        // TODO
+          break;
+      }
+
+      if (datauri) {
+        isEmbed = true;
+        img.attr('src', datauri);
+        img.removeAttr('loading');
+        img.removeAttr('decoding');
+      }
+    }
+
+    if (isEmbed) {
+      // Image is embed, no need for more processing
+      return;
+    }
+
+    /*
+    * Attribute 'width' & 'height'
+    */
+    const [w, h] = setImageSize(img, meta);
+    if (w < 0 || h < 0) {
+      console.warn(`Unexpected error in image size calculation - some optimizations can't be done`);
+      return;
+    }
+
+    /*
+    * Compress image
+    */
+
+    if (!globalState.compressedFiles.includes(absoluteImgPath)) {
+      // Image not already compressed before
+      
+      const result: Result = {
+        file: absoluteImgPath,
+        originalSize: originalData.length,
+        compressedSize: originalData.length
+      }
+      
+      const newImage = await compressImage(originalData, {width: w, height: h});
+      if (newImage && newImage.length < originalData.length) {
+    
+        if (!globalState.args.nowrite) {
+          fs.writeFile(absoluteImgPath, newImage);
+        }
+    
+        result.compressedSize = newImage.length;
+      }
+
+      globalState.addFile(result);
+    }
+
+    const attr_srcset = img.attr('srcset');
+    if (attr_srcset) {
+      // If srcset is set, don't touch it.
+      // Just compress files
+    }
+    else {
+      // Generate image set
+      // TODO
+    }
   }
   catch(e) {
-    console.error(`Missing img ${absoluteImgPath}`);
-    return;
-  }
-  
-  const sharpFile = sharp(absoluteImgPath);
-  const meta = await sharpFile.metadata();
-  const originalData = await fs.readFile(absoluteImgPath);
-
-  /*
-   * Embed small images
-   */
-  let isEmbed = false;
-  if (originalData.length <= options.image.embed_size) {
-    let datauri = undefined;
-
-    switch(meta.format) {
-      case 'svg':
-        const compressedData = await compressImage(originalData, {});
-        const svgEmbed = (compressedData && compressedData.length < originalData.length) ? compressedData : originalData;
-        datauri = svgToMiniDataURI(svgEmbed.toString());
-        break;
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'webp':
-      case 'gif':
-       // TODO
-        break;
-    }
-
-    if (datauri) {
-      isEmbed = true;
-      img.attr('src', datauri);
-      img.removeAttr('loading');
-      img.removeAttr('decoding');
-    }
-  }
-
-  if (isEmbed) {
-    // Image is embed, no need for more processing
-    return;
-  }
-
-  /*
-   * Attribute 'width' & 'height'
-   */
-  const [w, h] = setImageSize(img, meta);
-  if (w < 0 || h < 0) {
-    console.warn(`Unexpected error in image size calculation - some optimizations can't be done`);
-    return;
-  }
-
-  /*
-   * Compress image
-   */
-
-  if (!globalState.compressedFiles.includes(absoluteImgPath)) {
-    // Image not already compressed before
-    
-    const result: Result = {
-      file: absoluteImgPath,
-      originalSize: originalData.length,
-      compressedSize: originalData.length
-    }
-    
-    const newImage = await compressImage(originalData, {width: w, height: h});
-    if (newImage && newImage.length < originalData.length) {
-  
-      if (!globalState.args.nowrite) {
-        fs.writeFile(absoluteImgPath, newImage);
-      }
-  
-      result.compressedSize = newImage.length;
-    }
-
-    globalState.addFile(result);
-  }
-
-  const attr_srcset = img.attr('srcset');
-  if (attr_srcset) {
-    // If srcset is set, don't touch it.
-    // Just compress files
-  }
-  else {
-    // Generate image set
-    // TODO
+    console.error('Error while processing image');
+    console.error(e);    
   }
 }
 
