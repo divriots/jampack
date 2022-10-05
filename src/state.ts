@@ -20,7 +20,7 @@ export type Summary = {
 export class GlobalState {
   dir: string = 'dist';
   args: Args = {};
-  compressedFiles: string[] = [];
+  compressedFiles: Set<string> = new Set();
   compressedFilesResult: Result[] = [];
   summary: Summary = {
     nbFiles: 0,
@@ -33,7 +33,7 @@ export class GlobalState {
   addFile(r: Result) {
     const isCompressed = r.compressedSize < r.originalSize ? 1 : 0;
 
-    this.compressedFiles.push(r.file);
+    this.compressedFiles.add(r.file);
     this.compressedFilesResult.push(r);
 
     this.summary.nbFiles++;

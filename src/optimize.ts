@@ -159,7 +159,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
     * Compress image
     */
 
-    if (!globalState.compressedFiles.includes(absoluteImgPath)) {
+    if (!globalState.compressedFiles.has(absoluteImgPath)) {
       // Image not already compressed before
       
       const result: Result = {
@@ -185,10 +185,46 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
     if (attr_srcset) {
       // If srcset is set, don't touch it.
       // Just compress files
+      // TODO
     }
     else {
       // Generate image set
-      // TODO
+      const ext = path.extname(attrib_src);
+      const fullbasename = attrib_src.slice(0, -(ext.length));
+      const imageSrc = (addition: string) => `${fullbasename}${addition}${ext}`;
+
+      // Start from original image
+      let new_srcset = '';
+
+      // Start reduction
+      const step = 300; //px
+      const ratio = w/h;
+      let valueW = w-step;
+      let valueH = Math.trunc(valueW/ratio);
+
+      while (valueW > options.image.srcset_min_width) {
+        const src = imageSrc(`@${valueW}w`);
+        const absoluteFilename = translateSrc(globalState.dir, path.dirname(file), src);
+
+        const compressedData = await compressImage(originalData, { width: valueW, height: valueH });
+
+        if (compressedData && !globalState.args.nowrite) {
+          fs.writeFile(absoluteFilename, compressedData);
+        }
+
+        // Add file to list avoid recompression
+        globalState.compressedFiles.add(absoluteFilename);
+
+        new_srcset += `, ${src} ${valueW}w`;
+
+        // reduce size
+        valueW -= step;
+        valueH = Math.trunc(valueW/ratio);        
+      }
+
+      if (new_srcset) {
+        img.attr('srcset', `${attrib_src} ${w}w`+new_srcset);
+      }
     }
   }
   catch(e) {

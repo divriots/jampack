@@ -115,7 +115,7 @@ export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions ):
     case 'jpeg':
     case 'webp':
     case 'gif':
-      return await sharpFile.resize( {...resize, withoutEnlargement: true} ).toBuffer();
+      return await sharpFile.resize( {...resize, fit: 'fill', withoutEnlargement: true} ).toBuffer();
   }
 
   return undefined;
@@ -133,7 +133,7 @@ export async function compress(glob: string): Promise<void> {
 
   // "Parallel" processing
   await Promise.all(paths.map(async file => {
-    if (!globalState.compressedFiles.includes(file)) {
+    if (!globalState.compressedFiles.has(file)) {
       await processFile(file, await fs.stat(file));
     }
   }));
