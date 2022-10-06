@@ -1,6 +1,6 @@
 {
   "name": "@divriots/jampack",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Packer for static websites",
   "author": "Georges Gomes @georges-gomes",
   "bin": {
