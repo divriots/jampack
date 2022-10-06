@@ -230,8 +230,8 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
   catch(e) {
     console.error('Error while processing image');
     console.error(e);
-    // exit here until we cover all the issues
-    exit(1);
+    // exit here
+    // exit(1);
   }
 }
 
