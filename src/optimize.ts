@@ -128,7 +128,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
         case 'jpeg':
         case 'png':
         case 'webp':
-        case 'gif':
+        //case 'gif':
         // TODO
           break;
       }

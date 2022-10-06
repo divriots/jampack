@@ -49,7 +49,7 @@ const processFile = async (file: string, stats: Stats): Promise<void> => {
       case '.jpg':
       case '.jpeg':
       case '.webp':
-      case '.gif':
+      //case '.gif':
         const newImageData = await compressImageFile(file);
         if (newImageData && newImageData.length < result.originalSize) {
           writeData = newImageData;
@@ -114,7 +114,7 @@ export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions ):
     case 'jpg':
     case 'jpeg':
     case 'webp':
-    case 'gif':
+    //case 'gif':
       return await sharpFile.resize( {...resize, fit: 'fill', withoutEnlargement: true} ).toBuffer();
   }
 
