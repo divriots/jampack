@@ -24,23 +24,23 @@ async function analyse(file: string): Promise<void> {
 
   // Process images sequentially
   await imgsArray.reduce(async (previousPromise, imgElement) => {
-      await previousPromise;
-      return processImage(file, $, imgElement);
-    }, Promise.resolve());
+    await previousPromise;
+    return processImage(file, $, imgElement);
+  }, Promise.resolve());
 
   if (!globalState.args.nowrite) {
     await fs.writeFile(path.join(globalState.dir, file), $.html());
   }
 }
 
-async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.Element) : Promise<void> {
+async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.Element): Promise<void> {
   try {
 
     const img = $(imgElement);
-    
+
     /*
     * Attribute 'alt'
-    */ 
+    */
     const attrib_alt = img.attr('alt');
     if (attrib_alt === undefined) {
       console.warn('<img> has no alt attribute - adding an empty but you should fix it');
@@ -52,8 +52,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
     */
     const attrib_src = img.attr('src');
     console.log(`- Image ${attrib_src}`);
-    if (!attrib_src)
-    {
+    if (!attrib_src) {
       console.warn('<img> has no src attribute');
       return;
     }
@@ -73,7 +72,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
     * Attribute 'loading'
     */
     const attr_loading = img.attr('loading');
-    switch(attr_loading) {
+    switch (attr_loading) {
       case undefined:
         // Go lazy by default
         img.attr('loading', 'lazy');
@@ -87,12 +86,12 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
       default:
         console.warn(`Invalid loading attribute ${attr_loading}`)
     }
-    
+
     /*
     * Attribute 'decoding'
     */
     img.attr('decoding', 'async');
-    
+
     /*
     * Loading image
     */
@@ -102,11 +101,11 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
     try {
       const stats = await fs.stat(absoluteImgPath);
     }
-    catch(e) {
+    catch (e) {
       console.error(`Missing img ${absoluteImgPath}`);
       return;
     }
-    
+
     const sharpFile = sharp(absoluteImgPath);
     const meta = await sharpFile.metadata();
     const originalData = await fs.readFile(absoluteImgPath);
@@ -118,7 +117,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
     if (originalData.length <= options.image.embed_size) {
       let datauri = undefined;
 
-      switch(meta.format) {
+      switch (meta.format) {
         case 'svg':
           const compressedData = await compressImage(originalData, {});
           const svgEmbed = (compressedData && compressedData.length < originalData.length) ? compressedData : originalData;
@@ -128,8 +127,8 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
         case 'jpeg':
         case 'png':
         case 'webp':
-        //case 'gif':
-        // TODO
+          //case 'gif':
+          // TODO
           break;
       }
 
@@ -147,8 +146,38 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
     }
 
     /*
-    * Attribute 'width' & 'height'
+    * Compress image
     */
+    if (!globalState.compressedFiles.has(absoluteImgPath)) {
+      // Image not already compressed before
+
+      const result: Result = {
+        file: absoluteImgPath,
+        originalSize: originalData.length,
+        compressedSize: originalData.length
+      }
+
+      const newImage = await compressImage(originalData, {});
+      if (newImage && newImage.length < originalData.length) {
+
+        if (!globalState.args.nowrite) {
+          fs.writeFile(absoluteImgPath, newImage);
+        }
+
+        result.compressedSize = newImage.length;
+      }
+
+      globalState.addFile(result);
+    }
+
+    //
+    // Stop here if svg
+    //
+    if (meta.format === 'svg') return;
+
+    /*
+     * Attribute 'width' & 'height'
+     */
     const [w, h] = setImageSize(img, meta);
     if (w < 0 || h < 0) {
       console.warn(`Unexpected error in image size calculation - some optimizations can't be done`);
@@ -156,36 +185,13 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
     }
 
     /*
-    * Compress image
-    */
-
-    if (!globalState.compressedFiles.has(absoluteImgPath)) {
-      // Image not already compressed before
-      
-      const result: Result = {
-        file: absoluteImgPath,
-        originalSize: originalData.length,
-        compressedSize: originalData.length
-      }
-      
-      const newImage = await compressImage(originalData, {});
-      if (newImage && newImage.length < originalData.length) {
-    
-        if (!globalState.args.nowrite) {
-          fs.writeFile(absoluteImgPath, newImage);
-        }
-    
-        result.compressedSize = newImage.length;
-      }
-
-      globalState.addFile(result);
-    }
-
+     * Attribute 'srcset'
+     */
     const attr_srcset = img.attr('srcset');
     if (attr_srcset) {
       // If srcset is set, don't touch it.
-      // Just compress files
-      // TODO
+      // The compress pass will compress the images
+      // of the srcset
     }
     else {
       // Generate image set
@@ -198,9 +204,9 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
 
       // Start reduction
       const step = 300; //px
-      const ratio = w/h;
-      let valueW = w-step;
-      let valueH = Math.trunc(valueW/ratio);
+      const ratio = w / h;
+      let valueW = w - step;
+      let valueH = Math.trunc(valueW / ratio);
 
       while (valueW > options.image.srcset_min_width) {
         const src = imageSrc(`@${valueW}w`);
@@ -219,15 +225,16 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
 
         // reduce size
         valueW -= step;
-        valueH = Math.trunc(valueW/ratio);        
+        valueH = Math.trunc(valueW / ratio);
       }
 
       if (new_srcset) {
-        img.attr('srcset', `${attrib_src} ${w}w`+new_srcset);
+        img.attr('srcset', `${attrib_src} ${w}w` + new_srcset);
       }
     }
+
   }
-  catch(e) {
+  catch (e) {
     console.error('Error while processing image');
     console.error(e);
     // exit here
@@ -247,30 +254,30 @@ function setImageSize(img: cheerio.Cheerio, meta: sharp.Metadata): number[] {
       console.warn(`Invalid width attribute "${width}" - overriding`);
       width = undefined;
     }
-  } 
+  }
   if (height !== undefined) {
     if (!isNumeric(height)) {
       console.warn(`Invalid height attribute "${height}" - overriding`);
       height = undefined;
     }
-  } 
+  }
 
   // If we don't have the metadata, we can't do much more
   if (meta.width === undefined || meta.height === undefined) {
     return [-1, -1];
   }
 
-  const originalRatio = meta.width/meta.height;
-  
+  const originalRatio = meta.width / meta.height;
+
   if (width !== undefined && height !== undefined) {
     // Both are provided
     const w = parseInt(width, 10);
     const h = parseInt(height, 10);
 
     // Is ratio equal?
-    const providedRatio = Math.round(w/h*10)/10;
-    const imageRatio = Math.round(originalRatio*10)/10;
-    if (providedRatio !== imageRatio ) {
+    const providedRatio = Math.round(w / h * 10) / 10;
+    const imageRatio = Math.round(originalRatio * 10) / 10;
+    if (providedRatio !== imageRatio) {
       console.warn(`Image aspect ratio in HTML (${providedRatio}) differs from image aspect ratio (${imageRatio}) - fix width and height or let jampack fill them.`);
     }
 
@@ -278,12 +285,12 @@ function setImageSize(img: cheerio.Cheerio, meta: sharp.Metadata): number[] {
   } else if (width !== undefined && height === undefined) {
     // Width is provided
     width_new = parseInt(width, 10);
-    height_new = width_new/originalRatio;
+    height_new = width_new / originalRatio;
   }
   else if (width === undefined && height !== undefined) {
     // Height is provided
     height_new = parseInt(height, 10);
-    width_new = height_new*originalRatio;
+    width_new = height_new * originalRatio;
   }
   else {
     // No width or height provided - set both to image size
@@ -307,7 +314,7 @@ export async function optimize(): Promise<void> {
 
   // Sequential async
   await paths.reduce(async (previousPromise, item) => {
-      await previousPromise;
-      return analyse(item);
-    }, Promise.resolve());
+    await previousPromise;
+    return analyse(item);
+  }, Promise.resolve());
 }
