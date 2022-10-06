@@ -168,7 +168,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
         compressedSize: originalData.length
       }
       
-      const newImage = await compressImage(originalData, {width: w, height: h});
+      const newImage = await compressImage(originalData, {});
       if (newImage && newImage.length < originalData.length) {
     
         if (!globalState.args.nowrite) {

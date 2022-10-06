@@ -104,7 +104,18 @@ export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions ):
 
   switch(meta.format) {
     case 'svg':
-      const newData = svgo(data, {});
+      const newData = svgo(data, {
+        multipass: true,
+        plugins: [ {
+          name: "preset-default",
+          params: {
+            overrides: {
+              removeViewBox: false,
+            },
+          },
+          }
+        ],
+      });
       if (newData.error || newData.modernError) {
         console.log( `Error processing svg ${data}`);
         return undefined;
@@ -115,7 +126,11 @@ export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions ):
     case 'jpeg':
     case 'webp':
     //case 'gif':
-      return await sharpFile.resize( {...resize, fit: 'fill', withoutEnlargement: true} ).toBuffer();
+      let sf = sharpFile;
+      if (resize.width && resize.height) {
+        sf = sf.resize( {...resize, fit: 'fill', withoutEnlargement: true} );
+      }
+      return await sf.toBuffer();
   }
 
   return undefined;
