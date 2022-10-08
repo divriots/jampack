@@ -7,13 +7,15 @@
 \______|    \/      \/|  |       \/     \/     \/
                       |__|
 ```
+[![npm version](https://img.shields.io/npm/v/@divriots/jampack)](https://npmjs.org/package/@divriots/jampack) 
+[![Discord](https://img.shields.io/discord/744781525119139859)](https://discord.gg/XkQxSU9)
 
-# jampack
+# `jampack`
 
 Optimize static websites for maximum performance and best Core Web Vitals scores.
 
 <div>
-  <p>Brought to you by<br/></p>
+  <div>Brought to you by</div>
   <a href="https://divRIOTS.com#gh-light-mode-only">
     <img width="150" height="40" src="https://divRIOTS.com/divriots.svg" alt="‹div›RIOTS" />
   </a>
@@ -22,9 +24,13 @@ Optimize static websites for maximum performance and best Core Web Vitals scores
   </a>
 </div>
 
-## Why jampack?
+## Why `jampack`?
 
 ## Optimizations
+
+## How can I help?
+
+
 
 ## Installation
 
@@ -52,7 +58,11 @@ TODO
 
 ## Configuration
 
-No configuration yet. All defaults
+No configuration yet. All defaults.
+
+## Why is it called `jampack`?
+
+TODO
 
 ## License
 
