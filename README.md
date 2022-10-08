@@ -8,7 +8,7 @@
                       |__|
 ```
 [![npm version](https://img.shields.io/npm/v/@divriots/jampack)](https://npmjs.org/package/@divriots/jampack) 
-[![Discord](https://img.shields.io/discord/744781525119139859)](https://discord.gg/XkQxSU9)
+[![Discord](https://img.shields.io/badge/chat-discord-blue?style=flat&logo=discord)](https://discord.gg/XkQxSU9)
 
 # `jampack`
 
