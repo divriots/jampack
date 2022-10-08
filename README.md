@@ -28,10 +28,6 @@ Optimize static websites for maximum performance and best Core Web Vitals scores
 
 ## Optimizations
 
-## How can I help?
-
-
-
 ## Installation
 
 ```sh
@@ -48,8 +44,7 @@ yarn add -dev @divriots/jampack
 ## Usage
 
 ```sh
-# Process static site output in folder `dist` of current directory
-> jampack dist
+todo
 ```
 
 ## CLI Options
@@ -59,6 +54,16 @@ TODO
 ## Configuration
 
 No configuration yet. All defaults.
+
+## How can I help?
+
+## Who uses `jampack` in the wild?
+
+- [divRIOTS.com](https://divRIOTS.com)
+- [Backlight.dev](https://backlight.dev)
+- [story.to.design](https://story.to.design)
+- [Components.studio](https://components.studio)
+> Add yours here 
 
 ## Why is it called `jampack`?
 
