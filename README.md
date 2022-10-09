@@ -39,7 +39,7 @@ Optimizes static websites for best user experience and best Core Web Vitals scor
 
 ## Optimizations
 
-Growing list of optimizations performed by `jampack`:
+Growing list of optimizations performed:
 
 | Optimization  |  Description  |
 | ------------- | ------------- |
