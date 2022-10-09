@@ -12,7 +12,7 @@
 
 # `jampack`
 
-Optimizes static websites for maximum performance and best Core Web Vitals scores.
+Optimizes static websites for best user experience and best Core Web Vitals scores.
 
 <div>
   <div>Brought to you by</div>
