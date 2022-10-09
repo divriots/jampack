@@ -56,7 +56,7 @@ npx @divriots/jampack ./dist
 
 No configuration yet. All defaults.
 
-## What sites uses `jampack` in the wild?
+## `jampack` use in the wild
 
 - [divRIOTS.com](https://divRIOTS.com)
 - [Backlight.dev](https://backlight.dev)
