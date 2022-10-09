@@ -12,7 +12,7 @@
 
 # `jampack`
 
-Optimize static websites for maximum performance and best Core Web Vitals scores.
+Optimizes static websites for maximum performance and best Core Web Vitals scores.
 
 <div>
   <div>Brought to you by</div>
@@ -24,20 +24,32 @@ Optimize static websites for maximum performance and best Core Web Vitals scores
   </a>
 </div>
 
+## What is `jampack`?
+
+Not a bundler. Not a framework.
+
+`jampack` is a post-processing tool that takes the output of your [SSG](https://jamstack.org/generators/) and optimizes it for maximum performance and best Core Web Vitals scores.
+
 ## Why `jampack`?
 
+Static sites are fast by nature but they don't naturally perform in the best possible way. Generating top performance webpages requires some extra engineering in the composition of the pages that is counterproductive with the maintenance of the website.
+
+`jampack` let's you focus on your website in the most maintainable way and perform the heaving-lifting for you.
+
 ## Optimizations
+
+Current list of optimizations performed by `jampack`:
+
+| Optimization  |  Description  |
+| ------------- | ------------- |
+| todo              |   todo            |
 
 ## Quick use
 
 ```sh
-# Optimize static website in `dist` folder in current directory
+# Optimize static website in `dist` folder
 npx @divriots/jampack ./dist
 ```
-
-## CLI Options
-
-TODO
 
 ## Configuration
 
