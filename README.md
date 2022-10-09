@@ -28,17 +28,18 @@ Optimizes static websites for maximum performance and best Core Web Vitals score
 
 Not a bundler. Not a framework.
 
-`jampack` is a post-processing tool that takes the output of your [SSG](https://jamstack.org/generators/) and optimizes it for maximum performance and best Core Web Vitals scores.
+`jampack` is a post-processing tool that takes the output of your [SSG](https://jamstack.org/generators/) and optimizes it for best user experience and best [Core Web Vitals](https://web.dev/learn-core-web-vitals/) scores.
 
 ## Why `jampack`?
 
-Static sites are fast by nature but they don't naturally perform in the best possible way. Generating top performance webpages requires some extra engineering in the composition of the pages that is counterproductive with the maintenance of the website.
-
-`jampack` let's you focus on your website in the most maintainable way and perform the heaving-lifting for you.
+- **Better user experience**. Specially on low-end devices.
+- **Better SEO**. Page experience now [affects ranking](https://developers.google.com/search/docs/appearance/page-experience).
+- **Easier maintenance**. Generating top performance webpages requires extra engineering in the composition of the pages that is counterproductive with the maintenance of the website.
+- **Time saving**. Spend less time optimizing and let `jampack` perform the heaving-lifting for you.
 
 ## Optimizations
 
-Current list of optimizations performed by `jampack`:
+Growing list of optimizations performed by `jampack`:
 
 | Optimization  |  Description  |
 | ------------- | ------------- |
@@ -61,7 +62,7 @@ No configuration yet. All defaults.
 - [Backlight.dev](https://backlight.dev)
 - [story.to.design](https://story.to.design)
 - [Components.studio](https://components.studio)
-> Add yours here 
+> Add yours here
 
 ## Why is it called `jampack`?
 
