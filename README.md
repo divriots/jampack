@@ -28,23 +28,11 @@ Optimize static websites for maximum performance and best Core Web Vitals scores
 
 ## Optimizations
 
-## Installation
+## Quick use
 
 ```sh
-# Via npm
-npm install -dev @divriots/jampack
-
-# Via pnpm
-pnpm install -dev @divriots/jampack
-
-# Via yarn
-yarn add -dev @divriots/jampack
-```
-
-## Usage
-
-```sh
-todo
+# Optimize static website in `dist` folder in current directory
+npx @divriots/jampack ./dist
 ```
 
 ## CLI Options
@@ -55,9 +43,7 @@ TODO
 
 No configuration yet. All defaults.
 
-## How can I help?
-
-## Who uses `jampack` in the wild?
+## What sites uses `jampack` in the wild?
 
 - [divRIOTS.com](https://divRIOTS.com)
 - [Backlight.dev](https://backlight.dev)
@@ -67,7 +53,8 @@ No configuration yet. All defaults.
 
 ## Why is it called `jampack`?
 
-TODO
+` jam`: From [Jamstack](https://en.wikipedia.org/wiki/Jamstack).
+`pack`: Reminescent of the [Executable Packers](https://en.wikipedia.org/wiki/Executable_compression#List_of_executable_packers) from the 90s.
 
 ## License
 
