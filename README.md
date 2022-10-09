@@ -26,9 +26,9 @@ Optimizes static websites for best user experience and best Core Web Vitals scor
 
 ## What is `jampack`?
 
-Not a bundler. Not a framework.
+> Not a bundler. Not a framework.
 
-`jampack` is a post-processing tool that takes the output of your [SSG](https://jamstack.org/generators/) and optimizes it for best user experience and best [Core Web Vitals](https://web.dev/learn-core-web-vitals/) scores.
+`jampack` is a post-processing tool that takes the output of your [Static Site Generator (aka SSG)](https://jamstack.org/generators/) and optimizes it for best user experience and best [Core Web Vitals](https://web.dev/learn-core-web-vitals/) scores.
 
 ## Why `jampack`?
 
@@ -66,8 +66,8 @@ No configuration yet. All defaults.
 
 ## Why is it called `jampack`?
 
-` jam`: From [Jamstack](https://en.wikipedia.org/wiki/Jamstack).
-`pack`: Reminescent of the [Executable Packers](https://en.wikipedia.org/wiki/Executable_compression#List_of_executable_packers) from the 90s.
+- ` jam`: From [Jamstack](https://en.wikipedia.org/wiki/Jamstack).
+- `pack`: Reminescent of the [Executable Packers](https://en.wikipedia.org/wiki/Executable_compression#List_of_executable_packers) from the 90s.
 
 ## License
 
