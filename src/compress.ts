@@ -182,10 +182,12 @@ const compressImageFile = async (file: string, toWebP: boolean = false): Promise
   return compressImage(buffer, {}, toWebP);
 }
 
-export async function compress(glob: string): Promise<void> {  
+export async function compress(exclude: string): Promise<void> {  
   beginProgress();
-  
-  const paths = await globby(glob, { cwd: globalState.dir, absolute: true });
+
+  const globs = ['**/**'];
+  if (exclude) globs.push('!'+exclude);
+  const paths = await globby(globs, { cwd: globalState.dir, absolute: true });
 
   // "Parallel" processing
   await Promise.all(paths.map(async file => {

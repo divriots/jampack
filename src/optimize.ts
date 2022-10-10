@@ -331,8 +331,12 @@ function setImageSize(img: cheerio.Cheerio, meta: sharp.Metadata): number[] {
   throw new Error('Unexpected issue when resolving image sizes')
 }
 
-export async function optimize(): Promise<void> {
-  const paths = await globby('**/*.{htm,html}', { cwd: globalState.dir });
+export async function optimize(exclude?: string): Promise<void> {
+
+  const glob = ['**/*.{htm,html}'];
+  if (exclude) glob.push('!'+exclude);
+
+  const paths = await globby(glob, { cwd: globalState.dir });
 
   // Sequential async
   await paths.reduce(async (previousPromise, item) => {

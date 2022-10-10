@@ -30,6 +30,7 @@ program
 program.command('pack', { isDefault: true})
   .description('todo')
   .argument('<dir>', 'Directory to pack')
+  .option('--exclude <exclude>', 'Glob to exclude')
   .option('--nowrite', 'No write')
   .option('--onlycomp', 'Only compress')
   .option('--onlyoptim', 'Only optimize')
@@ -41,13 +42,13 @@ program.command('pack', { isDefault: true})
     if (!options.onlycomp) {
       console.log('');
       console.log(kleur.bgGreen(kleur.black(` PASS 1 - Optimizing `)));
-      await optimize();
+      await optimize(options.exclude);
     } 
     
     if (!options.onlyoptim) {
       console.log('');
       console.log(kleur.bgGreen(kleur.black(` PASS 2 - Compressing the rest`)));
-      await compress("**/**");
+      await compress(options.exclude);
     }
     printDetails();
   });
