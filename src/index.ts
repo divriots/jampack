@@ -38,31 +38,27 @@ program.command('pack', { isDefault: true})
     globalState.dir = dir;
     globalState.args = options;
 
-    if (!options.onlyoptim && !options.onlycomp) {
-      console.log(kleur.bgGreen(kleur.black(`\n PASS 1 - Compressing embeddables `)));
-      await compress("**/*.{css,svg,js}");
-    }
-
     if (!options.onlycomp) {
-      console.log(kleur.bgGreen(kleur.black(`\n PASS 2 - Optimizing `)));
+      console.log('');
+      console.log(kleur.bgGreen(kleur.black(` PASS 1 - Optimizing `)));
       await optimize();
     } 
     
     if (!options.onlyoptim) {
-      console.log(kleur.bgGreen(kleur.black(`\n PASS 3 - Compressing the rest`)));
+      console.log('');
+      console.log(kleur.bgGreen(kleur.black(` PASS 2 - Compressing the rest`)));
       await compress("**/**");
     }
-
     printDetails();
   });
 
 program.parse();
-
 function printDetails() {
-  const dataTable: any[] = [['Extension', 'Compressed', 'Original', 'Compressed', 'Gain']];
+  const dataTable: any[] = [['Action', 'Compressed', 'Original', 'Compressed', 'Gain']];
   const config: TableUserConfig = {
     columns: [
       { alignment: 'left' },
+      { alignment: 'right' },
       { alignment: 'right' },
       { alignment: 'right' },
       { alignment: 'right' }

@@ -4,8 +4,8 @@ export type Args = {
   nowrite?: boolean;
 }
 
-export type Result = {
-  file: string;
+export type ReportItem = {
+  action: string;
   originalSize: number;
   compressedSize: number;
 }
@@ -21,7 +21,7 @@ export class GlobalState {
   dir: string = 'dist';
   args: Args = {};
   compressedFiles: Set<string> = new Set();
-  compressedFilesResult: Result[] = [];
+  optimizedFiles: Set<string> = new Set();
   summary: Summary = {
     nbFiles: 0,
     nbFilesCompressed: 0,
@@ -30,20 +30,16 @@ export class GlobalState {
   };
   summaryByExtension: Record<string, Summary> = {};
 
-  addFile(r: Result) {
+  reportItem(r: ReportItem) {
     const isCompressed = r.compressedSize < r.originalSize ? 1 : 0;
-
-    this.compressedFiles.add(r.file);
-    this.compressedFilesResult.push(r);
 
     this.summary.nbFiles++;
     state.summary.nbFilesCompressed += isCompressed;
     state.summary.dataLenUncompressed += r.originalSize;
     state.summary.dataLenCompressed += r.compressedSize;
     
-    const ext = path.extname(r.file);
-    if(ext) {
-      let summary = this.summaryByExtension[ext];
+    if(r.action) {
+      let summary = this.summaryByExtension[r.action];
       if (!summary) {
         summary = {
           nbFiles: 0,
@@ -51,7 +47,7 @@ export class GlobalState {
           dataLenUncompressed: 0,
           dataLenCompressed: 0
         }
-        this.summaryByExtension[ext] = summary;
+        this.summaryByExtension[r.action] = summary;
       }
       summary.nbFiles++;
       summary.nbFilesCompressed += isCompressed;

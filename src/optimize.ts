@@ -7,7 +7,8 @@ import sharp from "sharp";
 import options from './options.js';
 import { compressImage } from './compress.js';
 import svgToMiniDataURI from 'mini-svg-data-uri';
-import globalState, { Result } from './state.js';
+import globalState from './state.js';
+import type { Image } from './types.js';
 import { exit } from 'process';
 
 async function analyse(file: string): Promise<void> {
@@ -99,7 +100,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
 
     // file exists?
     try {
-      const stats = await fs.stat(absoluteImgPath);
+      await fs.stat(absoluteImgPath);
     }
     catch (e) {
       console.error(`Missing img ${absoluteImgPath}`);
@@ -111,24 +112,62 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
     const originalData = await fs.readFile(absoluteImgPath);
 
     /*
-    * Embed small images
-    */
+     * Compress image to WebP
+     */
+    let newImage: Image | undefined;
+
+    if (!globalState.optimizedFiles.has(absoluteImgPath)) {
+
+      // Let's avoid to optimize same images twice
+      globalState.optimizedFiles.add(absoluteImgPath);
+
+      newImage = await compressImage(originalData, {}, true);
+      if (newImage?.data && newImage.data.length < originalData.length) {
+        // Do we need to add an new extension?
+        const newExtension = `.${newImage.format}`;
+        const additionalExtension = path.extname(absoluteImgPath) === newExtension ? '' : newExtension;
+
+        const newFilename = absoluteImgPath+additionalExtension;
+        
+        if (!globalState.args.nowrite) {
+          fs.writeFile(newFilename, newImage.data);
+        }
+
+        globalState.compressedFiles.add(newFilename);
+
+        // Report compression result
+        globalState.reportItem({
+          action: (newFilename !== absoluteImgPath) ? `${meta.format}->${newImage.format}` : path.extname(absoluteImgPath),
+          originalSize: originalData.length,
+          compressedSize: newImage.data.length
+        });
+        
+        img.attr('src', attrib_src+additionalExtension);
+      }
+
+    }
+
+    /*
+     * Embed small images
+     *
+     * TODO this is only embedding images that have
+     * successfully be compressed. Should embed original
+     * image if it fits the size.
+     */
     let isEmbed = false;
-    if (originalData.length <= options.image.embed_size) {
+    if (newImage && newImage.data.length <= options.image.embed_size) {
       let datauri = undefined;
 
-      switch (meta.format) {
+      switch (newImage.format) {
         case 'svg':
-          const compressedData = await compressImage(originalData, {});
-          const svgEmbed = (compressedData && compressedData.length < originalData.length) ? compressedData : originalData;
-          datauri = svgToMiniDataURI(svgEmbed.toString());
+          datauri = svgToMiniDataURI(newImage.data.toString());
+          break;
+        case 'webp':
+          datauri = `data:image/webp;base64,${newImage.data.toString('base64')}`;
           break;
         case 'jpg':
-        case 'jpeg':
         case 'png':
-        case 'webp':
-          //case 'gif':
-          // TODO
+          // TODO but not possible in current code
           break;
       }
 
@@ -137,37 +176,14 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
         img.attr('src', datauri);
         img.removeAttr('loading');
         img.removeAttr('decoding');
+
+        globalState.reportItem({ action: `${newImage.format}->embed`, originalSize: originalData.length, compressedSize: newImage.data.length});
       }
     }
 
     if (isEmbed) {
       // Image is embed, no need for more processing
       return;
-    }
-
-    /*
-    * Compress image
-    */
-    if (!globalState.compressedFiles.has(absoluteImgPath)) {
-      // Image not already compressed before
-
-      const result: Result = {
-        file: absoluteImgPath,
-        originalSize: originalData.length,
-        compressedSize: originalData.length
-      }
-
-      const newImage = await compressImage(originalData, {});
-      if (newImage && newImage.length < originalData.length) {
-
-        if (!globalState.args.nowrite) {
-          fs.writeFile(absoluteImgPath, newImage);
-        }
-
-        result.compressedSize = newImage.length;
-      }
-
-      globalState.addFile(result);
     }
 
     //
@@ -197,7 +213,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
       // Generate image set
       const ext = path.extname(attrib_src);
       const fullbasename = attrib_src.slice(0, -(ext.length));
-      const imageSrc = (addition: string) => `${fullbasename}${addition}${ext}`;
+      const imageSrc = (addition: string) => `${fullbasename}${addition}.webp`;
 
       // Start from original image
       let new_srcset = '';
@@ -210,16 +226,22 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
 
       while (valueW > options.image.srcset_min_width) {
         const src = imageSrc(`@${valueW}w`);
+
+        console.log(`Generating srcset ${src}`);
+
         const absoluteFilename = translateSrc(globalState.dir, path.dirname(file), src);
+        
+        // Don't generate srcset file twice
+        if (!globalState.compressedFiles.has(absoluteFilename)) {
+          // Add file to list avoid recompression
+          globalState.compressedFiles.add(absoluteFilename);
 
-        const compressedData = await compressImage(originalData, { width: valueW, height: valueH });
+          const compressedImage = await compressImage(originalData, { width: valueW, height: valueH }, true);
 
-        if (compressedData && !globalState.args.nowrite) {
-          fs.writeFile(absoluteFilename, compressedData);
+          if (compressedImage?.data && !globalState.args.nowrite) {
+            fs.writeFile(absoluteFilename, compressedImage.data);
+          }  
         }
-
-        // Add file to list avoid recompression
-        globalState.compressedFiles.add(absoluteFilename);
 
         new_srcset += `, ${src} ${valueW}w`;
 
@@ -229,7 +251,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
       }
 
       if (new_srcset) {
-        img.attr('srcset', `${attrib_src} ${w}w` + new_srcset);
+        img.attr('srcset', `${img.attr('src')} ${w}w` + new_srcset);
       }
     }
 
