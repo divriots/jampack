@@ -81,7 +81,12 @@ npx @divriots/jampack ./dist
 
 ## CLI options
 
-
+| Option        | Description                    |
+| -----------   | ------------------------------ |
+| `--onlyoptim` | Only runs optimization (PASS 1) |
+| `--onlycomp`  | Only runs compression (PASS 2) |
+| `--nowrite`   | Don't write anything to disk (for testing) |
+| `--exclude`   | Files to exclude from processing. Expect glob format like `--exclude 'blog/**'` |
 
 ## Configuration
 
