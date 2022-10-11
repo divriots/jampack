@@ -39,11 +39,38 @@ Optimizes static websites for best user experience and best Core Web Vitals scor
 
 ## Optimizations
 
-Growing list of optimizations performed:
+### PASS 1 - Optimizations
 
-| Optimization  |  Description  |
-| ------------- | ------------- |
-| todo              |   todo            |
+This pass takes all `*.{html|.htm}` files and parse them for optimisation. 
+
+| Optimization   | Technical details     | Related links | Available |
+| -------------- | --------------------- |:------------:|:---------:|
+| 🔽 `<img>`      |                       |             |           |
+| Optimize `png` to `WebP` | Given `foo.png`, creates a **near loss less** `foo.png.webp` if size reduced. | [web.dev](https://web.dev/uses-webp-images/) |  ✅  |
+| Optimize `jpeg` to `WebP` | Given `foo.jpg`, creates a **lossly* `foo.jpg.webp` if size reduced. | [web.dev](https://web.dev/uses-webp-images/) |  ✅  |
+| Optimize `svg` |  |  |  ✅  |
+| Generate responsive images and set `srcset` | Multiple smaller images are generated exclusively in `WebP` and `srcset` attribute is set accordingly.  | [web.dev](https://web.dev/patterns/web-vitals-patterns/images/responsive-images/) |  ✅  |
+| Embed small images | If optimised image size is <500 bytes, image is embed in `[src]` |  |  ✅  |
+| Set `width` and `height` if missing | Uses image size and aspect ratio to fill values | [web.dev](https://web.dev/optimize-cls/#images-without-dimensions) |  ✅  |
+| Fix `width` or `height` if not numerical | Uses image size and aspect ratio to fill values | [web.dev](https://web.dev/optimize-cls/#images-without-dimensions) |  ✅  |
+| Set lazy loading by default  | Sets `loading="lazy"` if `[loading]` is not set. | [web.dev](https://web.dev/lazy-loading-images/) |  ✅  |
+| Set async decoding by default  | Sets `decoding="async"`. |  |  ✅  |
+| Warn on missing `[alt]` | Warn on missing `alt` attribute but adds `alt=""` in case image is considered decorative. |  |  ✅  |
+| 🔽 `<picture>`  |                       |      |   |
+| - TODO         |                       |  |  ❌  |
+
+### PASS 2 - Compression
+
+This pass compresses all untouched files without changing filename or format.
+
+| Extension       | Compressor            | Some options |
+| --------------- | --------------------- | ------------ |
+| `.html`,`.htm`  | html-minifier-terser  |              |
+| `.css`          | csso                  |              |
+| `.svg`          | svgo                  |              |
+| `.jpg`,`.jpeg`  | sharp                 |              |
+| `.png`          | sharp                 |              |
+| `.webp`         | sharp                 |              | 
 
 ## Quick use
 
@@ -51,6 +78,10 @@ Growing list of optimizations performed:
 # Optimize static website in `dist` folder
 npx @divriots/jampack ./dist
 ```
+
+## CLI options
+
+
 
 ## Configuration
 
