@@ -1,12 +1,9 @@
 *-debug.log
 *-error.log
-/.nyc_output
+.DS_Store
 /dist
-/lib
-/package-lock.json
-/tmp
+/pnpm-lock.json
 node_modules
-oclif.manifest.json
 demo
 demo_ref
 demo_webdev
