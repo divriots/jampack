@@ -67,6 +67,7 @@ This pass compresses all untouched files without changing filename or format.
 | --------------- | --------------------- | ------------ |
 | `.html`,`.htm`  | html-minifier-terser  |              |
 | `.css`          | csso                  |              |
+| `.js`           | swc                   |              |
 | `.svg`          | svgo                  |              |
 | `.jpg`,`.jpeg`  | sharp                 |              |
 | `.png`          | sharp                 |              |
