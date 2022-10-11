@@ -47,7 +47,7 @@ This pass takes all `*.{html|.htm}` files and parse them for optimisation.
 | -------------- | --------------------- |:------------:|:---------:|
 | 🔽 `<img>`      |                       |             |           |
 | Optimize `png` to `WebP` | Given `foo.png`, creates a **near loss less** `foo.png.webp` if size reduced. | [web.dev](https://web.dev/uses-webp-images/) |  ✅  |
-| Optimize `jpeg` to `WebP` | Given `foo.jpg`, creates a **lossly* `foo.jpg.webp` if size reduced. | [web.dev](https://web.dev/uses-webp-images/) |  ✅  |
+| Optimize `jpeg` to `WebP` | Given `foo.jpg`, creates a **lossly** `foo.jpg.webp` if size reduced. | [web.dev](https://web.dev/uses-webp-images/) |  ✅  |
 | Optimize `svg` |  |  |  ✅  |
 | Generate responsive images and set `srcset` | Multiple smaller images are generated exclusively in `WebP` and `srcset` attribute is set accordingly.  | [web.dev](https://web.dev/patterns/web-vitals-patterns/images/responsive-images/) |  ✅  |
 | Embed small images | If optimised image size is <500 bytes, image is embed in `[src]` |  |  ✅  |
