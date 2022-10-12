@@ -3,11 +3,13 @@
 import { Command } from 'commander';
 import { compress } from './compress.js';
 import { optimize } from './optimize.js';
-import kleur from 'kleur';
-import globalState from './state.js';
+import $state from './state.js';
 import { table, TableUserConfig } from 'table';
 import { formatBytes } from './utils.js';
+import { fast } from './config.js';
+import { printTitle } from './logger.js';
 import { exit } from 'process';
+import kleur from 'kleur';
 
 const logo = `     __                                    __    
     |__|____    _____ ___________    ____ |  | __
@@ -32,48 +34,84 @@ program.command('pack', { isDefault: true})
   .argument('<dir>', 'Directory to pack')
   .option('--exclude <exclude>', 'Glob to exclude')
   .option('--nowrite', 'No write')
+  .option('--fast', 'Go fast. Mostly no compression just checks for issues.')
   .option('--onlycomp', 'Only compress')
   .option('--onlyoptim', 'Only optimize')
   .action(async (dir, options) => {
 
-    globalState.dir = dir;
-    globalState.args = options;
+    $state.dir = dir;
+    $state.args = options;
+
+    // Override config with fast options
+    if (options.fast) {
+      fast();
+    }
+
+    console.time('Done');
 
     if (!options.onlycomp) {
-      console.log('');
-      console.log(kleur.bgGreen(kleur.black(` PASS 1 - Optimizing `)));
+      printTitle('PASS 1 - Optimizing');
       await optimize(options.exclude);
     } 
     
     if (!options.onlyoptim) {
-      console.log('');
-      console.log(kleur.bgGreen(kleur.black(` PASS 2 - Compressing the rest`)));
+      printTitle('PASS 2 - Compressing the rest');
       await compress(options.exclude);
     }
-    printDetails();
+
+    console.log('');
+    console.timeEnd('Done');
+
+    printSummary();
+
+    printWarningsAndErrors();
   });
 
 program.parse();
-function printDetails() {
-  const dataTable: any[] = [['Action', 'Compressed', 'Original', 'Compressed', 'Gain']];
-  const config: TableUserConfig = {
-    columns: [
-      { alignment: 'left' },
-      { alignment: 'right' },
-      { alignment: 'right' },
-      { alignment: 'right' },
-      { alignment: 'right' }
-    ],
-  };
 
-  Object.entries(globalState.summaryByExtension).forEach(([ext, summary]) => {
-    if (summary.dataLenCompressed < summary.dataLenUncompressed) {
-      const row = [ ext,  `${summary.nbFilesCompressed} / ${summary.nbFiles}`, formatBytes(summary.dataLenUncompressed), formatBytes(summary.dataLenCompressed), '-'+formatBytes(summary.dataLenUncompressed - summary.dataLenCompressed) ];
-      dataTable.push(row);  
-    }
-  });
-  const total = [ 'Total', `${globalState.summary.nbFilesCompressed} / ${globalState.summary.nbFiles}`, formatBytes(globalState.summary.dataLenUncompressed), formatBytes(globalState.summary.dataLenCompressed), '-'+formatBytes(globalState.summary.dataLenUncompressed - globalState.summary.dataLenCompressed)];
-  dataTable.push(total);
+function printSummary() {
 
-  console.log(table(dataTable, config));
+  if ($state.summary.nbFiles > 0) {
+    printTitle('Summary');
+
+    const dataTable: any[] = [['Action', 'Compressed', 'Original', 'Compressed', 'Gain']];
+    const config: TableUserConfig = {
+      columns: [
+        { alignment: 'left' },
+        { alignment: 'right' },
+        { alignment: 'right' },
+        { alignment: 'right' },
+        { alignment: 'right' }
+      ],
+      drawHorizontalLine: (lineIndex, rowCount) => {
+        return lineIndex === 0 || lineIndex === 1 || lineIndex === rowCount - 1 || lineIndex === rowCount;
+      }
+    };
+
+    Object.entries($state.summaryByExtension).forEach(([ext, summary]) => {
+      if (summary.dataLenCompressed < summary.dataLenUncompressed) {
+        const row = [ ext,  `${summary.nbFilesCompressed} / ${summary.nbFiles}`, formatBytes(summary.dataLenUncompressed), formatBytes(summary.dataLenCompressed), '-'+formatBytes(summary.dataLenUncompressed - summary.dataLenCompressed) ];
+        dataTable.push(row);  
+      }
+    });
+    const total = [ 'Total', `${$state.summary.nbFilesCompressed} / ${$state.summary.nbFiles}`, formatBytes($state.summary.dataLenUncompressed), formatBytes($state.summary.dataLenCompressed), '-'+formatBytes($state.summary.dataLenUncompressed - $state.summary.dataLenCompressed)];
+    dataTable.push(total);
+
+    console.log(table(dataTable, config));
+  }
+  
 }
+
+function printWarningsAndErrors() {
+
+  if ($state.issues.size === 0) {
+    printTitle('✔ No issues');
+  }
+  else
+  {
+    printTitle(`${$state.issues.size} file(s) with issues`, kleur.bgRed);
+
+    console.log($state.issues);
+  }
+
+} 

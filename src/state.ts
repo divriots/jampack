@@ -10,18 +10,27 @@ export type ReportItem = {
   compressedSize: number;
 }
 
-export type Summary = {
+type Summary = {
   nbFiles: number;
   nbFilesCompressed: number;
   dataLenUncompressed: number;
   dataLenCompressed: number;
 }
 
+type Issue = {
+  type: "warn" | "error";
+  message: string;
+}
+
 export class GlobalState {
   dir: string = 'dist';
   args: Args = {};
+
   compressedFiles: Set<string> = new Set();
   optimizedFiles: Set<string> = new Set();
+
+  issues: Map<string, Issue[]> = new Map();
+
   summary: Summary = {
     nbFiles: 0,
     nbFilesCompressed: 0,
@@ -30,7 +39,16 @@ export class GlobalState {
   };
   summaryByExtension: Record<string, Summary> = {};
 
-  reportItem(r: ReportItem) {
+  reportIssue(sourceFile: string, issue: Issue) {
+    let issueList = this.issues.get(sourceFile);
+    if (issueList === undefined) {
+      issueList = [];
+      this.issues.set(sourceFile, issueList);
+    }
+    issueList.push(issue);
+  }
+
+  reportSummary(r: ReportItem) {
     const isCompressed = r.compressedSize < r.originalSize ? 1 : 0;
 
     this.summary.nbFiles++;

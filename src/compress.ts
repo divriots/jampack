@@ -7,17 +7,17 @@ import { minify as csso } from "csso";
 import { formatBytes } from './utils.js';
 import sharp from 'sharp';
 import swc from '@swc/core';
-import globalState, { ReportItem } from './state.js';
+import $state, { ReportItem } from './state.js';
 import { globby } from 'globby';
-import options, { WebpOptions } from './options.js';
+import config, { WebpOptions } from './config.js';
 import type { Image, ImageFormat } from './types.js';
 
 const beginProgress = (): void => {
 }
 
 const printProgress = (): void => {
-  const gain = globalState.summary.dataLenUncompressed-globalState.summary.dataLenCompressed;
-  const msg = `${globalState.summary.nbFiles} files | ${formatBytes(globalState.summary.dataLenUncompressed)} → ${formatBytes(globalState.summary.dataLenCompressed)} | -${formatBytes(gain)} `;
+  const gain = $state.summary.dataLenUncompressed-$state.summary.dataLenCompressed;
+  const msg = `${$state.summary.nbFiles} files | ${formatBytes($state.summary.dataLenUncompressed)} → ${formatBytes($state.summary.dataLenCompressed)} | -${formatBytes(gain)} `;
   if (!process.stdout.clearLine || !process.stdout.cursorTo) {
     // In CI we don't have access to clearLine or cursorTo
     // Just don't log any progress
@@ -89,26 +89,28 @@ const processFile = async (file: string, stats: Stats): Promise<void> => {
   if (writeData && writeData.length < result.originalSize) {
     result.compressedSize = writeData.length;
     
-    if (!globalState.args.nowrite) {
+    if (!$state.args.nowrite) {
       await fs.writeFile(file, writeData);
     }
   }
 
-  globalState.compressedFiles.add(file);
-  globalState.reportItem(result);
+  $state.compressedFiles.add(file);
+  $state.reportSummary(result);
 
   printProgress();
 }
 
 function createWebpOptions( opt: WebpOptions | undefined ): sharp.WebpOptions {
   return {
-      nearLossless: opt?.mode === 'lossless',
-      quality: opt?.quality || 80,
-      effort: opt?.effort || 4
+      nearLossless: opt!.mode === 'lossless',
+      quality: opt!.quality,
+      effort: opt!.effort
    }
 }
 
 export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions, toWebp: boolean = false ): Promise<Image | undefined> => {
+
+  if (!config.image.compress) return undefined;
 
   let sharpFile = await sharp(data, { animated: true });
   const meta = await sharpFile.metadata();
@@ -143,7 +145,7 @@ export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions, t
     case 'png':
       outputFormat = 'png';
       if (!toWebp) {
-        sharpFile = sharpFile.png(options.image.png.options || {});
+        sharpFile = sharpFile.png(config.image.png.options || {});
       }     
       doSharp = true;
       break;
@@ -151,13 +153,13 @@ export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions, t
     case 'jpg':
       outputFormat = 'jpg';
       if (!toWebp) {
-        sharpFile = sharpFile.jpeg(options.image.jpeg.options || {});
+        sharpFile = sharpFile.jpeg(config.image.jpeg.options || {});
       }
       doSharp = true;
       break;
     case 'webp':
       outputFormat = 'webp';
-      sharpFile = sharpFile.webp( createWebpOptions(options.image.webp.options_lossly) || {});
+      sharpFile = sharpFile.webp( createWebpOptions(config.image.webp.options_lossly) || {});
       doSharp = true;
       toWebp = false; // Don't need to convert to webP again
       break;
@@ -165,7 +167,7 @@ export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions, t
 
   if (doSharp) {
     if (toWebp) {
-      sharpFile = sharpFile.webp( createWebpOptions(meta.format==='png' ? options.image.webp.options_lossless : options.image.webp.options_lossly));
+      sharpFile = sharpFile.webp( createWebpOptions(meta.format==='png' ? config.image.webp.options_lossless : config.image.webp.options_lossly));
       outputFormat = 'webp';
     }
     if (resize.width && resize.height) {
@@ -187,11 +189,11 @@ export async function compress(exclude: string): Promise<void> {
 
   const globs = ['**/**'];
   if (exclude) globs.push('!'+exclude);
-  const paths = await globby(globs, { cwd: globalState.dir, absolute: true });
+  const paths = await globby(globs, { cwd: $state.dir, absolute: true });
 
   // "Parallel" processing
   await Promise.all(paths.map(async file => {
-    if (!globalState.compressedFiles.has(file)) {
+    if (!$state.compressedFiles.has(file)) {
       await processFile(file, await fs.stat(file));
     }
   }));

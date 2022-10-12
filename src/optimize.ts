@@ -4,17 +4,16 @@ import * as fs from 'fs/promises';
 import cheerio from 'cheerio';
 import { isLocal, isNumeric, translateSrc } from './utils.js';
 import sharp from "sharp";
-import options from './options.js';
+import config from './config.js';
 import { compressImage } from './compress.js';
 import svgToMiniDataURI from 'mini-svg-data-uri';
-import globalState from './state.js';
+import $state from './state.js';
 import type { Image } from './types.js';
-import { exit } from 'process';
 
 async function analyse(file: string): Promise<void> {
   console.log('Processing ' + file);
 
-  const html = (await fs.readFile(path.join(globalState.dir, file))).toString();
+  const html = (await fs.readFile(path.join($state.dir, file))).toString();
   const $ = cheerio.load(html, {});
 
   const imgs = $('img');
@@ -24,17 +23,16 @@ async function analyse(file: string): Promise<void> {
   });
 
   // Process images sequentially
-  await imgsArray.reduce(async (previousPromise, imgElement) => {
-    await previousPromise;
-    return processImage(file, $, imgElement);
-  }, Promise.resolve());
+  for(const imgElement of imgsArray) {
+    await processImage(file, $, imgElement);
+  }
 
-  if (!globalState.args.nowrite) {
-    await fs.writeFile(path.join(globalState.dir, file), $.html());
+  if (!$state.args.nowrite) {
+    await fs.writeFile(path.join($state.dir, file), $.html());
   }
 }
 
-async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.Element): Promise<void> {
+async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheerio.Element): Promise<void> {
   try {
 
     const img = $(imgElement);
@@ -45,6 +43,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
     const attrib_alt = img.attr('alt');
     if (attrib_alt === undefined) {
       console.warn('<img> has no alt attribute - adding an empty but you should fix it');
+      $state.reportIssue(htmlfile, { type: "warn", message: "Missing alt on img"});
       img.attr('alt', "");
     }
 
@@ -96,7 +95,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
     /*
     * Loading image
     */
-    const absoluteImgPath = translateSrc(globalState.dir, path.dirname(file), attrib_src);
+    const absoluteImgPath = translateSrc($state.dir, path.dirname(htmlfile), attrib_src);
 
     // file exists?
     try {
@@ -116,10 +115,10 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
      */
     let newImage: Image | undefined;
 
-    if (!globalState.optimizedFiles.has(absoluteImgPath)) {
+    if (!$state.optimizedFiles.has(absoluteImgPath)) {
 
       // Let's avoid to optimize same images twice
-      globalState.optimizedFiles.add(absoluteImgPath);
+      $state.optimizedFiles.add(absoluteImgPath);
 
       newImage = await compressImage(originalData, {}, true);
       if (newImage?.data && newImage.data.length < originalData.length) {
@@ -129,14 +128,14 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
 
         const newFilename = absoluteImgPath+additionalExtension;
         
-        if (!globalState.args.nowrite) {
+        if (!$state.args.nowrite) {
           fs.writeFile(newFilename, newImage.data);
         }
 
-        globalState.compressedFiles.add(newFilename);
+        $state.compressedFiles.add(newFilename);
 
         // Report compression result
-        globalState.reportItem({
+        $state.reportSummary({
           action: (newFilename !== absoluteImgPath) ? `${meta.format}->${newImage.format}` : path.extname(absoluteImgPath),
           originalSize: originalData.length,
           compressedSize: newImage.data.length
@@ -155,7 +154,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
      * image if it fits the size.
      */
     let isEmbed = false;
-    if (newImage && newImage.data.length <= options.image.embed_size) {
+    if (newImage && newImage.data.length <= config.image.embed_size) {
       let datauri = undefined;
 
       switch (newImage.format) {
@@ -177,7 +176,7 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
         img.removeAttr('loading');
         img.removeAttr('decoding');
 
-        globalState.reportItem({ action: `${newImage.format}->embed`, originalSize: originalData.length, compressedSize: newImage.data.length});
+        $state.reportSummary({ action: `${newImage.format}->embed`, originalSize: originalData.length, compressedSize: newImage.data.length});
       }
     }
 
@@ -224,21 +223,21 @@ async function processImage(file: string, $: cheerio.Root, imgElement: cheerio.E
       let valueW = w - step;
       let valueH = Math.trunc(valueW / ratio);
 
-      while (valueW > options.image.srcset_min_width) {
+      while (valueW > config.image.srcset_min_width) {
         const src = imageSrc(`@${valueW}w`);
 
         console.log(`Generating srcset ${src}`);
 
-        const absoluteFilename = translateSrc(globalState.dir, path.dirname(file), src);
+        const absoluteFilename = translateSrc($state.dir, path.dirname(htmlfile), src);
         
         // Don't generate srcset file twice
-        if (!globalState.compressedFiles.has(absoluteFilename)) {
+        if (!$state.compressedFiles.has(absoluteFilename)) {
           // Add file to list avoid recompression
-          globalState.compressedFiles.add(absoluteFilename);
+          $state.compressedFiles.add(absoluteFilename);
 
           const compressedImage = await compressImage(originalData, { width: valueW, height: valueH }, true);
 
-          if (compressedImage?.data && !globalState.args.nowrite) {
+          if (compressedImage?.data && !$state.args.nowrite) {
             fs.writeFile(absoluteFilename, compressedImage.data);
           }  
         }
@@ -336,11 +335,10 @@ export async function optimize(exclude?: string): Promise<void> {
   const glob = ['**/*.{htm,html}'];
   if (exclude) glob.push('!'+exclude);
 
-  const paths = await globby(glob, { cwd: globalState.dir });
+  const paths = await globby(glob, { cwd: $state.dir });
 
   // Sequential async
-  await paths.reduce(async (previousPromise, item) => {
-    await previousPromise;
-    return analyse(item);
-  }, Promise.resolve());
+  for(const file of paths) {
+    await analyse(file);
+  };
 }
