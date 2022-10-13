@@ -11,27 +11,7 @@ import $state, { ReportItem } from './state.js';
 import { globby } from 'globby';
 import config, { WebpOptions } from './config.js';
 import type { Image, ImageFormat } from './types.js';
-
-const beginProgress = (): void => {
-}
-
-const printProgress = (): void => {
-  const gain = $state.summary.dataLenUncompressed-$state.summary.dataLenCompressed;
-  const msg = `${$state.summary.nbFiles} files | ${formatBytes($state.summary.dataLenUncompressed)} → ${formatBytes($state.summary.dataLenCompressed)} | -${formatBytes(gain)} `;
-  if (!process.stdout.clearLine || !process.stdout.cursorTo) {
-    // In CI we don't have access to clearLine or cursorTo
-    // Just don't log any progress
-  }
-  else {
-    process.stdout.clearLine(0);
-    process.stdout.cursorTo(0);
-    process.stdout.write(msg);
-  }
-}
-
-const endProgress = (): void => {
-  process.stdout.write('\n');
-}
+import ora from 'ora';
 
 const processFile = async (file: string, stats: Stats): Promise<void> => {
 
@@ -97,7 +77,6 @@ const processFile = async (file: string, stats: Stats): Promise<void> => {
   $state.compressedFiles.add(file);
   $state.reportSummary(result);
 
-  printProgress();
 }
 
 function createWebpOptions( opt: WebpOptions | undefined ): sharp.WebpOptions {
@@ -185,7 +164,7 @@ const compressImageFile = async (file: string, toWebP: boolean = false): Promise
 }
 
 export async function compress(exclude: string): Promise<void> {  
-  beginProgress();
+  const spinner = ora(getProgressText()).start();
 
   const globs = ['**/**'];
   if (exclude) globs.push('!'+exclude);
@@ -195,8 +174,15 @@ export async function compress(exclude: string): Promise<void> {
   await Promise.all(paths.map(async file => {
     if (!$state.compressedFiles.has(file)) {
       await processFile(file, await fs.stat(file));
+      spinner.text = getProgressText();
     }
   }));
 
-  endProgress();
+  spinner.text = getProgressText();
+  spinner.succeed();
+}
+
+const getProgressText = (): string => {
+  const gain = $state.summary.dataLenUncompressed-$state.summary.dataLenCompressed;
+  return `${$state.summary.nbFiles} files | ${formatBytes($state.summary.dataLenUncompressed)} → ${formatBytes($state.summary.dataLenCompressed)} | -${formatBytes(gain)} `;
 }
