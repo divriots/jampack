@@ -47,20 +47,20 @@ program.command('pack', { isDefault: true})
       fast();
     }
 
-    console.time('Done');
 
     if (!options.onlycomp) {
       printTitle('PASS 1 - Optimizing');
+      console.time('Done');
       await optimize(options.exclude);
+      console.timeEnd('Done');
     } 
     
     if (!options.onlyoptim) {
       printTitle('PASS 2 - Compressing the rest');
+      console.time('Done');
       await compress(options.exclude);
+      console.timeEnd('Done');
     }
-
-    console.log('');
-    console.timeEnd('Done');
 
     printSummary();
 
@@ -104,14 +104,27 @@ function printSummary() {
 
 function printWarningsAndErrors() {
 
+  let issueCount = 0;
+
   if ($state.issues.size === 0) {
     printTitle('✔ No issues');
   }
   else
   {
-    printTitle(`${$state.issues.size} file(s) with issues`, kleur.bgRed);
+    printTitle('Issues', kleur.bgRed);
 
-    console.log($state.issues);
+    for (let [file, list] of $state.issues) {
+      console.log(kleur.red('▶ ')+file);
+      let index = list.length-1;
+      list.forEach( issue => {
+        console.log(`${index>0?'├─':'└─'} ${issue.message}`);
+        index--;
+        issueCount++;
+      })
+      console.log('');
+    }
+
+    printTitle(`${issueCount} issue(s) over ${$state.issues.size} files`, kleur.bgRed);
   }
 
 } 

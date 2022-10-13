@@ -8,6 +8,10 @@ export class Logger {
     this.prefix = prefix;
   }
 
+  debug(message: string): void {
+    console.debug(this.prefix+message);
+  }
+
   info(message: string): void {
     console.info(this.prefix+message);
   }

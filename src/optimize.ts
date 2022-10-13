@@ -9,9 +9,11 @@ import { compressImage } from './compress.js';
 import svgToMiniDataURI from 'mini-svg-data-uri';
 import $state from './state.js';
 import type { Image } from './types.js';
+import kleur from 'kleur';
+import ora from 'ora';
 
 async function analyse(file: string): Promise<void> {
-  console.log('Processing ' + file);
+  console.log('▶ ' + file);
 
   const html = (await fs.readFile(path.join($state.dir, file))).toString();
   const $ = cheerio.load(html, {});
@@ -23,13 +25,27 @@ async function analyse(file: string): Promise<void> {
   });
 
   // Process images sequentially
-  for(const imgElement of imgsArray) {
+  const spinnerImg = ora({ prefixText:' '}).start();
+  for(let i=0; i<imgsArray.length; i++) {
+    const imgElement = imgsArray[i];
+    spinnerImg.text = kleur.dim(`<img> [${i+1}/${imgsArray.length}] ${$(imgElement).attr('src')} `);
     await processImage(file, $, imgElement);
+  }
+
+  const issues = $state.issues.get(file);
+  if (issues) {
+    spinnerImg.text = kleur.dim(`<img> [${imgsArray.length}/${imgsArray.length}] - ${issues.length} issue(s) found.`);
+    spinnerImg.fail();
+  }
+  else {
+    spinnerImg.text = kleur.dim(`<img> [${imgsArray.length}/${imgsArray.length}]`);
+    spinnerImg.succeed();
   }
 
   if (!$state.args.nowrite) {
     await fs.writeFile(path.join($state.dir, file), $.html());
   }
+
 }
 
 async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheerio.Element): Promise<void> {
@@ -42,7 +58,6 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
     */
     const attrib_alt = img.attr('alt');
     if (attrib_alt === undefined) {
-      console.warn('<img> has no alt attribute - adding an empty but you should fix it');
       $state.reportIssue(htmlfile, { type: "warn", message: "Missing alt on img"});
       img.attr('alt', "");
     }
@@ -51,7 +66,6 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
     * Attribute 'src'
     */
     const attrib_src = img.attr('src');
-    console.log(`- Image ${attrib_src}`);
     if (!attrib_src) {
       console.warn('<img> has no src attribute');
       return;
@@ -102,7 +116,7 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
       await fs.stat(absoluteImgPath);
     }
     catch (e) {
-      console.error(`Missing img ${absoluteImgPath}`);
+      //console.error(`Missing img ${absoluteImgPath}`);
       return;
     }
 
@@ -226,7 +240,7 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
       while (valueW > config.image.srcset_min_width) {
         const src = imageSrc(`@${valueW}w`);
 
-        console.log(`Generating srcset ${src}`);
+        //console.log(`Generating srcset ${src}`);
 
         const absoluteFilename = translateSrc($state.dir, path.dirname(htmlfile), src);
         
@@ -272,13 +286,13 @@ function setImageSize(img: cheerio.Cheerio, meta: sharp.Metadata): number[] {
   // Check valid values
   if (width !== undefined) {
     if (!isNumeric(width)) {
-      console.warn(`Invalid width attribute "${width}" - overriding`);
+      //console.warn(`Invalid width attribute "${width}" - overriding`);
       width = undefined;
     }
   }
   if (height !== undefined) {
     if (!isNumeric(height)) {
-      console.warn(`Invalid height attribute "${height}" - overriding`);
+      //console.warn(`Invalid height attribute "${height}" - overriding`);
       height = undefined;
     }
   }
@@ -299,7 +313,7 @@ function setImageSize(img: cheerio.Cheerio, meta: sharp.Metadata): number[] {
     const providedRatio = Math.round(w / h * 10) / 10;
     const imageRatio = Math.round(originalRatio * 10) / 10;
     if (providedRatio !== imageRatio) {
-      console.warn(`Image aspect ratio in HTML (${providedRatio}) differs from image aspect ratio (${imageRatio}) - fix width and height or let jampack fill them.`);
+      //console.warn(`Image aspect ratio in HTML (${providedRatio}) differs from image aspect ratio (${imageRatio}) - fix width and height or let jampack fill them.`);
     }
 
     return [w, h];
