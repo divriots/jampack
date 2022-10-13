@@ -35,6 +35,7 @@ program.command('pack', { isDefault: true})
   .option('--exclude <exclude>', 'Glob to exclude')
   .option('--nowrite', 'No write')
   .option('--fast', 'Go fast. Mostly no compression just checks for issues.')
+  .option('--fail-on-issue', 'Exits with a non-zero return code.')
   .option('--onlycomp', 'Only compress')
   .option('--onlyoptim', 'Only optimize')
   .action(async (dir, options) => {
@@ -46,7 +47,6 @@ program.command('pack', { isDefault: true})
     if (options.fast) {
       fast();
     }
-
 
     if (!options.onlycomp) {
       printTitle('PASS 1 - Optimizing');
@@ -112,16 +112,13 @@ function printWarningsAndErrors() {
   else
   {
     printTitle('Issues', kleur.bgRed);
-
+    console.log('');
     for (let [file, list] of $state.issues) {
-      console.log(kleur.red('▶ ')+file);
-      let index = list.length-1;
+      console.log(kleur.red('▶ '+file+'\n'));
       list.forEach( issue => {
-        console.log(`${index>0?'├─':'└─'} ${issue.message}`);
-        index--;
         issueCount++;
+        console.log(`${issueCount}) ${issue.msg}\n`);
       })
-      console.log('');
     }
 
     printTitle(`${issueCount} issue(s) over ${$state.issues.size} files`, kleur.bgRed);

@@ -32,13 +32,16 @@ async function analyse(file: string): Promise<void> {
     await processImage(file, $, imgElement);
   }
 
+  // Reset spinner
+  spinnerImg.text = kleur.dim(`<img> [${imgsArray.length}/${imgsArray.length}]`);
+
+  // Notify issues
   const issues = $state.issues.get(file);
   if (issues) {
-    spinnerImg.text = kleur.dim(`<img> [${imgsArray.length}/${imgsArray.length}] - ${issues.length} issue(s) found.`);
     spinnerImg.fail();
+    console.log(kleur.red(`  ${issues.length} issue${issues.length>1?'s':''}`));
   }
   else {
-    spinnerImg.text = kleur.dim(`<img> [${imgsArray.length}/${imgsArray.length}]`);
     spinnerImg.succeed();
   }
 
@@ -54,22 +57,23 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
     const img = $(imgElement);
 
     /*
-    * Attribute 'alt'
-    */
-    const attrib_alt = img.attr('alt');
-    if (attrib_alt === undefined) {
-      $state.reportIssue(htmlfile, { type: "warn", message: "Missing alt on img"});
-      img.attr('alt', "");
-    }
-
-    /*
     * Attribute 'src'
     */
     const attrib_src = img.attr('src');
     if (!attrib_src) {
-      console.warn('<img> has no src attribute');
+      $state.reportIssue(htmlfile, { msg: `Missing [src] on img - processing skipped.`});
       return;
     }
+
+    /*
+    * Attribute 'alt'
+    */
+    const attrib_alt = img.attr('alt');
+    if (attrib_alt === undefined) {
+      $state.reportIssue(htmlfile, { msg: `Missing [alt] on img src="${attrib_src}" - Added alt="" meanwhile.`});
+      img.attr('alt', "");
+    }
+
 
     if (attrib_src.startsWith('data:')) {
       // Data URI image
@@ -98,7 +102,7 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
         // Don't touch it
         break;
       default:
-        console.warn(`Invalid loading attribute ${attr_loading}`)
+        $state.reportIssue(htmlfile, { msg: `Invalid [loading]="${attr_loading}" on img src="${attrib_src}"` });
     }
 
     /*
@@ -116,7 +120,7 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
       await fs.stat(absoluteImgPath);
     }
     catch (e) {
-      //console.error(`Missing img ${absoluteImgPath}`);
+      $state.reportIssue(htmlfile, { msg: `Can't find img src="${attrib_src}" in ${absoluteImgPath}`});
       return;
     }
 
@@ -209,7 +213,7 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
      */
     const [w, h] = setImageSize(img, meta);
     if (w < 0 || h < 0) {
-      console.warn(`Unexpected error in image size calculation - some optimizations can't be done`);
+      $state.reportIssue(htmlfile, { msg: `Unexpected error in image size calculation src="${attrib_src}" - can't performance some optmizations.`});
       return;
     }
 
@@ -240,8 +244,6 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
       while (valueW > config.image.srcset_min_width) {
         const src = imageSrc(`@${valueW}w`);
 
-        //console.log(`Generating srcset ${src}`);
-
         const absoluteFilename = translateSrc($state.dir, path.dirname(htmlfile), src);
         
         // Don't generate srcset file twice
@@ -270,10 +272,7 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
 
   }
   catch (e) {
-    console.error('Error while processing image');
-    console.error(e);
-    // exit here
-    // exit(1);
+    $state.reportIssue(htmlfile, { msg: `Unexpected error while processing image: ${JSON.stringify(e)}`});
   }
 }
 

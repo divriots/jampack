@@ -18,8 +18,7 @@ type Summary = {
 }
 
 type Issue = {
-  type: "warn" | "error";
-  message: string;
+  msg: string;
 }
 
 export class GlobalState {
