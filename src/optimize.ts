@@ -124,9 +124,11 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
       return;
     }
 
+    // Read file
+    const originalData = await fs.readFile(absoluteImgPath);
+
     const sharpFile = sharp(absoluteImgPath);
     const meta = await sharpFile.metadata();
-    const originalData = await fs.readFile(absoluteImgPath);
 
     /*
      * Compress image to WebP
@@ -198,6 +200,15 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
       }
     }
 
+    /*
+     * Attribute 'width' & 'height'
+     */
+    const [w, h] = setImageSize(img, meta);
+    if (w < 0 || h < 0) {
+      $state.reportIssue(htmlfile, { msg: `Unexpected error in image size calculation src="${attrib_src}" - can't performance some optmizations.`});
+      return;
+    }
+
     if (isEmbed) {
       // Image is embed, no need for more processing
       return;
@@ -207,15 +218,6 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
     // Stop here if svg
     //
     if (meta.format === 'svg') return;
-
-    /*
-     * Attribute 'width' & 'height'
-     */
-    const [w, h] = setImageSize(img, meta);
-    if (w < 0 || h < 0) {
-      $state.reportIssue(htmlfile, { msg: `Unexpected error in image size calculation src="${attrib_src}" - can't performance some optmizations.`});
-      return;
-    }
 
     /*
      * Attribute 'srcset'
