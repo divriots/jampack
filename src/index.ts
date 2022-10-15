@@ -119,10 +119,10 @@ function printIssues() {
     printTitle('Issues', kleur.bgRed);
     console.log('');
     for (let [file, list] of $state.issues) {
-      console.log(kleur.red('▶ '+file+'\n'));
+      console.log('▶ '+file+'\n');
       list.forEach( issue => {
         issueCount++;
-        console.log(`❌ ${issue.msg}\n`);
+        console.log(`${kleur.yellow('⚠️')} ${issue.msg}\n`);
       })
     }
 
