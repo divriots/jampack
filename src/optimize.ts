@@ -205,7 +205,7 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
      */
     const [w, h] = setImageSize(img, meta);
     if (w < 0 || h < 0) {
-      $state.reportIssue(htmlfile, { msg: `Unexpected error in image size calculation src="${attrib_src}" - can't performance some optmizations.`});
+      $state.reportIssue(htmlfile, { msg: `Unexpected error in image size calculation src="${attrib_src}" - can't perform some optimizations.`});
       return;
     }
 

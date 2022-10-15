@@ -6,7 +6,7 @@ import { optimize } from './optimize.js';
 import $state from './state.js';
 import { table, TableUserConfig } from 'table';
 import { formatBytes } from './utils.js';
-import default_options, { fast } from './config.js';
+import { fast } from './config.js';
 import { printTitle } from './logger.js';
 import { exit } from 'process';
 import kleur from 'kleur';
