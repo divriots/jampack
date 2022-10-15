@@ -55,7 +55,7 @@ program.command('pack', { isDefault: true})
       console.timeEnd('Done');
     } 
     
-    if (!options.onlyoptim) {
+    if (!options.onlyoptim && !options.fast) {
       printTitle('PASS 2 - Compressing the rest');
       console.time('Done');
       await compress(options.exclude);
@@ -64,7 +64,12 @@ program.command('pack', { isDefault: true})
 
     printSummary();
 
-    printWarningsAndErrors(options);
+    printIssues();
+
+    if (options.failOnIssues && $state.issues.size>0) {
+      exit(1);
+    }
+
   });
 
 program.parse();
@@ -102,7 +107,7 @@ function printSummary() {
   
 }
 
-function printWarningsAndErrors(options: any) {
+function printIssues() {
 
   let issueCount = 0;
 
@@ -117,15 +122,12 @@ function printWarningsAndErrors(options: any) {
       console.log(kleur.red('▶ '+file+'\n'));
       list.forEach( issue => {
         issueCount++;
-        console.log(`${issueCount}) ${issue.msg}\n`);
+        console.log(`❌ ${issue.msg}\n`);
       })
     }
 
+    console.log('');
     printTitle(`${issueCount} issue(s) over ${$state.issues.size} files`, kleur.bgRed);
-
-    if (options.failOnIssues) {
-      exit(1);
-    }
   }
 
 } 

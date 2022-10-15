@@ -70,7 +70,7 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
     */
     const attrib_alt = img.attr('alt');
     if (attrib_alt === undefined) {
-      $state.reportIssue(htmlfile, { msg: `Missing [alt] on img src="${attrib_src}" - Added alt="" meanwhile.`});
+      $state.reportIssue(htmlfile, { msg: `Missing [alt] on img src="${attrib_src}" - Adding alt="" meanwhile.`});
       img.attr('alt', "");
     }
 

@@ -28,5 +28,5 @@ export class Logger {
 
 export function printTitle(msg: string, bgColor: (x: string | number) => string = kleur.bgGreen) {
   console.log('');
-  console.log(bgColor(kleur.black(` ${msg} `)));
+  console.log(kleur.black(bgColor(` ${msg} `)));
 }
