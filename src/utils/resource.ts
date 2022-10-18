@@ -103,12 +103,18 @@ export class Resource {
 
   static async loadResource(projectRoot: string, relativeFile: string, src: string) : Promise<Resource | undefined> {
     if (!isLocal(src)) {
-      throw new Error('Source should be local');
+      throw new Error('src should be local');
     }
-  
-    const relativePath = path.join(projectRoot, src.startsWith('/') ? '' : path.dirname(relativeFile), src);
-    const absolutePath = path.resolve(relativePath);
-  
+
+    const u = url.parse(src);
+
+    if (!u.pathname) {
+      throw new Error(`Invalid src format "${src}"`);
+    }
+
+    const relativePath = path.join(projectRoot, src.startsWith('/') ? '' : path.dirname(relativeFile), u.pathname);
+    let absolutePath = path.resolve(relativePath);
+
     if (await fileExists(absolutePath))
     {
       return new Resource(src, absolutePath);
