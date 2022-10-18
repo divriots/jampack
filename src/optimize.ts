@@ -2,7 +2,7 @@ import { globby } from 'globby';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import cheerio from 'cheerio';
-import { isLocal, isNumeric, translateSrc } from './utils.js';
+import { isNumeric } from './utils.js';
 import sharp from "sharp";
 import config from './config.js';
 import { compressImage } from './compress.js';
@@ -11,6 +11,7 @@ import $state from './state.js';
 import type { Image } from './types.js';
 import kleur from 'kleur';
 import ora from 'ora';
+import { isLocal, Resource, translateSrc } from './utils/resource.js';
 
 async function analyse(file: string): Promise<void> {
   console.log('▶ ' + file);
@@ -61,7 +62,7 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
     */
     const attrib_src = img.attr('src');
     if (!attrib_src) {
-      $state.reportIssue(htmlfile, { msg: `Missing [src] on img - processing skipped.`});
+      $state.reportIssue(htmlfile, {type: 'warn', msg: `Missing [src] on img - processing skipped.`});
       return;
     }
 
@@ -70,7 +71,7 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
     */
     const attrib_alt = img.attr('alt');
     if (attrib_alt === undefined) {
-      $state.reportIssue(htmlfile, { msg: `Missing [alt] on img src="${attrib_src}" - Adding alt="" meanwhile.`});
+      $state.reportIssue(htmlfile, { type: 'a11y', msg: `Missing [alt] on img src="${attrib_src}" - Adding alt="" meanwhile.`});
       img.attr('alt', "");
     }
 
@@ -78,11 +79,6 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
     if (attrib_src.startsWith('data:')) {
       // Data URI image
       // TODO: try to compress it
-      return;
-    }
-
-    if (!isLocal(attrib_src)) {
-      // Image not local, don't touch it
       return;
     }
 
@@ -102,7 +98,7 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
         // Don't touch it
         break;
       default:
-        $state.reportIssue(htmlfile, { msg: `Invalid [loading]="${attr_loading}" on img src="${attrib_src}"` });
+        $state.reportIssue(htmlfile, { type: 'invalid', msg: `Invalid [loading]="${attr_loading}" on img src="${attrib_src}"` });
     }
 
     /*
@@ -110,43 +106,40 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
     */
     img.attr('decoding', 'async');
 
-    /*
-    * Loading image
-    */
-    const absoluteImgPath = translateSrc($state.dir, path.dirname(htmlfile), attrib_src);
-
-    // file exists?
-    try {
-      await fs.stat(absoluteImgPath);
-    }
-    catch (e) {
-      $state.reportIssue(htmlfile, { msg: `Can't find img src="${attrib_src}" in ${absoluteImgPath}`});
+    if (!isLocal(attrib_src)) {
+      // Image not local, don't touch it
       return;
     }
 
-    // Read file
-    const originalData = await fs.readFile(absoluteImgPath);
-
-    const sharpFile = sharp(absoluteImgPath);
-    const meta = await sharpFile.metadata();
+    /*
+    * Loading image
+    */
+    
+    const originalImage = await Resource.loadResource($state.dir, htmlfile, attrib_src);
+    
+    // No file -> give up
+    if (!originalImage) {
+      $state.reportIssue(htmlfile, { type: 'erro', msg: `Can't find img on disk src="${attrib_src}"`});
+      return;
+    }
 
     /*
      * Compress image to WebP
      */
     let newImage: Image | undefined;
 
-    if (!$state.optimizedFiles.has(absoluteImgPath)) {
+    if (!$state.optimizedFiles.has(originalImage.filePathAbsolute)) {
 
       // Let's avoid to optimize same images twice
-      $state.optimizedFiles.add(absoluteImgPath);
+      $state.optimizedFiles.add(originalImage.filePathAbsolute);
 
-      newImage = await compressImage(originalData, {}, true);
-      if (newImage?.data && newImage.data.length < originalData.length) {
+      newImage = await compressImage(await originalImage.getData(), {}, true);
+      if (newImage?.data && newImage.data.length < await originalImage.getLen()) {
         // Do we need to add an new extension?
         const newExtension = `.${newImage.format}`;
-        const additionalExtension = path.extname(absoluteImgPath) === newExtension ? '' : newExtension;
+        const additionalExtension = path.extname(originalImage.filePathAbsolute) === newExtension ? '' : newExtension;
 
-        const newFilename = absoluteImgPath+additionalExtension;
+        const newFilename = originalImage.filePathAbsolute+additionalExtension;
         
         if (!$state.args.nowrite) {
           fs.writeFile(newFilename, newImage.data);
@@ -156,8 +149,8 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
 
         // Report compression result
         $state.reportSummary({
-          action: (newFilename !== absoluteImgPath) ? `${meta.format}->${newImage.format}` : path.extname(absoluteImgPath),
-          originalSize: originalData.length,
+          action: (newFilename !== originalImage.filePathAbsolute) ? `${await originalImage.getExt()}->${newImage.format}` : path.extname(originalImage.filePathAbsolute),
+          originalSize: await originalImage.getLen(),
           compressedSize: newImage.data.length
         });
         
@@ -196,18 +189,14 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
         img.removeAttr('loading');
         img.removeAttr('decoding');
 
-        $state.reportSummary({ action: `${newImage.format}->embed`, originalSize: originalData.length, compressedSize: newImage.data.length});
+        $state.reportSummary({ action: `${newImage.format}->embed`, originalSize: await originalImage.getLen(), compressedSize: newImage.data.length});
       }
     }
 
     /*
      * Attribute 'width' & 'height'
      */
-    const [w, h] = setImageSize(img, meta);
-    if (w < 0 || h < 0) {
-      $state.reportIssue(htmlfile, { msg: `Unexpected error in image size calculation src="${attrib_src}" - can't perform some optimizations.`});
-      return;
-    }
+    const [w, h] = await setImageSize(img, originalImage);
 
     if (isEmbed) {
       // Image is embed, no need for more processing
@@ -217,7 +206,9 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
     //
     // Stop here if svg
     //
-    if (meta.format === 'svg') return;
+    if (await originalImage.getExt() === 'svg') {
+      return;
+    }
 
     /*
      * Attribute 'srcset'
@@ -253,7 +244,7 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
           // Add file to list avoid recompression
           $state.compressedFiles.add(absoluteFilename);
 
-          const compressedImage = await compressImage(originalData, { width: valueW, height: valueH }, true);
+          const compressedImage = await compressImage(await originalImage.getData(), { width: valueW, height: valueH }, true);
 
           if (compressedImage?.data && !$state.args.nowrite) {
             fs.writeFile(absoluteFilename, compressedImage.data);
@@ -274,11 +265,11 @@ async function processImage(htmlfile: string, $: cheerio.Root, imgElement: cheer
 
   }
   catch (e) {
-    $state.reportIssue(htmlfile, { msg: `Unexpected error while processing image: ${JSON.stringify(e)}`});
+    $state.reportIssue(htmlfile, { type: 'erro', msg: (e as Error).message || `Unexpected error while processing image: ${JSON.stringify(e)}`});
   }
 }
 
-function setImageSize(img: cheerio.Cheerio, meta: sharp.Metadata): number[] {
+async function setImageSize(img: cheerio.Cheerio, image: Resource): Promise<number[]> {
   let width = img.attr('width');
   let height = img.attr('height');
   let width_new: number | undefined = undefined;
@@ -299,11 +290,16 @@ function setImageSize(img: cheerio.Cheerio, meta: sharp.Metadata): number[] {
   }
 
   // If we don't have the metadata, we can't do much more
-  if (meta.width === undefined || meta.height === undefined) {
-    return [-1, -1];
+  const meta = await image.getImageMeta();
+  if (!meta) {
+    throw new Error(`Can't get image meta information of "${image.src}" - some optimizations are not possible without this information.`);
   }
 
-  const originalRatio = meta.width / meta.height;
+  if (meta.width === undefined && meta.height === undefined) {
+    throw new Error(`Can't get image width and height of "${image.src}" - some optimizations are not possible without this information.`);
+  }
+
+  const originalRatio = meta.width! / meta.height!;
 
   if (width !== undefined && height !== undefined) {
     // Both are provided
@@ -330,19 +326,75 @@ function setImageSize(img: cheerio.Cheerio, meta: sharp.Metadata): number[] {
   }
   else {
     // No width or height provided - set both to image size
-    width_new = meta.width;
-    height_new = meta.height;
+
+    if (await image.getExt() === 'svg') {
+      // svg with no height and width has special sizing by browsers
+      // They size it inside 300x150 unless they have width and height
+      // attributes
+
+      // Load svg
+      const c = cheerio.load(await image.getData(), {});
+      const svg = c('svg').first();
+      const svg_viewbox = svg.attr('viewbox'); // bug in cheerio here, should be "viewBox"
+      const svg_width = svg.attr('width');
+      const svg_height = svg.attr('height');
+
+      // Calculate aspect ratio from viewbox
+      let svg_aspectratio_from_viewbox: number | undefined = undefined;
+      if (svg_viewbox) {
+        const box = svg_viewbox.split(' ');
+        const w = parseInt(box[2], 10);
+        const h = parseInt(box[3], 10);
+        svg_aspectratio_from_viewbox = w/h;
+      }
+
+      // Set size
+      //
+      if (svg_width && isNumeric(svg_width) && svg_height && isNumeric(svg_height)) {
+        // height and width are present
+        // use them
+        width_new = parseInt(svg_width, 10);
+        height_new = parseInt(svg_height, 10);
+      }
+      else if (svg_width === undefined && svg_height === undefined && svg_aspectratio_from_viewbox) {
+        // no height and no width but viewbox is present
+        // fit it in default browser box 300x150
+        if (svg_aspectratio_from_viewbox >= 2) {
+          // fit width
+          width_new = 300;
+          height_new = width_new / svg_aspectratio_from_viewbox;
+        }
+        else {
+          // fit height
+          height_new = 150;
+          width_new = height_new * svg_aspectratio_from_viewbox;
+        }
+      }
+      else {
+        // no width and no height and no viewbox
+        // default browser values
+        width_new = 300;
+        height_new = 150;
+      }
+    }
+    else {
+      width_new = meta.width;
+      height_new = meta.height;  
+    }
+
   }
 
   // New sizes
   if (width_new !== undefined && height_new !== undefined) {
-    img.attr('width', width_new.toFixed(0));
-    img.attr('height', height_new.toFixed(0));
-    return [Math.round(width_new), Math.round(height_new)];
+    const result_w = Math.round(width_new);
+    const result_h = Math.round(height_new);
+    img.attr('width', result_w.toFixed(0));
+    img.attr('height', result_h.toFixed(0));
+    return [result_w, result_h];
   }
 
   // Something when wrong
-  throw new Error('Unexpected issue when resolving image sizes')
+  throw new Error(`Unexpected issue when resolving image size "${image.src}"`);
 }
 
 export async function optimize(exclude?: string): Promise<void> {

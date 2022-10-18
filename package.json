@@ -1,6 +1,6 @@
 {
   "name": "@divriots/jampack",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Packer for static websites",
   "author": "Georges Gomes @georges-gomes",
   "bin": {
@@ -29,6 +29,7 @@
     "cheerio": "0.22.0",
     "commander": "^9.4.1",
     "csso": "^5.0.5",
+    "file-type": "^18.0.0",
     "globby": "^13.1.2",
     "html-minifier-terser": "^7.0.0",
     "kleur": "^4.1.5",

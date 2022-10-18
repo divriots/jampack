@@ -122,12 +122,11 @@ function printIssues() {
       console.log('▶ '+file+'\n');
       list.forEach( issue => {
         issueCount++;
-        console.log(`${kleur.yellow('⚠️')} ${issue.msg}\n`);
+        console.log(`${kleur.bgYellow(` ${issue.type} `)} ${issue.msg}\n`);
       })
     }
-
+    printTitle(`${issueCount} issue(s) over ${$state.issues.size} files`, kleur.bgYellow);
     console.log('');
-    printTitle(`${issueCount} issue(s) over ${$state.issues.size} files`, kleur.bgRed);
   }
 
 } 
