@@ -1,0 +1,63 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import FileTree from '../../components/FileTree/FileTree.astro';
+import path from 'path';
+import { execSync } from 'child_process';
+
+export function getStaticPaths() {
+  return [
+    {params: {feature: 'feature1'}},
+  ]
+}
+
+const { feature } = Astro.params;
+
+// Loading the feature description
+// (this loading is complex because it's a dynamic import)
+//
+const content = (await Astro.glob('../../../public/features/*/index.md')).find(m => m.file === path.resolve(`public/features/${feature}/index.md`));
+
+// Pack 
+//
+const root = `public/features/${feature}`
+const packed = `${root}/packed`
+const source = `${root}/source`
+execSync(`rm -fr ${packed} && mkdir ${packed}`);
+execSync(`cp ${source}/* ${packed}`);
+execSync(`node ../../dist/index.js ${packed}`);
+
+---
+<MainLayout frontmatter={{ title: content.frontmatter.title, description: 'todo', layout: undefined}} headings={content.getHeadings()}>
+
+  <p>{ content.rawContent }</p>
+
+  <h2>Files</h2>
+
+  <div class="col2">
+    <section>
+      <FileTree title="source" path={source}>
+      </FileTree>  
+    </section>
+    <section>
+      <FileTree title="packed" path={packed}>
+      </FileTree>
+    </section>
+  </div>
+
+  <iframe src={`/features/${feature}/source/index.html`}></iframe>
+
+  <iframe src={`/features/${feature}/packed/index.html`}></iframe>
+
+</MainLayout>
+
+<style>
+  .col2 {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .col2 > section {
+    flex: 0 0 50%;
+  }
+
+</style>

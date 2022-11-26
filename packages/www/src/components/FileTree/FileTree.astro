@@ -1,0 +1,58 @@
+---
+import * as p from 'path';
+import { buildTree, TreeNode } from './tree';
+
+type Props = {
+    title: string;
+	path: string;
+};
+const { title, path } = Astro.props as Props;
+
+const tree = buildTree(path);
+
+function relativePath(file: string) {
+    return file.slice(path.length+1);
+}
+
+---
+
+<div class="container">
+    <h3>{ title }</h3>
+    <ol class="file-list">
+        { tree.children.map( ({ path, size }) => 
+            (<li class="file">
+                <div>
+                    {relativePath(path)}
+                </div>
+                <div>
+                    {size}
+                </div>
+            </li>)
+        )}
+    </ol>    
+</div>
+
+<style>
+    .container {
+        border: 1px solid red;
+    }
+
+    h3 {
+        margin: 0;
+        border-bottom: 1px solid red;
+    }
+
+    .file-list {
+        font-family: var(--font-mono);
+        font-size: 90%;
+        list-style: none;
+        padding: 4px 8px;
+        background-color: black;
+    }
+
+    .file {
+        display: flex;
+        justify-content: space-between;
+        margin: 0;
+    }
+</style>

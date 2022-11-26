@@ -31,9 +31,9 @@ export const KNOWN_LANGUAGES = {
 
 export const KNOWN_LANGUAGE_CODES = Object.values(KNOWN_LANGUAGES);
 
-export const GITHUB_EDIT_URL = `https://github.com/withastro/astro/tree/main/examples/docs`;
+export const GITHUB_EDIT_URL = `https://github.com/divriots/jampack/tree/main/packages/www`;
 
-export const COMMUNITY_INVITE_URL = `https://astro.build/chat`;
+export const COMMUNITY_INVITE_URL = `https://divRIOTS.com/chat`;
 
 // See "Algolia" section of the README for more information.
 export const ALGOLIA = {
@@ -55,7 +55,7 @@ export const SIDEBAR: Sidebar = {
 			{ text: 'CLI Options', link: 'cli-options' },
 			{ text: 'Configuration', link: 'configuration' },
 		],
-		'Optimizations': [{ text: 'todo', link: 'todo' }],
+		'Optimizations': [{ text: 'feature1', link: 'optimizations/feature1' }],
 		'Community': [{ text: 'Join us on Discord', link: 'https://discord.gg/zSHxuz2SMw' }],
 	},
 };
