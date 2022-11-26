@@ -13,6 +13,7 @@ specifiers:
   preact: ^10.7.3
   react: ^18.1.0
   react-dom: ^18.1.0
+  ultrahtml: ^1.0.0
 
 dependencies:
   '@algolia/client-search': 4.14.2
@@ -27,6 +28,9 @@ dependencies:
   preact: 10.11.2
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
+
+devDependencies:
+  ultrahtml: 1.0.0
 
 packages:
 
@@ -3698,6 +3702,10 @@ packages:
     engines: {node: '>=4.2.0'}
     hasBin: true
     dev: false
+
+  /ultrahtml/1.0.0:
+    resolution: {integrity: sha512-BOtReLegZ/OlSTVOSt4aH+wrUPwxoXvapUHXjwhDE4k4kMISWdfUR4PH5wvt/vgKjFcAcEUPFEZQiPiB87XO3Q==}
+    dev: true
 
   /unherit/3.0.0:
     resolution: {integrity: sha512-UmvIQZGEc9qdLIQ8mv8/61n6PiMgfbOoASPKHpCvII5srShCQSa6jSjBjlZOR4bxt2XnT6uo6csmPKRi+zQ0Jg==}

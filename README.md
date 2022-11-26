@@ -10,11 +10,11 @@
 [![npm version](https://img.shields.io/npm/v/@divriots/jampack)](https://npmjs.org/package/@divriots/jampack) 
 [![Discord](https://img.shields.io/badge/chat-discord-blue?style=flat&logo=discord)](https://discord.gg/XkQxSU9)
 
-# `jampack`
+# jampack
 
 Optimizes static websites for best user experience and best Core Web Vitals scores.
 
-<div>
+<div id="banner">
   <div>Brought to you by</div>
   <a href="https://divRIOTS.com#gh-light-mode-only">
     <img width="150" height="40" src="https://divRIOTS.com/divriots.svg" alt="‹div›RIOTS" />
@@ -36,6 +36,32 @@ Optimizes static websites for best user experience and best Core Web Vitals scor
 - **Better SEO**. Page experience now [affects ranking](https://developers.google.com/search/docs/appearance/page-experience).
 - **Easier maintenance**. Generating top performance webpages requires extra engineering in the composition of the pages that is counterproductive with the maintenance of the website.
 - **Time saving**. Spend less time optimizing and let `jampack` perform the heaving-lifting for you.
+
+
+## Quick use
+
+```sh
+# Optimize static website in `dist` folder
+npx @divriots/jampack ./dist
+```
+
+## `jampack` use in the wild
+
+- [divRIOTS.com](https://divRIOTS.com)
+- [Backlight.dev](https://backlight.dev)
+- [story.to.design](https://story.to.design)
+- [Components.studio](https://components.studio)
+> Add yours here
+
+## Why is it called `jampack`?
+
+- ` jam`: From [Jamstack](https://en.wikipedia.org/wiki/Jamstack).
+- `pack`: Reminescent of the [Executable Packers](https://en.wikipedia.org/wiki/Executable_compression#List_of_executable_packers) from the 90s.
+
+## License
+
+This software is released under the terms of the [MIT license](https://github.com/divriots/jampack/blob/main/LICENSE).
+
 
 ## Optimizations
 
@@ -72,50 +98,3 @@ This pass compresses all untouched files without changing filename or format.
 | `.jpg`,`.jpeg`  | sharp                 |              |
 | `.png`          | sharp                 |              |
 | `.webp`         | sharp                 |              | 
-
-## Quick use
-
-```sh
-# Optimize static website in `dist` folder
-npx @divriots/jampack ./dist
-```
-
-## CLI options
-
-| Option        | Description                    |
-| -----------   | ------------------------------ |
-| `--onlyoptim` | Only runs optimization (PASS 1) |
-| `--onlycomp`  | Only runs compression (PASS 2) |
-| `--fast`      | Go fast. Mostly no compression just checks for issues. |
-| `--fail`      | Exits with a non-zero return code if issues. |
-| `--nowrite`   | Don't write anything to disk (for testing) |
-| `--exclude`   | Files to exclude from processing. Expect glob format like `--exclude 'blog/**'` |
-
-## Configuration
-
-No configuration yet. All defaults.
-
-## Considerations
-
-`jampack` is meant to be used with your static website as is with no particular changes but here are some things you can do to help it extract the best performance of your pages.
-
-### Add `loading="eager"` to your images above the fold
-
-`jampack` sets all images to lazy by default. But, [images above the fold should not be lazy](https://web.dev/lazy-loading-images/#effects-on-largest-contentful-paint-lcp). Just add `loading="eager"` to your images above the fold and `jampack` will treat them as high priority.
-
-## `jampack` use in the wild
-
-- [divRIOTS.com](https://divRIOTS.com)
-- [Backlight.dev](https://backlight.dev)
-- [story.to.design](https://story.to.design)
-- [Components.studio](https://components.studio)
-> Add yours here
-
-## Why is it called `jampack`?
-
-- ` jam`: From [Jamstack](https://en.wikipedia.org/wiki/Jamstack).
-- `pack`: Reminescent of the [Executable Packers](https://en.wikipedia.org/wiki/Executable_compression#List_of_executable_packers) from the 90s.
-
-## License
-
-This software is released under the terms of the [MIT license](https://github.com/divriots/jampack/blob/main/LICENSE).

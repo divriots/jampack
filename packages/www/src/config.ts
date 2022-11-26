@@ -1,5 +1,5 @@
 export const SITE = {
-	title: 'Documentation',
+	title: 'jampack',
 	description: 'Your website description.',
 	defaultLanguage: 'en_US',
 };
@@ -48,11 +48,14 @@ export type Sidebar = Record<
 >;
 export const SIDEBAR: Sidebar = {
 	en: {
-		'Section Header': [
+		'Getting started': [
 			{ text: 'Introduction', link: 'introduction' },
-			{ text: 'Page 2', link: 'page-2' },
-			{ text: 'Page 3', link: 'page-3' },
 		],
-		'Another Section': [{ text: 'Page 4', link: 'page-4' }],
+		'Reference': [
+			{ text: 'CLI Options', link: 'cli-options' },
+			{ text: 'Configuration', link: 'configuration' },
+		],
+		'Optimizations': [{ text: 'todo', link: 'todo' }],
+		'Community': [{ text: 'Join us on Discord', link: 'https://discord.gg/zSHxuz2SMw' }],
 	},
 };

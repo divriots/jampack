@@ -23,15 +23,14 @@ const lang = getLanguageFromURL(currentPage);
 		</div>
 		<div class="logo flex">
 			<a href="/">
-				<AstroLogo size={40} />
-				<h1>{CONFIG.SITE.title ?? 'Documentation'}</h1>
+				<h1>jampack</h1>
 			</a>
 		</div>
 		<div style="flex-grow: 1;"></div>
-		{KNOWN_LANGUAGE_CODES.length > 1 && <LanguageSelect lang={lang} client:idle />}
+		<!-- {KNOWN_LANGUAGE_CODES.length > 1 && <LanguageSelect lang={lang} client:idle />}
 		<div class="search-item">
 			<Search client:idle />
-		</div>
+		</div> -->
 	</nav>
 </header>
 
@@ -57,7 +56,7 @@ const lang = getLanguageFromURL(currentPage);
 		font-size: 2rem;
 		flex-shrink: 0;
 		font-weight: 600;
-		line-height: 1;
+		line-height: 1.5;
 		color: hsla(var(--color-base-white), 100%, 1);
 		gap: 0.25em;
 		z-index: -1;

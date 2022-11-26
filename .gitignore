@@ -2,8 +2,5 @@
 *-error.log
 .DS_Store
 /dist
-/pnpm-lock.json
 node_modules
-demo
-demo_ref
-demo_webdev
+demo**
