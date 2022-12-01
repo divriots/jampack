@@ -31,7 +31,7 @@
     "csso": "^5.0.5",
     "file-type": "^18.0.0",
     "globby": "^13.1.2",
-    "html-minifier-terser": "^7.0.0",
+    "html-minifier-terser": "^7.1.0",
     "kleur": "^4.1.5",
     "mini-svg-data-uri": "^1.4.4",
     "ora": "^6.1.2",
