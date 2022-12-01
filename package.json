@@ -37,7 +37,7 @@
     "ora": "^6.1.2",
     "sharp": "^0.31.1",
     "svgo": "^2.8.0",
-    "table": "^6.8.0"
+    "table": "^6.8.1"
   },
   "devDependencies": {
     "@types/node": "^16.9.4",
