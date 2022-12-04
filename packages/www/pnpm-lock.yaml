@@ -9,6 +9,7 @@ specifiers:
   '@types/node': ^18.0.0
   '@types/react': ^17.0.45
   '@types/react-dom': ^18.0.0
+  ansi-to-html: ^0.7.2
   astro: ^1.6.2
   preact: ^10.7.3
   react: ^18.1.0
@@ -24,6 +25,7 @@ dependencies:
   '@types/node': 18.11.9
   '@types/react': 17.0.52
   '@types/react-dom': 18.0.8
+  ansi-to-html: 0.7.2
   astro: 1.6.2
   preact: 10.11.2
   react: 18.2.0
@@ -906,6 +908,14 @@ packages:
     engines: {node: '>=12'}
     dev: false
 
+  /ansi-to-html/0.7.2:
+    resolution: {integrity: sha512-v6MqmEpNlxF+POuyhKkidusCHWWkaLcGRURzivcU3I9tv7k4JVhFcnukrM5Rlk2rUywdZuzYAZ+kbZqWCnfN3g==}
+    engines: {node: '>=8.0.0'}
+    hasBin: true
+    dependencies:
+      entities: 2.2.0
+    dev: false
+
   /argparse/1.0.10:
     resolution: {integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==}
     dependencies:
@@ -1309,6 +1319,10 @@ packages:
 
   /emoji-regex/9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
+    dev: false
+
+  /entities/2.2.0:
+    resolution: {integrity: sha512-p92if5Nz619I0w+akJrLZH0MX0Pb5DX39XOwQTtXSdQQOaYH03S1uIQp4mhOZtAXrxq4ViO67YTiLBo2638o9A==}
     dev: false
 
   /eol/0.9.1:

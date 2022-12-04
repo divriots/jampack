@@ -3,6 +3,7 @@ import MainLayout from '../../layouts/MainLayout.astro';
 import FileTree from '../../components/FileTree/FileTree.astro';
 import path from 'path';
 import { execSync } from 'child_process';
+import Convert from 'ansi-to-html';
 
 export function getStaticPaths() {
   return [
@@ -24,7 +25,8 @@ const packed = `${root}/packed`
 const source = `${root}/source`
 execSync(`rm -fr ${packed} && mkdir ${packed}`);
 execSync(`cp ${source}/* ${packed}`);
-const result = execSync(`node ../../dist/index.js ${packed}`);
+const result = execSync(`node ../../dist/index.js ${packed}`, { env: { ...process.env, FORCE_COLOR: "1" }});
+const resultHtml = new Convert().toHtml(result.toString().trim());
 
 const iframeSource = `/features/${feature}/source/index.html`;
 const iframePacked = `/features/${feature}/packed/index.html`;
@@ -61,8 +63,7 @@ const iframePacked = `/features/${feature}/packed/index.html`;
     </div>
   
     <pre id="terminal" class="astro-code">
-      <code>
-        { result.toString().trim() }
+      <code set:html="resultHtml">
       </code>
     </pre>
   </section>
