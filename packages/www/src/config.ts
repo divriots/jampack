@@ -46,6 +46,7 @@ export type Sidebar = Record<
 	typeof KNOWN_LANGUAGE_CODES[number],
 	Record<string, { text: string; link: string }[]>
 >;
+
 export const SIDEBAR: Sidebar = {
 	en: {
 		'Getting started': [
@@ -55,7 +56,10 @@ export const SIDEBAR: Sidebar = {
 			{ text: 'CLI Options', link: 'cli-options' },
 			{ text: 'Configuration', link: 'configuration' },
 		],
-		'Optimizations': [{ text: 'feature1', link: 'optimizations/feature1' }],
+		'Features': [
+			{ text: 'Compress images to WebP', link: 'features/compress-images-to-webp' },
+			{ text: 'Compress SVG', link: 'features/compress-svg' }
+		],
 		'Community': [{ text: 'Join us on Discord', link: 'https://discord.gg/zSHxuz2SMw' }],
 	},
 };

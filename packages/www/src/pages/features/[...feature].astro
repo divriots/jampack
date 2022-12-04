@@ -1,14 +1,15 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import FileTree from '../../components/FileTree/FileTree.astro';
 import path from 'path';
 import { execSync } from 'child_process';
 import Convert from 'ansi-to-html';
+import { compareSync } from "dir-compare";
+import { SIDEBAR } from '../../config';
 
+// Generate pages present in SIDEBAR
+//
 export function getStaticPaths() {
-  return [
-    {params: {feature: 'feature1'}},
-  ]
+  return SIDEBAR.en.Features.map(entry => ({params: {feature: path.basename(entry.link)}}));
 }
 
 const { feature } = Astro.params;
@@ -18,30 +19,56 @@ const { feature } = Astro.params;
 //
 const content = (await Astro.glob('../../../public/features/*/index.md')).find(m => m.file === path.resolve(`public/features/${feature}/index.md`));
 
-// Pack 
+// Setup paths
 //
 const root = `public/features/${feature}`
 const packed = `${root}/packed`
 const source = `${root}/source`
+
+// Clean and run pack
+//
 execSync(`rm -fr ${packed} && mkdir ${packed}`);
-execSync(`cp ${source}/* ${packed}`);
-const result = execSync(`node ../../dist/index.js ${packed}`, { env: { ...process.env, FORCE_COLOR: "1" }});
+execSync(`cp -r ${source}/* ${packed}`);
+const result = execSync(`node ../../dist/index.js ${packed} --onlyoptim`, { env: { ...process.env, FORCE_COLOR: "1" }});
 const resultHtml = new Convert().toHtml(result.toString().trim());
 
+// Compare dirs
+//
+const dirCompare = compareSync(source, packed, { compareContent: true, compareSize: true });
+
+// iframe URLs
+//
 const iframeSource = `/features/${feature}/source/index.html`;
 const iframePacked = `/features/${feature}/packed/index.html`;
 ---
 <MainLayout frontmatter={{ title: content.frontmatter.title, description: 'todo', layout: undefined}} headings={content.getHeadings()}>
 
-  <p>{ content.rawContent }</p>
+  <section set:html={ content.compiledContent() }>
+  </section>
 
   <h2>Demo</h2>
 
+  <div class="files">
+    <span style="text-decoration: underline;">SOURCE</span>
+    <span></span>
+    <span></span>
+    <span style="text-decoration: underline;">JAMPACKED</span>
+    <span></span>
+
+    { dirCompare.diffSet.map( l => {
+      return (
+        <span class={ `color-${l.state} col-file is-${l.type1}` } style={ `padding-left: ${l.level*1.3}rem;` }>{ l.name1 }</span>
+        <span class={ `color-${l.state} col-size` }>{ l.type1 === 'file' ? l.size1 : '' }</span>
+        <span class={ `color-${l.state}` }></span>
+        <span class={ `color-${l.state} col-file is-${l.type1}` } style={ `padding-left: ${l.level*1.3}rem;` }>{ l.name2 }</span>
+        <span class={ `color-${l.state} col-size` }>{ l.type2 === 'file' ? l.size2 : '' }</span>
+        )
+      })
+    }
+  </div>
+
   <div class="grid">
-    <FileTree title="SOURCE" path={source}>
-    </FileTree>  
-    <FileTree title="PACKED" path={packed}>
-    </FileTree>
+  
     <div class="iframe-shrinker">
       <iframe style="width: 100%; height: 100%;" src={iframeSource}></iframe>
     </div>
@@ -63,7 +90,7 @@ const iframePacked = `/features/${feature}/packed/index.html`;
     </div>
   
     <pre id="terminal" class="astro-code">
-      <code set:html="resultHtml">
+      <code set:html={ resultHtml }>
       </code>
     </pre>
   </section>
@@ -75,12 +102,52 @@ const iframePacked = `/features/${feature}/packed/index.html`;
   terminalElement.scrollTop = terminalElement.scrollHeight;
 </script>
 
-<style>
+<style lang="scss">
   .grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: max-content 300px min-content;
+    grid-template-rows: 300px min-content;
     gap: 1rem;
+  }
+
+  .files {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+
+    display: grid;
+    grid-template-columns: 1fr min-content 3rem 1fr min-content;
+    background-color: black;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+
+    .color-equal {
+      opacity: 0.6;
+    }
+
+    .color-distinct {
+      color: gold;
+    }
+
+    .color-right {
+      color: greenyellow;
+    }
+
+    .color-left {
+      color: red;
+    }
+
+    .col-size {
+      justify-self: right;
+    }
+
+    .is-directory {
+      font-weight: bold;
+
+      &::before {
+        content: "📁 "
+      }
+    }
+
   }
 
   .iframe-shrinker {
@@ -122,8 +189,8 @@ const iframePacked = `/features/${feature}/packed/index.html`;
   }
 
   .buttons {
-    padding-left: 8px;
-    padding-top: 3px;
+    padding-left: 6px;
+    padding-top: 4px;
     float: left;
     line-height: 0px;
   }
@@ -142,13 +209,13 @@ const iframePacked = `/features/${feature}/packed/index.html`;
 
   .minimize {
     background: #ffbd4c;
-    margin-left: 4px;
+    margin-left: 2px;
     border: 1px solid #e09e3e;
   }
 
   .zoom {
     background: #00ca56;
-    margin-left: 4px;
+    margin-left: 2px;
     border: 1px solid #14ae46;
   }
 
