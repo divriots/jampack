@@ -12,6 +12,7 @@ specifiers:
   ansi-to-html: ^0.7.2
   astro: ^1.6.2
   dir-compare: ^4.0.0
+  front-matter: ^4.0.2
   preact: ^10.7.3
   react: ^18.1.0
   react-dom: ^18.1.0
@@ -30,6 +31,7 @@ dependencies:
   ansi-to-html: 0.7.2
   astro: 1.6.2_sass@1.56.1
   dir-compare: 4.0.0
+  front-matter: 4.0.2
   preact: 10.11.2
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
@@ -1938,6 +1940,12 @@ packages:
     engines: {node: '>=12.20.0'}
     dependencies:
       fetch-blob: 3.2.0
+    dev: false
+
+  /front-matter/4.0.2:
+    resolution: {integrity: sha512-I8ZuJ/qG92NWX8i5x1Y8qyj3vizhXS31OxjKDu3LKP+7/qBgfIKValiZIEwoVoJKUHlhWtYrktkxV1XsX+pPlg==}
+    dependencies:
+      js-yaml: 3.14.1
     dev: false
 
   /fs.realpath/1.0.0:

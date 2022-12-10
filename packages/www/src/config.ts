@@ -1,3 +1,6 @@
+import fs from 'fs';
+import fm from 'front-matter';
+
 export const SITE = {
 	title: 'jampack',
 	description: 'Your website description.',
@@ -47,6 +50,14 @@ export type Sidebar = Record<
 	Record<string, { text: string; link: string }[]>
 >;
 
+const featuresDirs = fs.readdirSync( './public/features', { withFileTypes: true })
+  .filter(dirent => dirent.isDirectory())
+  .map(dirent => dirent.name);
+
+const getTitle = (file: string) => {
+	return fm(fs.readFileSync(file, 'utf8')).attributes['title'];
+}
+
 export const SIDEBAR: Sidebar = {
 	en: {
 		'Getting started': [
@@ -56,10 +67,7 @@ export const SIDEBAR: Sidebar = {
 			{ text: 'CLI Options', link: 'cli-options' },
 			{ text: 'Configuration', link: 'configuration' },
 		],
-		'Features': [
-			{ text: 'Compress images to WebP', link: 'features/compress-images-to-webp' },
-			{ text: 'Compress SVG', link: 'features/compress-svg' }
-		],
+		'Features': featuresDirs.map(dir => ({ text: getTitle('./public/features/'+dir+'/index.md'), link: 'features/'+dir }) ),
 		'Community': [{ text: 'Join us on Discord', link: 'https://discord.gg/zSHxuz2SMw' }],
 	},
 };
