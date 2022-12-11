@@ -55,8 +55,8 @@ export type Sidebar = Record<
 //   .map(dirent => dirent.name);
 
 const featuresDirs = [
-	'compress-images-to-webp',
-	'compress-svg',
+	'optimize-images-to-webp',
+	'optimize-svg',
 	'compress-all'
 ]
 

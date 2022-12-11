@@ -1,5 +1,5 @@
 ---
-title: 'Compress SVG'
+title: 'Optimize SVG images'
 jampack: '--onlyoptim'
 ---
 
