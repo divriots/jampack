@@ -13,6 +13,17 @@ import config, { WebpOptions } from './config.js';
 import type { Image, ImageFormat } from './types.js';
 import ora from 'ora';
 
+async function compressJS(code: string): Promise<string> {
+  const newjsresult = await swc.minify(code, { compress: true, mangle: true });
+  return newjsresult.code;
+}
+
+async function compressInlineJS(code: string): Promise<string> {
+  const newCode = await compressJS(code);
+  if (newCode && newCode.length < code.length) return newCode;
+  return code;
+}
+
 const processFile = async (file: string, stats: Stats): Promise<void> => {
 
   let writeData: Buffer | string | undefined = undefined;
@@ -34,7 +45,7 @@ const processFile = async (file: string, stats: Stats): Promise<void> => {
       case '.html':
       case '.htm':
           const htmldata = await fs.readFile(file);
-          const newhtmlData = await htmlminifier(htmldata.toString(), { minifyCSS: true, minifyJS: true, sortClassName: true, sortAttributes: true});
+          const newhtmlData = await htmlminifier(htmldata.toString(), { minifyCSS: true, minifyJS: compressInlineJS, sortClassName: true, sortAttributes: true});
           writeData = newhtmlData;
           break;
       case '.css':
@@ -46,9 +57,9 @@ const processFile = async (file: string, stats: Stats): Promise<void> => {
         break;
       case '.js':
         const jsdata = await fs.readFile(file);
-        const newjsresult = await swc.minify(jsdata.toString(), { compress: true, mangle: true });
-        if (newjsresult.code && newjsresult.code.length < jsdata.length) {
-          writeData = newjsresult.code;
+        const newJS = await compressJS(jsdata.toString());
+        if (newJS && newJS.length < jsdata.length) {
+          writeData = newJS;
         }
         break;
     }

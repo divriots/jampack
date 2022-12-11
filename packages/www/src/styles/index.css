@@ -94,6 +94,7 @@ p {
 }
 
 .content ul {
+	margin-top: 2rem;
 	line-height: 1.1em;
 }
 
@@ -191,14 +192,14 @@ strong {
 code {
 	--border-radius: 3px;
 	--padding-block: 0.2rem;
-	--padding-inline: 0.33rem;
+	--padding-inline: 0.4rem;
 
 	font-family: var(--font-mono);
 	font-size: 0.85em;
 	color: inherit;
 	background-color: var(--theme-code-inline-bg);
 	padding: var(--padding-block) var(--padding-inline);
-	margin: calc(var(--padding-block) * -1) -0.125em;
+	margin: calc(var(--padding-block) * -1) 0em;
 	border-radius: var(--border-radius);
 	word-break: break-word;
 }
@@ -231,13 +232,13 @@ pre {
 table {
 	width: 100%;
 	padding: var(--padding-block) 0;
-	margin: 0;
+	margin: 2rem 0;
 	border-collapse: collapse;
 }
 
 /* Zebra striping */
 tr:nth-of-type(odd) {
-	background: var(--theme-bg-hover);
+	background: var(--theme-bg-offset);
 }
 th {
 	background: var(--color-black);
@@ -270,7 +271,7 @@ blockquote code {
 
 blockquote {
 	margin: 2rem 0;
-	padding: 1.25em 1.5rem;
+	padding: 0.5em 1rem;
 	border-left: 3px solid var(--theme-text-light);
 	background-color: var(--theme-bg-offset);
 	border-radius: 0 0.25rem 0.25rem 0;

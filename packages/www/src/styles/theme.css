@@ -96,10 +96,10 @@ body {
 
 	/* @@@: not used anywhere */
 	--theme-text-lighter: hsla(var(--color-gray-40), 1);
-	--theme-bg: hsla(215, 28%, 17%, 1);
+	--theme-bg: hsla(215, 28%, 10%, 1);
 	--theme-bg-hover: hsla(var(--color-gray-40), 1);
 	--theme-bg-offset: hsla(var(--color-gray-5), 1);
-	--theme-code-inline-bg: hsla(var(--color-gray-10), 1);
+	--theme-code-inline-bg: hsla(var(--color-gray-20), 1);
 	--theme-code-inline-text: hsla(var(--color-base-white), 100%, 1);
 	--theme-code-bg: hsla(var(--color-gray-5), 1);
 	--theme-code-text: hsla(var(--color-base-white), 100%, 1);

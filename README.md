@@ -84,17 +84,3 @@ This pass takes all `*.{html|.htm}` files and parse them for optimisation.
 | Warn on missing `[alt]` | Warn on missing `alt` attribute but adds `alt=""` in case image is considered decorative. |  |  ✅  |
 | 🔽 `<picture>`  |                       |      |   |
 | - TODO         |                       |  |  ❌  |
-
-### PASS 2 - Compression
-
-This pass compresses all untouched files without changing filename or format.
-
-| Extension       | Compressor            | Some options |
-| --------------- | --------------------- | ------------ |
-| `.html`,`.htm`  | html-minifier-terser  |              |
-| `.css`          | csso                  |              |
-| `.js`           | swc                   |              |
-| `.svg`          | svgo                  |              |
-| `.jpg`,`.jpeg`  | sharp                 |              |
-| `.png`          | sharp                 |              |
-| `.webp`         | sharp                 |              | 

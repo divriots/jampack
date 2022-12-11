@@ -50,9 +50,15 @@ export type Sidebar = Record<
 	Record<string, { text: string; link: string }[]>
 >;
 
-const featuresDirs = fs.readdirSync( './public/features', { withFileTypes: true })
-  .filter(dirent => dirent.isDirectory())
-  .map(dirent => dirent.name);
+// const featuresDirs = fs.readdirSync( './public/features', { withFileTypes: true })
+//   .filter(dirent => dirent.isDirectory())
+//   .map(dirent => dirent.name);
+
+const featuresDirs = [
+	'compress-images-to-webp',
+	'compress-svg',
+	'compress-all'
+]
 
 const getTitle = (file: string) => {
 	return fm(fs.readFileSync(file, 'utf8')).attributes['title'];

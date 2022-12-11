@@ -3,7 +3,6 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import cheerio from 'cheerio';
 import { isNumeric } from './utils.js';
-import sharp from "sharp";
 import config from './config.js';
 import { compressImage } from './compress.js';
 import svgToMiniDataURI from 'mini-svg-data-uri';

@@ -22,7 +22,7 @@ const sidebar = SIDEBAR[langCode];
 					<h2>{header}</h2>
 					<ul>
 						{children.map((child) => {
-							const url = Astro.site?.pathname + child.link;
+							const url = child.link.startsWith('https://') ? child.link : Astro.site?.pathname + child.link;
 							return (
 								<li class="nav-link">
 									<a href={url} aria-current={currentPageMatch === child.link ? 'page' : false}>
