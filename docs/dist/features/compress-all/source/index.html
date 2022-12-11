@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-color: whitesmoke;
+        }
+                
+        p    {
+            color: black;
+        }
+    </style>
+</head>
+<body>
+
+<h1 style="color: seagreen;">Compress all untouched assets</h1>
+
+<p id="message"></p>
+
+</body>
+<script>
+    const id = "message";
+    const element = document.getElementById(id);
+    element.innerHTML = "This page doesn't reference any asset.";
+</script>
+</html>

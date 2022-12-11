@@ -1,0 +1,1 @@
+export function square(r){return r*r}export function cube(r){return r*r*r}
