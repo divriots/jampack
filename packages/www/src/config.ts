@@ -36,7 +36,7 @@ export const KNOWN_LANGUAGE_CODES = Object.values(KNOWN_LANGUAGES);
 
 export const GITHUB_EDIT_URL = `https://github.com/divriots/jampack/tree/main/packages/www`;
 
-export const COMMUNITY_INVITE_URL = `https://divRIOTS.com/chat`;
+export const COMMUNITY_INVITE_URL = `https://jampack.divriots.com/chat`;
 
 // See "Algolia" section of the README for more information.
 export const ALGOLIA = {
@@ -74,6 +74,6 @@ export const SIDEBAR: Sidebar = {
 			{ text: 'Configuration', link: 'configuration' },
 		],
 		'Features': featuresDirs.map(dir => ({ text: getTitle('./public/features/'+dir+'/index.md'), link: 'features/'+dir }) ),
-		'Community': [{ text: 'Join us on Discord', link: 'https://discord.gg/zSHxuz2SMw' }],
+		'Community': [{ text: 'Join us on Discord', link: 'https://jampack.divriots.com/chat' }],
 	},
 };
