@@ -7,7 +7,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "check": "astro check && tsc",
-    "build": "cd ../.. && pnpm i && pnpm build && cd packages/www && astro build",
+    "build": "cd ../.. && pnpm i && pnpm build && cd packages/www && astro build && cp -fr public/features dist",
     "preview": "astro preview",
     "astro": "astro"
   },
