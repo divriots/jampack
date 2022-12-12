@@ -1,3 +1,5 @@
+<div>
+
 ```
      __                                    __    
     |__|____    _____ ___________    ____ |  | __
@@ -7,10 +9,13 @@
 \______|    \/      \/|  |       \/     \/     \/
                       |__|
 ```
+
+</div>
+
 [![npm version](https://img.shields.io/npm/v/@divriots/jampack)](https://npmjs.org/package/@divriots/jampack) 
 [![Discord](https://img.shields.io/badge/chat-discord-blue?style=flat&logo=discord)](https://discord.gg/XkQxSU9)
 
-# jampack
+# Jampack
 
 Optimizes static websites for best user experience and best Core Web Vitals scores.
 
@@ -32,11 +37,10 @@ Optimizes static websites for best user experience and best Core Web Vitals scor
 
 ## Why `jampack`?
 
-- **Better user experience**. Specially on low-end devices.
+- **Better user experience** for your website visitors. Specially on low-end devices.
 - **Better SEO**. Page experience now [affects ranking](https://developers.google.com/search/docs/appearance/page-experience).
 - **Easier maintenance**. Generating top performance webpages requires extra engineering in the composition of the pages that is counterproductive with the maintenance of the website.
 - **Time saving**. Spend less time optimizing and let `jampack` perform the heaving-lifting for you.
-
 
 ## Quick use
 
@@ -44,6 +48,12 @@ Optimizes static websites for best user experience and best Core Web Vitals scor
 # Optimize static website in `dist` folder
 npx @divriots/jampack ./dist
 ```
+
+For more options see [CLI options](https://jampack.divriots.com/cli-options).
+
+## Documentation
+
+Check the [Documentation side](https://jampack.divriots.com).
 
 ## `jampack` use in the wild
 
