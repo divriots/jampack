@@ -4,8 +4,8 @@ description: Lorem ipsum dolor sit amet - 3
 layout: ../layouts/MainLayout.astro
 ---
 
-| Option        | Description                    |
-| -----------   | ------------------------------ |
+| --Options___       | Description                    |
+| ------------- | ------------------------------ |
 | `--onlyoptim` | Only runs optimization (PASS 1) |
 | `--onlycomp`  | Only runs compression (PASS 2) |
 | `--fast`      | Go fast. Mostly no compression just checks for issues. |

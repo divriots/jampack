@@ -40,10 +40,7 @@ const githubEditUrl = `${CONFIG.GITHUB_EDIT_URL}/${currentFile}`;
 			.layout {
 				display: grid;
 				grid-auto-flow: column;
-				grid-template-columns: minmax(var(--gutter), 1fr) minmax(0, var(--max-width)) minmax(
-						var(--gutter),
-						1fr
-					);
+				grid-template-columns: minmax(var(--gutter), 1fr) minmax(0, var(--max-width));
 				overflow-x: hidden;
 			}
 
@@ -69,10 +66,6 @@ const githubEditUrl = `${CONFIG.GITHUB_EDIT_URL}/${currentFile}`;
 				height: 100%;
 			}
 
-			#grid-right {
-				display: none;
-			}
-
 			@media (min-width: 50em) {
 				.layout {
 					overflow: initial;
@@ -90,15 +83,10 @@ const githubEditUrl = `${CONFIG.GITHUB_EDIT_URL}/${currentFile}`;
 
 			@media (min-width: 72em) {
 				.layout {
-					grid-template-columns: 20rem minmax(0, var(--max-width)) 18rem;
+					grid-template-columns: 20rem minmax(0, var(--max-width));
 					padding-left: 0;
 					padding-right: 0;
 					margin: 0 auto;
-				}
-
-				#grid-right {
-					grid-column: 3;
-					display: flex;
 				}
 			}
 		</style>
@@ -130,9 +118,9 @@ const githubEditUrl = `${CONFIG.GITHUB_EDIT_URL}/${currentFile}`;
 					<slot />
 				</PageContent>
 			</div>
-			<aside id="grid-right" class="grid-sidebar" title="Table of Contents">
+			<!-- <aside id="grid-right" class="grid-sidebar" title="Table of Contents">
 				<RightSidebar headings={headings} githubEditUrl={githubEditUrl} />
-			</aside>
+			</aside> -->
 		</main>
 		<Footer path={currentFile} />
 	</body>

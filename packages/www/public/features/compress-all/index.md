@@ -1,9 +1,9 @@
 ---
-title: 'Compress all (PASS #2)'
+title: 'Compress all (PASS 2)'
 jampack:
 ---
 
-In a PASS #2, `jampack` compresses all untouched assets and keep the same name and the same format.
+In a PASS 2, `jampack` compresses all untouched assets and keep the same name and the same format.
 
 | Extension       | Compressor            | 
 | --------------- | --------------------- | 

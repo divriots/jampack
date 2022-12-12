@@ -9,12 +9,10 @@ export const SITE = {
 
 export const OPEN_GRAPH = {
 	image: {
-		src: 'https://github.com/withastro/astro/blob/main/assets/social/banner-minimal.png?raw=true',
-		alt:
-			'astro logo on a starry expanse of space,' +
-			' with a purple saturn-like planet floating in the right foreground',
+		src: '/og-image.jpg',
+		alt: ''			
 	},
-	twitter: 'astrodotbuild',
+	twitter: 'divRIOTS',
 };
 
 // This is the type of the frontmatter you put in the docs markdown files.
@@ -54,7 +52,7 @@ export type Sidebar = Record<
 //   .filter(dirent => dirent.isDirectory())
 //   .map(dirent => dirent.name);
 
-const featuresDirs = [
+export const featuresDirs = [
 	'optimize-images-to-webp',
 	'optimize-svg',
 	'compress-all'
@@ -67,7 +65,7 @@ const getTitle = (file: string) => {
 export const SIDEBAR: Sidebar = {
 	en: {
 		'Getting started': [
-			{ text: 'Introduction', link: 'introduction' },
+			{ text: 'Introduction', link: '' },
 		],
 		'Reference': [
 			{ text: 'CLI Options', link: 'cli-options' },

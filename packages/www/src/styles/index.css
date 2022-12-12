@@ -91,6 +91,8 @@ h5 {
 
 p {
 	line-height: 1.65em;
+	margin-top: 1rem;
+	margin-bottom: 1rem;
 }
 
 .content ul {
@@ -277,6 +279,14 @@ blockquote {
 	background-color: var(--theme-bg-offset);
 	border-radius: 0 0.25rem 0.25rem 0;
 	line-height: 1.7;
+}
+
+blockquote>:last-child {
+    margin-bottom: 0;
+}
+
+blockquote>:first-child {
+    margin-top: 0;
 }
 
 img {

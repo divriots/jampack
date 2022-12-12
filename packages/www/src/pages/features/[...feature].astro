@@ -4,12 +4,12 @@ import path from 'path';
 import { execSync } from 'child_process';
 import Convert from 'ansi-to-html';
 import { compareSync } from "dir-compare";
-import { SIDEBAR } from '../../config';
+import { featuresDirs } from '../../config';
 
 // Generate pages present in SIDEBAR
 //
 export function getStaticPaths() {
-  return SIDEBAR.en.Features.map(entry => ({params: {feature: path.basename(entry.link)}}));
+  return featuresDirs.map(f => ({params: {feature: f}}));
 }
 
 const { feature } = Astro.params;
