@@ -1,6 +1,7 @@
 ---
 import { getLanguageFromURL } from '../../languages';
 import { SIDEBAR } from '../../config';
+import logoRiots from './divRIOTS.svg?raw';
 
 type Props = {
 	currentPage: string;
@@ -35,6 +36,10 @@ const sidebar = SIDEBAR[langCode];
 				</div>
 			</li>
 		))}
+		<li>
+			<h2>Brought to you by</h2>
+			<a class="div-logo" href="https://divRIOTS.com" target="_blank" set:html={logoRiots}></a>	
+		</li>
 	</ul>
 </nav>
 
@@ -114,6 +119,10 @@ const sidebar = SIDEBAR[langCode];
 		.nav-groups {
 			padding: 0;
 		}
+	}
+
+	.div-logo {
+		color: inherit;
 	}
 </style>
 
