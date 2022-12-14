@@ -40,7 +40,7 @@
     "table": "^6.8.1"
   },
   "devDependencies": {
-    "@types/node": "^16.9.4",
+    "@types/node": "^16.11.59",
     "shx": "^0.3.3",
     "ts-node": "^10.2.1",
     "tslib": "^2.4.1",
