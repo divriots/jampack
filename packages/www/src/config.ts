@@ -53,6 +53,7 @@ export type Sidebar = Record<
 //   .map(dirent => dirent.name);
 
 export const featuresDirs = [
+	'optimize-above-the-fold',
 	'optimize-images-to-webp',
 	'optimize-svg',
 	'compress-all'

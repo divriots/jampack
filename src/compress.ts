@@ -98,7 +98,7 @@ function createWebpOptions( opt: WebpOptions | undefined ): sharp.WebpOptions {
    }
 }
 
-export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions, toWebp: boolean = false ): Promise<Image | undefined> => {
+export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions, toFormat: 'webp' | 'pjpg' | 'unchanged' = 'unchanged' ): Promise<Image | undefined> => {
 
   if (!config.image.compress) return undefined;
 
@@ -134,7 +134,7 @@ export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions, t
       return { format: 'svg', data: Buffer.from(newData.data, 'utf8') };
     case 'png':
       outputFormat = 'png';
-      if (!toWebp) {
+      if (toFormat === 'unchanged') {
         sharpFile = sharpFile.png(config.image.png.options || {});
       }     
       doSharp = true;
@@ -142,8 +142,8 @@ export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions, t
     case 'jpeg':
     case 'jpg':
       outputFormat = 'jpg';
-      if (!toWebp) {
-        sharpFile = sharpFile.jpeg(config.image.jpeg.options || {});
+      if (toFormat === 'unchanged') {
+        sharpFile = sharpFile.jpeg( config.image.jpeg.options  || {});
       }
       doSharp = true;
       break;
@@ -151,14 +151,18 @@ export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions, t
       outputFormat = 'webp';
       sharpFile = sharpFile.webp( createWebpOptions(config.image.webp.options_lossly) || {});
       doSharp = true;
-      toWebp = false; // Don't need to convert to webP again
+      toFormat = 'unchanged'; // Don't need to convert to webP again
       break;
   }
 
   if (doSharp) {
-    if (toWebp) {
+    if (toFormat === 'webp') {
       sharpFile = sharpFile.webp( createWebpOptions(meta.format==='png' ? config.image.webp.options_lossless : config.image.webp.options_lossly));
       outputFormat = 'webp';
+    }
+    else if (toFormat === 'pjpg') {
+      sharpFile = sharpFile.jpeg( { ...config.image.jpeg.options, progressive: true } || {});
+      outputFormat = 'jpg';
     }
     if (resize.width && resize.height) {
       sharpFile = sharpFile.resize( {...resize, fit: 'fill', withoutEnlargement: true} );
@@ -169,9 +173,9 @@ export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions, t
   return undefined;
 }
 
-const compressImageFile = async (file: string, toWebP: boolean = false): Promise<Image | undefined> => {
+const compressImageFile = async (file: string): Promise<Image | undefined> => {
   const buffer = await fs.readFile(file);
-  return compressImage(buffer, {}, toWebP);
+  return compressImage(buffer, {});
 }
 
 export async function compress(exclude: string): Promise<void> {  
