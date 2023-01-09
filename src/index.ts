@@ -10,6 +10,7 @@ import { fast } from './config.js';
 import { printTitle } from './logger.js';
 import { exit } from 'process';
 import kleur from 'kleur';
+import { cleanCache } from './cache.js';
 
 const logo = `     __                                    __    
     |__|____    _____ ___________    ____ |  | __
@@ -38,6 +39,8 @@ program.command('pack', { isDefault: true})
   .option('--fail', 'Exits with a non-zero return code if issues.')
   .option('--onlyoptim', 'Only optimize (PASS 1).')
   .option('--onlycomp', 'Only compress (PASS 2).')
+  .option('--cleancache', 'Clean cache before running')
+  .option('--nocache', 'Run with no use of cache')
   .action(async (dir, options) => {
 
     $state.dir = dir;
@@ -46,6 +49,11 @@ program.command('pack', { isDefault: true})
     // Override config with fast options
     if (options.fast) {
       fast();
+    }
+
+    // Clean cache
+    if (options.cleancache) {
+      cleanCache();
     }
 
     if (!options.onlycomp) {

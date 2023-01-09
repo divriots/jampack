@@ -2,6 +2,7 @@ import path from "path";
 
 export type Args = {
   nowrite?: boolean;
+  nocache?: boolean;
 }
 
 export type ReportItem = {

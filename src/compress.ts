@@ -12,6 +12,7 @@ import { globby } from 'globby';
 import config, { WebpOptions } from './config.js';
 import type { Image, ImageFormat } from './types.js';
 import ora from 'ora';
+import { getFromCacheCompressImage, addToCacheCompressImage, computeCacheHash } from './cache.js';
 
 async function compressJS(code: string): Promise<string> {
   const newjsresult = await swc.minify(code, { compress: true, mangle: true });
@@ -98,7 +99,16 @@ function createWebpOptions( opt: WebpOptions | undefined ): sharp.WebpOptions {
    }
 }
 
-export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions, toFormat: 'webp' | 'pjpg' | 'unchanged' = 'unchanged' ): Promise<Image | undefined> => {
+  export const compressImage = async (data: Buffer, options: { resize?: sharp.ResizeOptions, toFormat?: 'webp' | 'pjpg' | 'unchanged' } ): Promise<Image | undefined> => {
+
+  const cacheHash = computeCacheHash(data, options);
+  const imageFromCache = await getFromCacheCompressImage(cacheHash);
+  if (imageFromCache) {
+    return imageFromCache;
+  }
+
+  // Load modifiable toFormat
+  let toFormat = options.toFormat || 'unchanged';
 
   if (!config.image.compress) return undefined;
 
@@ -156,6 +166,7 @@ export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions, t
   }
 
   if (doSharp) {
+
     if (toFormat === 'webp') {
       sharpFile = sharpFile.webp( createWebpOptions(meta.format==='png' ? config.image.webp.options_lossless : config.image.webp.options_lossly));
       outputFormat = 'webp';
@@ -164,12 +175,23 @@ export const compressImage = async (data: Buffer, resize: sharp.ResizeOptions, t
       sharpFile = sharpFile.jpeg( { ...config.image.jpeg.options, progressive: true } || {});
       outputFormat = 'jpg';
     }
-    if (resize.width && resize.height) {
-      sharpFile = sharpFile.resize( {...resize, fit: 'fill', withoutEnlargement: true} );
+    if (options.resize?.width && options.resize?.height) {
+      sharpFile = sharpFile.resize( {...options.resize, fit: 'fill', withoutEnlargement: true} );
     }
-    return { format: outputFormat, data: await sharpFile.toBuffer()};
+
+    //
+    // Output image processed
+    //
+
+    // Add to cache
+    const outputImage: Image = { format: outputFormat, data: await sharpFile.toBuffer()};
+    await addToCacheCompressImage(cacheHash, outputImage);
+
+    // Go
+    return outputImage;
   }
 
+  // Unknown input format or error while processing
   return undefined;
 }
 

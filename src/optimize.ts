@@ -56,7 +56,7 @@ async function analyse(file: string): Promise<void> {
 
   // Remove the fold
   if (theFold) {
-    $('the-fold').remove();
+    $("the-fold").remove();
   }
 
   if (!$state.args.nowrite) {
@@ -178,10 +178,13 @@ async function processImage(
       // Let's avoid to optimize same images twice
       $state.optimizedFiles.add(originalImage.filePathAbsolute);
 
-      newImage = await compressImage(await originalImage.getData(), {}, isAboveTheFold ? 'pjpg' : 'webp');
+      newImage = await compressImage(await originalImage.getData(), {
+        toFormat: isAboveTheFold ? "pjpg" : "webp",
+      });
       if (
         newImage?.data &&
-        ( newImage.data.length < (await originalImage.getLen()) || isAboveTheFold ) // Progressive jpg above the fold should get replaced even if bigger
+        (newImage.data.length < (await originalImage.getLen()) ||
+          isAboveTheFold) // Progressive jpg above the fold should get replaced even if bigger
       ) {
         // Do we need to add an new extension?
         const newExtension = `.${newImage.format}`;
@@ -309,8 +312,7 @@ async function processImage(
 
           const compressedImage = await compressImage(
             await originalImage.getData(),
-            { width: valueW, height: valueH },
-            'webp'
+            { resize: { width: valueW, height: valueH }, toFormat: "webp" }
           );
 
           if (compressedImage?.data && !$state.args.nowrite) {

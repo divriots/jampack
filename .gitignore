@@ -3,4 +3,5 @@
 .DS_Store
 /dist
 node_modules
+.jampack
 demo**

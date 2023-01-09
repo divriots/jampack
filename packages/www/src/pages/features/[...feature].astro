@@ -29,7 +29,7 @@ const source = `${root}/source`
 //
 execSync(`rm -fr ${packed} && mkdir ${packed}`);
 execSync(`cp -r ${source}/* ${packed}`);
-const result = execSync(`node ../../dist/index.js ${packed} ${content.frontmatter.jampack}`, { env: { ...process.env, FORCE_COLOR: "1" }});
+const result = execSync(`node ../../dist/index.js ${packed} ${content.frontmatter.jampack} --nocache`, { env: { ...process.env, FORCE_COLOR: "1" }});
 const resultHtml = new Convert().toHtml(result.toString().trim());
 
 // Compare dirs
