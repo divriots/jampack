@@ -22,7 +22,7 @@
     "@types/csso": "^5.0.0",
     "@types/html-minifier-terser": "^7.0.0",
     "@types/ora": "^3.2.0",
-    "@types/sharp": "^0.31.0",
+    "@types/sharp": "^0.31.1",
     "@types/svgo": "^2.6.4",
     "@types/table": "^6.3.2",
     "chalk": "^5.1.2",
