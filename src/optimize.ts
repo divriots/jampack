@@ -16,7 +16,7 @@ async function analyse(file: string): Promise<void> {
   console.log("▶ " + file);
 
   const html = (await fs.readFile(path.join($state.dir, file))).toString();
-  const $ = cheerio.load(html, { withStartIndices: true });
+  const $ = cheerio.load(html, { withStartIndices: true, decodeEntities: false });
 
   const theFold = getTheFold($);
 

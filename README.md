@@ -60,6 +60,9 @@ Check the [Documentation side](https://jampack.divriots.com).
 - [divRIOTS.com](https://divRIOTS.com)
 - [Backlight.dev](https://backlight.dev)
 - [story.to.design](https://story.to.design)
+- [html.to.design](https://html.to.design/docs)
+- [WebComponents.dev](https://WebComponents.dev)
+- [LWC.studio](https://lwc.studio)
 - [Components.studio](https://components.studio)
 > Add yours here
 
