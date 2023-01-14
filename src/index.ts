@@ -11,6 +11,7 @@ import { printTitle } from './logger.js';
 import { exit } from 'process';
 import kleur from 'kleur';
 import { cleanCache } from './cache.js';
+import { VERSION } from './version.js';
 
 const logo = `     __                                    __    
     |__|____    _____ ___________    ____ |  | __
@@ -18,7 +19,7 @@ const logo = `     __                                    __
     |  |/ __ \\|  Y Y  \\  |_> > __ \\\\  \\___|    < 
 /\\__|  (____  /__|_|  /   __(____  /\\___  >__|_ \\
 \\______|    \\/      \\/|  |       \\/     \\/     \\/
-                      |__| by ‹div›RIOTS (c)2022-2023
+ v${VERSION.padEnd(14)}      |__| by ‹div›RIOTS
 `;
 
 console.log(logo);
@@ -28,7 +29,7 @@ const program = new Command();
 program
   .name('jampack')
   .description('Static website Optimizer')
-  .version('0.0.1');
+  .version(VERSION);
 
 program.command('pack', { isDefault: true})
   .description('todo')
