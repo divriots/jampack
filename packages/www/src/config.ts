@@ -1,33 +1,33 @@
-import fs from 'fs';
-import fm from 'front-matter';
+import fs from "fs";
+import fm from "front-matter";
 
 export const SITE = {
-	title: 'jampack',
-	description: 'Your website description.',
-	defaultLanguage: 'en_US',
+  title: "jampack",
+  description: "Your website description.",
+  defaultLanguage: "en_US",
 };
 
 export const OPEN_GRAPH = {
-	image: {
-		src: '/og-image.jpg',
-		alt: ''			
-	},
-	twitter: 'divRIOTS',
+  image: {
+    src: "/og-image.jpg",
+    alt: "",
+  },
+  twitter: "divRIOTS",
 };
 
 // This is the type of the frontmatter you put in the docs markdown files.
 export type Frontmatter = {
-	title: string;
-	description: string;
-	layout: string;
-	image?: { src: string; alt: string };
-	dir?: 'ltr' | 'rtl';
-	ogLocale?: string;
-	lang?: string;
+  title: string;
+  description: string;
+  layout: string;
+  image?: { src: string; alt: string };
+  dir?: "ltr" | "rtl";
+  ogLocale?: string;
+  lang?: string;
 };
 
 export const KNOWN_LANGUAGES = {
-	English: 'en',
+  English: "en",
 } as const;
 
 export const KNOWN_LANGUAGE_CODES = Object.values(KNOWN_LANGUAGES);
@@ -38,14 +38,14 @@ export const COMMUNITY_INVITE_URL = `https://jampack.divriots.com/chat`;
 
 // See "Algolia" section of the README for more information.
 export const ALGOLIA = {
-	indexName: 'XXXXXXXXXX',
-	appId: 'XXXXXXXXXX',
-	apiKey: 'XXXXXXXXXX',
+  indexName: "XXXXXXXXXX",
+  appId: "XXXXXXXXXX",
+  apiKey: "XXXXXXXXXX",
 };
 
 export type Sidebar = Record<
-	typeof KNOWN_LANGUAGE_CODES[number],
-	Record<string, { text: string; link: string }[]>
+  typeof KNOWN_LANGUAGE_CODES[number],
+  Record<string, { text: string; link: string }[]>
 >;
 
 // const featuresDirs = fs.readdirSync( './public/features', { withFileTypes: true })
@@ -53,26 +53,30 @@ export type Sidebar = Record<
 //   .map(dirent => dirent.name);
 
 export const featuresDirs = [
-	'optimize-above-the-fold',
-	'optimize-images-to-webp',
-	'optimize-svg',
-	'compress-all'
-]
+  "optimize-above-the-fold",
+  "optimize-images-to-webp",
+  "optimize-svg",
+  "compress-all",
+];
 
 const getTitle = (file: string) => {
-	return fm(fs.readFileSync(file, 'utf8')).attributes['title'];
-}
+  return fm(fs.readFileSync(file, "utf8")).attributes["title"];
+};
 
 export const SIDEBAR: Sidebar = {
-	en: {
-		'Getting started': [
-			{ text: 'Introduction', link: '' },
-		],
-		'Reference': [
-			{ text: 'CLI Options', link: 'cli-options' },
-			{ text: 'Configuration', link: 'configuration' },
-		],
-		'Features': featuresDirs.map(dir => ({ text: getTitle('./public/features/'+dir+'/index.md'), link: 'features/'+dir }) ),
-		'Community': [{ text: 'Join us on Discord', link: 'https://jampack.divriots.com/chat' }],
-	},
+  en: {
+    "Getting started": [{ text: "Introduction", link: "" }],
+    Reference: [
+      { text: "CLI Options", link: "cli-options" },
+      { text: "Configuration", link: "configuration" },
+      { text: "Cache", link: "cache" },
+    ],
+    Features: featuresDirs.map((dir) => ({
+      text: getTitle("./public/features/" + dir + "/index.md"),
+      link: "features/" + dir,
+    })),
+    Community: [
+      { text: "Join us on Discord", link: "https://jampack.divriots.com/chat" },
+    ],
+  },
 };

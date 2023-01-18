@@ -1,6 +1,6 @@
 ---
 title: CLI Options
-description: Lorem ipsum dolor sit amet - 3
+description: List of options for `jampack` command-line.
 layout: ../layouts/MainLayout.astro
 ---
 

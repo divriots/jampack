@@ -1,6 +1,6 @@
 ---
 title: Configuration
-description: 
+description: Configuration file for `jampack`.
 layout: ../layouts/MainLayout.astro
 ---
 
