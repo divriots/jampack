@@ -48,11 +48,11 @@ const iframePacked = `/features/${feature}/packed/index.html`;
 
   <h2>Demo</h2>
   
-  <div class="files">
-    <span style="text-decoration: underline;">SOURCE</span>
+  <div class="files files-horizontal">
+    <h3>SOURCE</h3>
     <span></span>
     <span></span>
-    <span style="text-decoration: underline;">JAMPACKED</span>
+    <h3>JAMPACKED</h3>
     <span></span>
 
     { dirCompare.diffSet.map( l => {
@@ -67,16 +67,43 @@ const iframePacked = `/features/${feature}/packed/index.html`;
     }
   </div>
 
-  <div class="grid">
-  
+  <div class="files files-vertical">
+    <h3>SOURCE</h3>
+
+    <ul>
+      { dirCompare.diffSet.map( l => {
+      return l.type1 !== 'missing' ?
+        ( <li>
+            <span class={ `col-file is-${l.type1}` } style={ `padding-left: ${l.level*1.3}rem; flex:1;` }>{ l.name1 }</span>
+            <span class={ `col-size` }>{ l.type1 === 'file' ? l.size1 : '' }</span>
+          </li>
+        ) : <></>
+      })
+    }
+    </ul>
+
+    <h3 style="margin-top: 2rem;">JAMPACKED</h3>
+
+    <ul>
+      { dirCompare.diffSet.map( l => {
+      return l.type1 !== 'missing' ?
+        ( <li>
+            <span class={ `color-${l.state} col-file is-${l.type1}` } style={ `padding-left: ${l.level*1.3}rem; flex:1;` }>{ l.name2 }</span>
+            <span class={ `color-${l.state} col-size` }>{ l.type2 === 'file' ? l.size2 : '' }</span>
+          </li>
+        ) : <></>
+      })
+    }
+    </ul>
+  </div>
+
+  <div class="browsers">
     <div class="iframe-shrinker">
       <iframe style="width: 100%; height: 100%;" src={iframeSource}></iframe>
     </div>
     <div class="iframe-shrinker">
       <iframe style="width: 100%; height: 100%;" src={iframePacked}></iframe>
     </div>
-    <a href={iframeSource} target="_source">Open in new tab</a>
-    <a href={iframePacked} target="_packed">Open in new tab</a>
   </div>
 
   <section class="window">
@@ -89,9 +116,7 @@ const iframePacked = `/features/${feature}/packed/index.html`;
       Terminal
     </div>
   
-    <pre id="terminal" class="astro-code">
-      <code set:html={ resultHtml }>
-      </code>
+    <pre id="terminal" set:html={ resultHtml }>
     </pre>
   </section>
 </MainLayout>
@@ -103,23 +128,24 @@ const iframePacked = `/features/${feature}/packed/index.html`;
 </script>
 
 <style lang="scss" scoped>
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 300px min-content;
-    gap: 1rem;
+  .browsers {
+    display: none;
   }
 
   .files {
     color: white;
     font-family: var(--font-mono);
-    font-size: 0.8rem;
-
-    display: grid;
-    grid-template-columns: 1fr min-content 3rem 1fr min-content;
+    font-size: 0.85em;
     background-color: black;
     padding: 0.5rem 1rem;
     border-radius: 6px;
+
+    h3 {
+      padding: 0;
+      margin: 0.4rem 0;
+      font-size: inherit;
+      text-decoration: underline;
+    }
 
     .color-equal {
       opacity: 0.6;
@@ -149,6 +175,43 @@ const iframePacked = `/features/${feature}/packed/index.html`;
       }
     }
 
+    ul {
+      padding: 0;
+      margin: 0;
+      list-style-type: none;
+
+      li {
+        margin-top: 4px;
+      }
+    }
+  }
+
+  .files-horizontal {
+    display: none;
+  }
+
+  @media (min-width: 40em) {
+    .files-horizontal {
+      display: grid;
+      grid-template-columns: 1fr min-content 3rem 1fr min-content;
+    }
+
+    .files-vertical {
+      display: none;
+    }
+
+    .browsers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 300px;
+      gap: 1rem;
+    }
+  }
+
+  .files-vertical {
+    ul > li {
+      display: flex;
+    }
   }
 
   .iframe-shrinker {
@@ -159,9 +222,12 @@ const iframePacked = `/features/${feature}/packed/index.html`;
   }
 
   #terminal {
+    box-sizing: border-box;
     background-color: black;
     max-height: 360px;
     overflow-y: auto;
+    font-size: 0.85em;
+    padding: 0 1rem;
   }
 
   .window {
