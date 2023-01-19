@@ -216,7 +216,7 @@ pre > code {
 }
 
 table,
-pre.astro-code {
+pre {
   position: relative;
   --padding-block: 1rem;
   --padding-inline: 2rem;
