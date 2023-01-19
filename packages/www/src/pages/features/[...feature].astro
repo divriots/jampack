@@ -81,8 +81,10 @@ const iframePacked = `/features/${feature}/packed/index.html`;
       })
     }
     </ul>
+  </div>
 
-    <h3 style="margin-top: 2rem;">JAMPACKED</h3>
+  <div class="files files-vertical">
+    <h3>JAMPACKED</h3>
 
     <ul>
       { dirCompare.diffSet.map( l => {
@@ -137,12 +139,12 @@ const iframePacked = `/features/${feature}/packed/index.html`;
     font-family: var(--font-mono);
     font-size: 0.85em;
     background-color: black;
-    padding: 0.5rem 1rem;
+    padding: 1rem 1rem;
     border-radius: 6px;
 
     h3 {
       padding: 0;
-      margin: 0.4rem 0;
+      margin-bottom: 0.7rem;
       font-size: inherit;
       text-decoration: underline;
     }
@@ -222,6 +224,7 @@ const iframePacked = `/features/${feature}/packed/index.html`;
   }
 
   #terminal {
+    --padding-inline: 0;
     box-sizing: border-box;
     background-color: black;
     max-height: 360px;
