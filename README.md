@@ -51,9 +51,13 @@ npx @divriots/jampack ./dist
 
 For more options see [CLI options](https://jampack.divriots.com/cli-options).
 
+<div>
+
 ## What can `jampack` do?
 
-Check the [Documentation site](https://jampack.divriots.com) for a description of features.
+See [the list of features](https://jampack.divriots.com).
+
+</div>
 
 ## `jampack` use in the wild
 
@@ -68,7 +72,7 @@ Check the [Documentation site](https://jampack.divriots.com) for a description o
 
 ## Why is it called `jampack`?
 
-- ` jam`: From [Jamstack](https://en.wikipedia.org/wiki/Jamstack).
+- `jam`: From [Jamstack](https://en.wikipedia.org/wiki/Jamstack).
 - `pack`: Reminescent of the [Executable Packers](https://en.wikipedia.org/wiki/Executable_compression#List_of_executable_packers) from the 90s.
 
 ## License
