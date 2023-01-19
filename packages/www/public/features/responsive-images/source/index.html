@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      img {
+        max-width: 80%;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Responsive images generation</h1>
+
+    <p>
+      The right image size will be used by the browser based on the device of
+      the user.
+    </p>
+
+    <h2>Hero image above the fold</h2>
+    <p>Above the fold, progressive jpg is used.</p>
+    <img src="./redpanda.jpg" alt="Red panda in the bush" />
+
+    <div>
+      <hr />
+      The fold is marked here
+      <the-fold></the-fold>
+      <hr />
+    </div>
+
+    <h2>Below the fold</h2>
+    <p>Above the fold, we use webp loaded lazily.</p>
+    <img src="./rudi-west.jpg" alt="Girl listening to music" />
+    <p>
+      Photo by
+      <a
+        href="https://unsplash.com/@rudi_west_photo?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText"
+        >Rudi West</a
+      >
+      on
+      <a
+        href="https://unsplash.com/?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText"
+        >Unsplash</a
+      >
+    </p>
+  </body>
+</html>

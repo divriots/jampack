@@ -54,6 +54,7 @@ export type Sidebar = Record<
 
 export const featuresDirs = [
   "optimize-above-the-fold",
+  "responsive-images",
   "optimize-images-to-webp",
   "optimize-svg",
   "compress-all",

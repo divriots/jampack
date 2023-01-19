@@ -16,7 +16,10 @@ async function analyse(file: string): Promise<void> {
   console.log("▶ " + file);
 
   const html = (await fs.readFile(path.join($state.dir, file))).toString();
-  const $ = cheerio.load(html, { withStartIndices: true, decodeEntities: false });
+  const $ = cheerio.load(html, {
+    withStartIndices: true,
+    decodeEntities: false,
+  });
 
   const theFold = getTheFold($);
 
@@ -170,21 +173,25 @@ async function processImage(
     }
 
     /*
-     * Compress image to WebP
+     * Compress image
      */
     let newImage: Image | undefined;
+
+    const originalImageMeta = await originalImage.getImageMeta();
+    const canBeProgressiveJpeg =
+      isAboveTheFold && originalImageMeta && !originalImageMeta.hasAlpha;
 
     if (!$state.optimizedFiles.has(originalImage.filePathAbsolute)) {
       // Let's avoid to optimize same images twice
       $state.optimizedFiles.add(originalImage.filePathAbsolute);
 
       newImage = await compressImage(await originalImage.getData(), {
-        toFormat: isAboveTheFold ? "pjpg" : "webp",
+        toFormat: canBeProgressiveJpeg ? "pjpg" : "webp",
       });
       if (
         newImage?.data &&
         (newImage.data.length < (await originalImage.getLen()) ||
-          isAboveTheFold) // Progressive jpg above the fold should get replaced even if bigger
+          canBeProgressiveJpeg) // Progressive jpg above the fold should get replaced even if bigger
       ) {
         // Do we need to add an new extension?
         const newExtension = `.${newImage.format}`;
@@ -285,7 +292,8 @@ async function processImage(
       // Generate image set
       const ext = path.extname(attrib_src);
       const fullbasename = attrib_src.slice(0, -ext.length);
-      const imageSrc = (addition: string) => `${fullbasename}${addition}.webp`;
+      const imageSrc = (addition: string) =>
+        `${fullbasename}${addition}.${canBeProgressiveJpeg ? "jpg" : "webp"}`;
 
       // Start from original image
       let new_srcset = "";
@@ -312,7 +320,10 @@ async function processImage(
 
           const compressedImage = await compressImage(
             await originalImage.getData(),
-            { resize: { width: valueW, height: valueH }, toFormat: "webp" }
+            {
+              resize: { width: valueW, height: valueH },
+              toFormat: canBeProgressiveJpeg ? "pjpg" : "webp",
+            }
           );
 
           if (compressedImage?.data && !$state.args.nowrite) {
