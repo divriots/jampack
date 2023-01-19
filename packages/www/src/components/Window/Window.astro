@@ -1,0 +1,89 @@
+---
+import externalSvg from './external-link.svg';
+
+export interface Props {
+	title: string;
+	open_url?: string;
+}
+
+const { title, open_url } = Astro.props as Props;
+---
+
+<section class="window">
+	<div class="title">
+	  <div class="buttons">
+		<div class="close"></div>
+		<div class="minimize"></div>
+		<div class="zoom"></div>
+	  </div>
+	  <span>{ title }</span>
+	  { open_url ? <a href={open_url} target="_blank"><img src={externalSvg} alt="Open in new tab" title="Open in new tab"/></a> : <div></div> }
+	</div>
+	<slot></slot>
+</section>
+
+<style lang="scss">
+
+.window {
+  border: 1px solid #acacac;
+  border-radius: 6px;
+  background-color: black;
+  overflow: hidden;
+}
+
+.title {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  background: #ebebeb;
+  color: #4d494d;
+  font-size: 11pt;
+  line-height: 20px;
+  text-align: center;
+  width: 100%;
+  height: 24px;
+  border-top: 1px solid #f3f1f3;
+  border-bottom: 1px solid #b1aeb1;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  cursor: default;
+
+  img {
+    margin: 2px 4px;
+  }
+}
+
+.buttons {
+  padding-left: 6px;
+  padding-top: 4px;
+  float: left;
+  line-height: 0px;
+}
+
+.buttons > div {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.close {
+  background: #ff5c5c;
+  border: 1px solid #e33e41;
+}
+
+.minimize {
+  background: #ffbd4c;
+  margin-left: 2px;
+  border: 1px solid #e09e3e;
+}
+
+.zoom {
+  background: #00ca56;
+  margin-left: 2px;
+  border: 1px solid #14ae46;
+}
+</style>
