@@ -51,9 +51,9 @@ npx @divriots/jampack ./dist
 
 For more options see [CLI options](https://jampack.divriots.com/cli-options).
 
-## Documentation
+## What can `jampack` do?
 
-Check the [Documentation side](https://jampack.divriots.com).
+Check the [Documentation site](https://jampack.divriots.com) for a description of features.
 
 ## `jampack` use in the wild
 
@@ -74,17 +74,3 @@ Check the [Documentation side](https://jampack.divriots.com).
 ## License
 
 This software is released under the terms of the [MIT license](https://github.com/divriots/jampack/blob/main/LICENSE).
-
-
-## Optimizations
-
-### PASS 1 - Optimizations
-
-This pass takes all `*.{html|.htm}` files and parse them for optimisation. 
-
-| Optimization   | Technical details     | Related links | Available |
-| -------------- | --------------------- |:------------:|:---------:|
-| Set `width` and `height` if missing | Uses image size and aspect ratio to fill values | [web.dev](https://web.dev/optimize-cls/#images-without-dimensions) |  ✅  |
-| Fix `width` or `height` if not numerical | Uses image size and aspect ratio to fill values | [web.dev](https://web.dev/optimize-cls/#images-without-dimensions) |  ✅  |
-| Set lazy loading by default  | Sets `loading="lazy"` if `[loading]` is not set. | [web.dev](https://web.dev/lazy-loading-images/) |  ✅  |
-| Set async decoding by default  | Sets `decoding="async"`. |  |  ✅  |

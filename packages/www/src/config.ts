@@ -57,10 +57,11 @@ export const featuresDirs = [
   "optimize-images-to-webp",
   "optimize-svg",
   "responsive-images",
+  "set-image-dimensions",
   "lazy-load-images",
   "embed-small-images",
-  "accessibility-warnings",
   "compress-all",
+  "warnings",
 ];
 
 const getTitle = (file: string) => {

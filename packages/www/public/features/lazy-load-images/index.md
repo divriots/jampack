@@ -18,4 +18,3 @@ Images will not be lazy loaded in the following conditions:
 
 ⚠️ [Lazy loading images above the fold can cause LCP issues](https://web.dev/lazy-loading-images/#effects-on-largest-contentful-paint-lcp),
 we recommend to use the `jampack`'s [`<the-fold>` feature](../optimize-above-the-fold/) or mark images with `loading="eager"` when they are above the fold.
-

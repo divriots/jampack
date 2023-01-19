@@ -271,7 +271,7 @@ async function processImage(
     /*
      * Attribute 'width' & 'height'
      */
-    const [w, h] = await setImageSize(img, originalImage);
+    const [w, h] = await setImageSize(htmlfile, img, originalImage);
 
     //
     // Stop here if svg
@@ -353,6 +353,7 @@ async function processImage(
 }
 
 async function setImageSize(
+  htmlfile: string,
   img: cheerio.Cheerio,
   image: Resource
 ): Promise<number[]> {
@@ -364,13 +365,19 @@ async function setImageSize(
   // Check valid values
   if (width !== undefined) {
     if (!isNumeric(width)) {
-      //console.warn(`Invalid width attribute "${width}" - overriding`);
+      $state.reportIssue(htmlfile, {
+        type: "warn",
+        msg: `Invalid width attribute "${width}" format - overriding`,
+      });
       width = undefined;
     }
   }
   if (height !== undefined) {
     if (!isNumeric(height)) {
-      //console.warn(`Invalid height attribute "${height}" - overriding`);
+      $state.reportIssue(htmlfile, {
+        type: "warn",
+        msg: `Invalid height attribute "${height}" format - overriding`,
+      });
       height = undefined;
     }
   }
@@ -400,7 +407,10 @@ async function setImageSize(
     const providedRatio = Math.round((w / h) * 10) / 10;
     const imageRatio = Math.round(originalRatio * 10) / 10;
     if (providedRatio !== imageRatio) {
-      //console.warn(`Image aspect ratio in HTML (${providedRatio}) differs from image aspect ratio (${imageRatio}) - fix width and height or let jampack fill them.`);
+      $state.reportIssue(htmlfile, {
+        type: "warn",
+        msg: `Image aspect ratio in HTML (${providedRatio}) differs from image aspect ratio (${imageRatio}) - fix width and height or let jampack fill them.`,
+      });
     }
 
     return [w, h];

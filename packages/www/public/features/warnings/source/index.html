@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1>Accessibility warnings</h1>
+
+    <h2>img missing `alt` attribute</h2>
+    <img src="./jam.svg" />
+
+    <h2>Image with wrong aspect ratio</h2>
+    <img
+      src="./redpanda_500x335.jpg"
+      alt="Red panada in the bush"
+      width="1000"
+      height="335"
+    />
+
+    <h2>Image with correct aspect ratio but different dimension</h2>
+    <img
+      src="./redpanda_500x335.jpg"
+      alt="Red panada in the bush"
+      width="1000"
+      height="670"
+    />
+  </body>
+</html>
