@@ -88,6 +88,3 @@ This pass takes all `*.{html|.htm}` files and parse them for optimisation.
 | Fix `width` or `height` if not numerical | Uses image size and aspect ratio to fill values | [web.dev](https://web.dev/optimize-cls/#images-without-dimensions) |  ✅  |
 | Set lazy loading by default  | Sets `loading="lazy"` if `[loading]` is not set. | [web.dev](https://web.dev/lazy-loading-images/) |  ✅  |
 | Set async decoding by default  | Sets `decoding="async"`. |  |  ✅  |
-| Warn on missing `[alt]` | Warn on missing `alt` attribute but adds `alt=""` in case image is considered decorative. |  |  ✅  |
-| 🔽 `<picture>`  |                       |      |   |
-| - TODO         |                       |  |  ❌  |

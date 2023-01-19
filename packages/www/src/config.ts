@@ -58,6 +58,7 @@ export const featuresDirs = [
   "optimize-svg",
   "responsive-images",
   "embed-small-images",
+  "accessibility-warnings",
   "compress-all",
 ];
 
