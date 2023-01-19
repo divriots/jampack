@@ -263,15 +263,15 @@ async function processImage(
       }
     }
 
-    /*
-     * Attribute 'width' & 'height'
-     */
-    const [w, h] = await setImageSize(img, originalImage);
-
     if (isEmbed) {
       // Image is embed, no need for more processing
       return;
     }
+
+    /*
+     * Attribute 'width' & 'height'
+     */
+    const [w, h] = await setImageSize(img, originalImage);
 
     //
     // Stop here if svg

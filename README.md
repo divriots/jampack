@@ -84,8 +84,6 @@ This pass takes all `*.{html|.htm}` files and parse them for optimisation.
 
 | Optimization   | Technical details     | Related links | Available |
 | -------------- | --------------------- |:------------:|:---------:|
-| Generate responsive images and set `srcset` | Multiple smaller images are generated exclusively in `WebP` and `srcset` attribute is set accordingly.  | [web.dev](https://web.dev/patterns/web-vitals-patterns/images/responsive-images/) |  ✅  |
-| Embed small images | If optimised image size is <500 bytes, image is embed in `[src]` |  |  ✅  |
 | Set `width` and `height` if missing | Uses image size and aspect ratio to fill values | [web.dev](https://web.dev/optimize-cls/#images-without-dimensions) |  ✅  |
 | Fix `width` or `height` if not numerical | Uses image size and aspect ratio to fill values | [web.dev](https://web.dev/optimize-cls/#images-without-dimensions) |  ✅  |
 | Set lazy loading by default  | Sets `loading="lazy"` if `[loading]` is not set. | [web.dev](https://web.dev/lazy-loading-images/) |  ✅  |
