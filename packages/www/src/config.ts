@@ -81,7 +81,7 @@ export const SIDEBAR: Sidebar = {
       link: "features/" + dir,
     })),
     Community: [
-      { text: "Join us on Discord", link: "https://jampack.divriots.com/chat" },
+      { text: "Chat with us", link: "https://jampack.divriots.com/chat" },
     ],
   },
 };
