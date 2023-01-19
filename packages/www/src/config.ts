@@ -57,6 +57,7 @@ export const featuresDirs = [
   "optimize-images-to-webp",
   "optimize-svg",
   "responsive-images",
+  "lazy-load-images",
   "embed-small-images",
   "accessibility-warnings",
   "compress-all",
