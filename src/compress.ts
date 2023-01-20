@@ -77,7 +77,9 @@ const processFile = async (file: string, stats: Stats): Promise<void> => {
         // Pick the best
         if (cssoCSSData && lightCSSData) {
           writeData =
-            cssoCSSData.length <= lightCSSData ? cssoCSSData : lightCSSData;
+            cssoCSSData.length <= lightCSSData.length
+              ? cssoCSSData
+              : lightCSSData;
         } else if (cssoCSSData && !lightCSSData) {
           writeData = cssoCSSData;
         } else if (!cssoCSSData && lightCSSData) {
