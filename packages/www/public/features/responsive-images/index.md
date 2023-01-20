@@ -7,7 +7,9 @@ For images wider than 600px, `jampack` will generate a set of smaller images and
 
 In other words, you can have a single image in your static site and `jampack` will create the different smaller versions to serve the most optimized image for the client device.
 
-Images above the fold generate [progressives `jpeg`](https://www.thewebmaster.com/progressive-jpegs/) as described in the [above the fold optimization](../optimize-above-the-fold/).
+- Images above the fold generate [progressives `jpeg`](https://www.thewebmaster.com/progressive-jpegs/) as described in the [above the fold optimization](../optimize-above-the-fold/).
+- `png` and `png` images will generate `WebP` responsive images.
+- `avif` images will generate `avif` responsive images.
 
 ## Processing
 
