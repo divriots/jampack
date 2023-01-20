@@ -49,7 +49,7 @@
   },
   "scripts": {
     "watch": "pnpm build --watch",
-    "try": "shx rm -fr demo && cp -R demo_ref demo && node ./dist/index.js",
+    "try": "shx rm -fr demo && cp -R demo_avif demo && node ./dist/index.js ./demo",
     "build": "shx rm -rf dist && tsc -b",
     "lint": "eslint . --ext .ts --config .eslintrc"
   },
