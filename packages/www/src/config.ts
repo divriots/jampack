@@ -72,6 +72,7 @@ export const SIDEBAR: Sidebar = {
   en: {
     "Getting started": [{ text: "Introduction", link: "" }],
     Reference: [
+      { text: "Installation", link: "installation" },
       { text: "CLI Options", link: "cli-options" },
       { text: "Configuration", link: "configuration" },
       { text: "Cache", link: "cache" },
