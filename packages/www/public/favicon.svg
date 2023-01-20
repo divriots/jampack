@@ -1,13 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 36 36">
-  <path fill="#000" d="M22.25 4h-8.5a1 1 0 0 0-.96.73l-5.54 19.4a.5.5 0 0 0 .62.62l5.05-1.44a2 2 0 0 0 1.38-1.4l3.22-11.66a.5.5 0 0 1 .96 0l3.22 11.67a2 2 0 0 0 1.38 1.39l5.05 1.44a.5.5 0 0 0 .62-.62l-5.54-19.4a1 1 0 0 0-.96-.73Z"/>
-  <path fill="url(#gradient)" d="M18 28a7.63 7.63 0 0 1-5-2c-1.4 2.1-.35 4.35.6 5.55.14.17.41.07.47-.15.44-1.8 2.93-1.22 2.93.6 0 2.28.87 3.4 1.72 3.81.34.16.59-.2.49-.56-.31-1.05-.29-2.46 1.29-3.25 3-1.5 3.17-4.83 2.5-6-.67.67-2.6 2-5 2Z"/>
-  <defs>
-    <linearGradient id="gradient" x1="16" x2="16" y1="32" y2="24" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#000"/>
-      <stop offset="1" stop-color="#000" stop-opacity="0"/>
-    </linearGradient>
-  </defs>
-	<style>
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 131.05 102">
+  <defs><style>.cls-1{fill:none;stroke:#000;stroke-linecap:round;stroke-width:6px;}</style></defs><g><line class="cls-1" x1="39" y1="3" x2="63" y2="3"/><line class="cls-1" x1="39" y1="3" x2="39" y2="67"/><line class="cls-1" x1="39" y1="19" x2="62.85" y2="19"/><line class="cls-1" x1="63" y1="3" x2="63" y2="19"/><line class="cls-1" x1="59" y1="19" x2="63" y2="27"/><line class="cls-1" x1="63" y1="27" x2="63" y2="44.84"/><path class="cls-1" d="m63,58.93v8.07"/><line class="cls-1" x1="11" y1="51" x2="3" y2="67"/><line class="cls-1" x1="11" y1="51" x2="19" y2="67"/><line class="cls-1" x1="19" y1="67" x2="39" y2="67"/><line class="cls-1" x1="3" y1="67" x2="11" y2="83"/><line class="cls-1" x1="11" y1="83" x2="63" y2="83"/><line class="cls-1" x1="63" y1="67" x2="63" y2="83"/></g><g><line class="cls-1" x1="63.04" y1="45.06" x2="67.05" y2="51"/><line class="cls-1" x1="67.05" y1="51" x2="63.05" y2="59"/><line class="cls-1" x1="63.05" y1="59" x2="63.05" y2="99"/><line class="cls-1" x1="87.05" y1="67" x2="107.05" y2="67"/><line class="cls-1" x1="87.05" y1="67" x2="87.05" y2="99"/><line class="cls-1" x1="63.05" y1="99" x2="87.05" y2="99"/></g><g><line class="cls-1" x1="59.05" y1="19" x2="106.93" y2="19"/><line class="cls-1" x1="59.05" y1="19" x2="67.05" y2="35"/><line class="cls-1" x1="67.05" y1="35" x2="99.05" y2="35"/><polyline class="cls-1" points="107.05 19 122.84 50.71 107.05 67"/><line class="cls-1" x1="87.05" y1="35" x2="87.05" y2="51"/><line class="cls-1" x1="87.05" y1="51" x2="99.05" y2="51"/></g><style>
     @media (prefers-color-scheme:dark){:root{filter:invert(100%)}}
   </style>
 </svg>
+
