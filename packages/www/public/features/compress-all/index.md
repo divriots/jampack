@@ -14,3 +14,4 @@ In a PASS 2, `jampack` compresses all untouched assets and keep the same name an
 | `.jpg`,`.jpeg`  | [`sharp`](https://sharp.pixelplumbing.com/)                 |  
 | `.png`          | [`sharp`](https://sharp.pixelplumbing.com/)                |    
 | `.webp`         | [`sharp`](https://sharp.pixelplumbing.com/)                 |  
+| `.avif`         | [`sharp`](https://sharp.pixelplumbing.com/)                 |  
