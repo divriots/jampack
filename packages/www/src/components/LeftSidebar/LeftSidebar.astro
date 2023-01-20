@@ -17,6 +17,10 @@ const sidebar = SIDEBAR[langCode];
 
 <nav aria-labelledby="grid-left">
 	<ul class="nav-groups">
+		<li>
+			<h2>Brought to you by</h2>
+			<a class="div-logo" href="https://divRIOTS.com" target="_blank" set:html={logoRiots}></a>	
+		</li>
 		{Object.entries(sidebar).map(([header, children]) => (
 			<li>
 				<div class="nav-group">
@@ -36,10 +40,6 @@ const sidebar = SIDEBAR[langCode];
 				</div>
 			</li>
 		))}
-		<li>
-			<h2>Brought to you by</h2>
-			<a class="div-logo" href="https://divRIOTS.com" target="_blank" set:html={logoRiots}></a>	
-		</li>
 	</ul>
 </nav>
 
@@ -123,6 +123,7 @@ const sidebar = SIDEBAR[langCode];
 
 	.div-logo {
 		color: inherit;
+		margin-left: 1rem;
 	}
 </style>
 
