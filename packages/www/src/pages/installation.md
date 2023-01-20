@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: `jampack` installation process
+description: Installation process
 layout: ../layouts/MainLayout.astro
 ---
 
