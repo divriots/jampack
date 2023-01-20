@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Data processing is cached to avoid long and redundant processing.
+description: `jampack` installation process
 layout: ../layouts/MainLayout.astro
 ---
 
