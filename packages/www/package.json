@@ -7,7 +7,9 @@
     "dev": "astro dev",
     "start": "astro dev",
     "check": "astro check && tsc",
-    "build": "cd ../.. && pnpm i && pnpm build && cd packages/www && astro build && cp -fr public/features dist",
+    "build-jampack": "cd ../.. && pnpm i && pnpm build && cd packages/www",
+    "build": "pnpm build-jampack && astro build && cp -fr public/features dist && pnpm build-optimize",
+    "build-optimize": "node ../../dist/index.js dist --exclude features/**",
     "preview": "astro preview",
     "astro": "astro"
   },
