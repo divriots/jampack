@@ -36,7 +36,7 @@
     "lightningcss": "^1.18.0",
     "mini-svg-data-uri": "^1.4.4",
     "ora": "^6.1.2",
-    "sharp": "^0.31.2",
+    "sharp": "^0.31.3",
     "svgo": "^2.8.0",
     "table": "^6.8.1"
   },
