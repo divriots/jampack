@@ -63,16 +63,23 @@ const processFile = async (file: string, stats: Stats): Promise<void> => {
         const cssdata = await fs.readFile(file);
 
         // Compress with csso
-        const cssoCSSData = await csso(cssdata.toString(), { comments: false })
-          .css;
+        const cssoCSSData = Buffer.from(
+          await csso(cssdata.toString(), { comments: false }).css
+        );
 
         // Compress with lightningcss
-        const lightCSSData = lightcss({
-          filename: 'style.css',
-          code: cssdata,
-          minify: true,
-          sourceMap: false,
-        }).code;
+        let lightCSSData;
+        try {
+          lightCSSData = lightcss({
+            filename: 'style.css',
+            code: cssdata,
+            minify: true,
+            sourceMap: false,
+          }).code;
+        } catch (e) {
+          // Error while processing with lightningcss
+          // Ignore
+        }
 
         // Pick the best
         if (cssoCSSData && lightCSSData) {
