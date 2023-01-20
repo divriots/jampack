@@ -60,7 +60,8 @@ const processFile = async (file: string, stats: Stats): Promise<void> => {
         break;
       case '.css':
         const cssdata = await fs.readFile(file);
-        const newcssData = await csso(cssdata.toString()).css;
+        const newcssData = await csso(cssdata.toString(), { comments: false })
+          .css;
         if (newcssData) {
           writeData = newcssData;
         }
