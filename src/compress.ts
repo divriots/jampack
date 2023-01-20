@@ -4,6 +4,7 @@ import * as path from 'path';
 import { optimize as svgo } from 'svgo';
 import { minify as htmlminifier } from 'html-minifier-terser';
 import { minify as csso } from 'csso';
+import { transform as lightcss } from 'lightningcss';
 import { formatBytes } from './utils.js';
 import sharp from 'sharp';
 import swc from '@swc/core';
@@ -60,10 +61,27 @@ const processFile = async (file: string, stats: Stats): Promise<void> => {
         break;
       case '.css':
         const cssdata = await fs.readFile(file);
-        const newcssData = await csso(cssdata.toString(), { comments: false })
+
+        // Compress with csso
+        const cssoCSSData = await csso(cssdata.toString(), { comments: false })
           .css;
-        if (newcssData) {
-          writeData = newcssData;
+
+        // Compress with lightningcss
+        const lightCSSData = lightcss({
+          filename: 'style.css',
+          code: cssdata,
+          minify: true,
+          sourceMap: false,
+        }).code;
+
+        // Pick the best
+        if (cssoCSSData && lightCSSData) {
+          writeData =
+            cssoCSSData.length <= lightCSSData ? cssoCSSData : lightCSSData;
+        } else if (cssoCSSData && !lightCSSData) {
+          writeData = cssoCSSData;
+        } else if (!cssoCSSData && lightCSSData) {
+          writeData = lightCSSData;
         }
         break;
       case '.js':
