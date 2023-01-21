@@ -16,5 +16,7 @@ Images will not be lazy loaded in the following conditions:
 - Image as attribute `loading="eager"`. Explicitly requesting for no lazy loading.
 - Image is marked [above the fold](../optimize-above-the-fold/).
 
-⚠️ [Lazy loading images above the fold can cause LCP issues](https://web.dev/lazy-loading-images/#effects-on-largest-contentful-paint-lcp),
+## Warning note
+
+[Lazy loading images above the fold can cause LCP issues](https://web.dev/lazy-loading-images/#effects-on-largest-contentful-paint-lcp),
 we recommend to use the `jampack`'s [`<the-fold>` feature](../optimize-above-the-fold/) or mark images with `loading="eager"` when they are above the fold.
