@@ -292,10 +292,14 @@ async function processImage(
      * Attribute 'srcset'
      */
     const attr_srcset = img.attr('srcset');
-    if (attr_srcset) {
-      // If srcset is set, don't touch it.
+    const attr_sizes = img.attr('sizes');
+    if (attr_srcset || attr_sizes) {
+      // If srcset or sizes are set, don't touch it.
       // The compress pass will compress the images
       // of the srcset
+      //
+      // TODO
+      // support if sizes alone is set (no srcset) and generate the appropriate srcset
     } else {
       // Generate image set
 
@@ -371,6 +375,7 @@ async function processImage(
 
       if (new_srcset) {
         img.attr('srcset', `${img.attr('src')} ${w}w` + new_srcset);
+        img.attr('sizes', '100vw');
       }
     }
   } catch (e) {

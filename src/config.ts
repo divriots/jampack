@@ -1,6 +1,6 @@
 export type WebpOptions = {
   effort: number;
-  mode: "lossless" | "lossly";
+  mode: 'lossless' | 'lossly';
   quality: number;
 };
 
@@ -30,7 +30,7 @@ export type Options = {
 const default_options: Options = {
   image: {
     embed_size: 400,
-    srcset_min_width: 400,
+    srcset_min_width: 640,
     compress: true,
     jpeg: {
       options: {
@@ -47,12 +47,12 @@ const default_options: Options = {
       options_lossless: {
         effort: 4,
         quality: 80,
-        mode: "lossless",
+        mode: 'lossless',
       },
       options_lossly: {
         effort: 4,
         quality: 80,
-        mode: "lossly",
+        mode: 'lossly',
       },
     },
   },
