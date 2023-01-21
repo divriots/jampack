@@ -399,7 +399,7 @@ async function setImageSize(
     if (!isNumeric(width)) {
       $state.reportIssue(htmlfile, {
         type: 'warn',
-        msg: `Invalid width attribute "${width}" format - overriding`,
+        msg: `Invalid width attribute format: "${width}" - overriding`,
       });
       width = undefined;
     }
@@ -408,7 +408,7 @@ async function setImageSize(
     if (!isNumeric(height)) {
       $state.reportIssue(htmlfile, {
         type: 'warn',
-        msg: `Invalid height attribute "${height}" format - overriding`,
+        msg: `Invalid height attribute format: "${height}" - overriding`,
       });
       height = undefined;
     }
