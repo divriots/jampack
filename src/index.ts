@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 
-import { Command } from 'commander'
-import { compress } from './compress.js'
-import { optimize } from './optimize.js'
-import $state from './state.js'
-import { table, TableUserConfig } from 'table'
-import { formatBytes } from './utils.js'
-import { fast } from './config.js'
-import { printTitle } from './logger.js'
-import { exit } from 'process'
-import kleur from 'kleur'
-import { cleanCache } from './cache.js'
-import { VERSION } from './version.js'
+import { Command } from 'commander';
+import { compressFolder } from './compress.js';
+import { optimize } from './optimize.js';
+import $state from './state.js';
+import { table, TableUserConfig } from 'table';
+import { formatBytes } from './utils.js';
+import { fast } from './config.js';
+import { printTitle } from './logger.js';
+import { exit } from 'process';
+import kleur from 'kleur';
+import { cleanCache } from './cache.js';
+import { VERSION } from './version.js';
 
 const logo = `     __                                    __    
     |__|____    _____ ___________    ____ |  | __
@@ -20,13 +20,16 @@ const logo = `     __                                    __
 /\\__|  (____  /__|_|  /   __(____  /\\___  >__|_ \\
 \\______|    \\/      \\/|  |       \\/     \\/     \\/
  v${VERSION.padEnd(14)}      |__| by ‹div›RIOTS
-`
+`;
 
-console.log(logo)
+console.log(logo);
 
-const program = new Command()
+const program = new Command();
 
-program.name('jampack').description('Static website Optimizer').version(VERSION)
+program
+  .name('jampack')
+  .description('Static website Optimizer')
+  .version(VERSION);
 
 program
   .command('pack', { isDefault: true })
@@ -41,51 +44,51 @@ program
   .option('--cleancache', 'Clean cache before running')
   .option('--nocache', 'Run with no use of cache')
   .action(async (dir, options) => {
-    $state.dir = dir
-    $state.args = options
+    $state.dir = dir;
+    $state.args = options;
 
     // Override config with fast options
     if (options.fast) {
-      fast()
+      fast();
     }
 
     // Clean cache
     if (options.cleancache) {
-      cleanCache()
+      cleanCache();
     }
 
     if (!options.onlycomp) {
-      printTitle('PASS 1 - Optimizing')
-      console.time('Done')
-      await optimize(options.exclude)
-      console.timeEnd('Done')
+      printTitle('PASS 1 - Optimizing');
+      console.time('Done');
+      await optimize(options.exclude);
+      console.timeEnd('Done');
     }
 
     if (!options.onlyoptim && !options.fast) {
-      printTitle('PASS 2 - Compressing the rest')
-      console.time('Done')
-      await compress(options.exclude)
-      console.timeEnd('Done')
+      printTitle('PASS 2 - Compressing the rest');
+      console.time('Done');
+      await compressFolder(options.exclude);
+      console.timeEnd('Done');
     }
 
-    printSummary()
+    printSummary();
 
-    printIssues()
+    printIssues();
 
     if (options.failOnIssues && $state.issues.size > 0) {
-      exit(1)
+      exit(1);
     }
-  })
+  });
 
-program.parse()
+program.parse();
 
 function printSummary() {
   if ($state.summary.nbFiles > 0) {
-    printTitle('Summary')
+    printTitle('Summary');
 
     const dataTable: any[] = [
       ['Action', 'Compressed', 'Original', 'Compressed', 'Gain'],
-    ]
+    ];
     const config: TableUserConfig = {
       columns: [
         { alignment: 'left' },
@@ -100,14 +103,14 @@ function printSummary() {
           lineIndex === 1 ||
           lineIndex === rowCount - 1 ||
           lineIndex === rowCount
-        )
+        );
       },
-    }
+    };
 
-    const unCompressedDataRows: any[] = []
+    const unCompressedDataRows: any[] = [];
 
     Object.entries($state.summaryByExtension).forEach(([ext, summary]) => {
-      const gain = summary.dataLenUncompressed - summary.dataLenCompressed
+      const gain = summary.dataLenUncompressed - summary.dataLenCompressed;
 
       const row = [
         ext,
@@ -116,17 +119,17 @@ function printSummary() {
         formatBytes(summary.dataLenCompressed),
 
         gain > 0 ? '-' + formatBytes(gain) : '',
-      ]
+      ];
 
       if (gain > 0) {
-        dataTable.push(row)
+        dataTable.push(row);
       } else {
-        unCompressedDataRows.push(row)
+        unCompressedDataRows.push(row);
       }
-    })
+    });
 
     // Add uncompress rows at the end
-    dataTable.push(...unCompressedDataRows)
+    dataTable.push(...unCompressedDataRows);
 
     const total = [
       'Total',
@@ -137,32 +140,32 @@ function printSummary() {
         formatBytes(
           $state.summary.dataLenUncompressed - $state.summary.dataLenCompressed
         ),
-    ]
-    dataTable.push(total)
+    ];
+    dataTable.push(total);
 
-    console.log(table(dataTable, config))
+    console.log(table(dataTable, config));
   }
 }
 
 function printIssues() {
-  let issueCount = 0
+  let issueCount = 0;
 
   if ($state.issues.size === 0) {
-    printTitle('✔ No issues')
+    printTitle('✔ No issues');
   } else {
-    printTitle('Issues', kleur.bgRed)
-    console.log('')
+    printTitle('Issues', kleur.bgRed);
+    console.log('');
     for (let [file, list] of $state.issues) {
-      console.log('▶ ' + file + '\n')
+      console.log('▶ ' + file + '\n');
       list.forEach((issue) => {
-        issueCount++
-        console.log(`${kleur.bgYellow(` ${issue.type} `)} ${issue.msg}\n`)
-      })
+        issueCount++;
+        console.log(`${kleur.bgYellow(` ${issue.type} `)} ${issue.msg}\n`);
+      });
     }
     printTitle(
       `${issueCount} issue(s) over ${$state.issues.size} files`,
       kleur.bgYellow
-    )
-    console.log('')
+    );
+    console.log('');
   }
 }
