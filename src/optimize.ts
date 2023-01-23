@@ -345,11 +345,10 @@ async function processImage(
           src
         );
 
+        let doAddToSrcSet = true;
+
         // Don't generate srcset file twice
         if (!$state.compressedFiles.has(absoluteFilename)) {
-          // Add file to list avoid recompression
-          $state.compressedFiles.add(absoluteFilename);
-
           const compressedImage = await compressImage(
             await originalImage.getData(),
             {
@@ -362,20 +361,26 @@ async function processImage(
             !compressedImage?.data ||
             compressedImage.data.length >= previousImageSize
           ) {
-            // jampack was not able to compress below the original image
-            // Let's move on
-            continue;
-          }
+            // New image is not compressed or bigger than previous image in srcset
+            // Don't add to srcset
+            doAddToSrcSet = false;
+          } else {
+            // Write file
+            if (!$state.args.nowrite) {
+              fs.writeFile(absoluteFilename, compressedImage.data);
+            }
 
-          if (!$state.args.nowrite) {
-            fs.writeFile(absoluteFilename, compressedImage.data);
-          }
+            // Set new previous size to beat
+            previousImageSize = compressedImage.data.length;
 
-          // Add previous smaller file size
-          previousImageSize = compressedImage.data.length;
+            // Add file to list avoid recompression
+            $state.compressedFiles.add(absoluteFilename);
+          }
         }
 
-        new_srcset += `, ${src} ${valueW}w`;
+        if (doAddToSrcSet) {
+          new_srcset += `, ${src} ${valueW}w`;
+        }
 
         // reduce size
         valueW -= step;
