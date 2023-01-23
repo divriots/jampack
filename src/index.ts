@@ -75,7 +75,7 @@ program
 
     printIssues();
 
-    if (options.failOnIssues && $state.issues.size > 0) {
+    if (options.fail && $state.issues.size > 0) {
       exit(1);
     }
   });
