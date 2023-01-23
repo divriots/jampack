@@ -89,9 +89,9 @@ const iframePacked = `/features/${feature}/packed/index.html`;
 
     <ul>
       { dirCompare.diffSet.map( l => {
-      return l.type1 !== 'missing' ?
+      return l.type2 !== 'missing' ?
         ( <li>
-            <span class={ `color-${l.state} col-file is-${l.type1}` } style={ `padding-left: ${l.level*1.3}rem; flex:1;` }>{ l.name2 }</span>
+            <span class={ `color-${l.state} col-file is-${l.type2}` } style={ `padding-left: ${l.level*1.3}rem; flex:1;` }>{ l.name2 }</span>
             <span class={ `color-${l.state} col-size` }>{ l.type2 === 'file' ? l.size2 : '' }</span>
           </li>
         ) : <></>
