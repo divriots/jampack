@@ -412,7 +412,7 @@ async function setImageSize(
     if (!isNumeric(width)) {
       $state.reportIssue(htmlfile, {
         type: 'warn',
-        msg: `Invalid width attribute format: "${width}" - overriding`,
+        msg: `Invalid width attribute format: "${width}" - overriding for ${image.src}`,
       });
       width = undefined;
     }
@@ -421,7 +421,7 @@ async function setImageSize(
     if (!isNumeric(height)) {
       $state.reportIssue(htmlfile, {
         type: 'warn',
-        msg: `Invalid height attribute format: "${height}" - overriding`,
+        msg: `Invalid height attribute format: "${height}" - overriding for ${image.src}`,
       });
       height = undefined;
     }
@@ -447,16 +447,6 @@ async function setImageSize(
     // Both are provided
     const w = parseInt(width, 10);
     const h = parseInt(height, 10);
-
-    // Is ratio equal?
-    const providedRatio = Math.round((w / h) * 10) / 10;
-    const imageRatio = Math.round(originalRatio * 10) / 10;
-    if (providedRatio !== imageRatio) {
-      $state.reportIssue(htmlfile, {
-        type: 'warn',
-        msg: `Image aspect ratio in HTML (${providedRatio}) differs from image aspect ratio (${imageRatio}) - fix width and height or let jampack fill them.`,
-      });
-    }
 
     return [w, h];
   } else if (width !== undefined && height === undefined) {
