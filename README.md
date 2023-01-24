@@ -37,10 +37,10 @@ Optimizes static websites for best user experience and best Core Web Vitals scor
 
 ## Why `jampack`?
 
-- **Better user experience** for your website visitors. Specially on low-end devices.
+- **Better user experience** for your website visitors. Especially on low-end devices.
 - **Better SEO**. Page experience now [affects ranking](https://developers.google.com/search/docs/appearance/page-experience).
 - **Easier maintenance**. Generating top performance webpages requires extra engineering in the composition of the pages that is counterproductive with the maintenance of the website.
-- **Time saving**. Spend less time optimizing and let `jampack` perform the heaving-lifting for you.
+- **Time saving**. Spend less time optimizing and let `jampack` do the heaving-lifting for you.
 
 ## Quick use
 
@@ -59,7 +59,7 @@ See [the list of features](https://jampack.divriots.com).
 
 </div>
 
-## `jampack` use in the wild
+## `jampack` used in the wild
 
 - [divRIOTS.com](https://divRIOTS.com)
 - [Backlight.dev](https://backlight.dev)
