@@ -82,7 +82,8 @@ export const SIDEBAR: Sidebar = {
     })),
     Advanced: [, { text: 'Cache', link: 'cache' }],
     Community: [
-      { text: 'Chat with us', link: 'https://jampack.divriots.com/chat' },
+      { text: 'GitHub', link: 'https://github.com/divriots/jampack' },
+      { text: 'Discord', link: 'https://jampack.divriots.com/chat' },
     ],
   },
 };
