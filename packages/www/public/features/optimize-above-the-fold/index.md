@@ -11,8 +11,8 @@ The tag `<the-fold>` should be placed in your HTML pages where you think the fol
 
 - Images will be eagerly loaded: no `loading="lazy"` attribute.
 - Images will have higher priority: set `fetchpriority="high"` attribute.
-- Images will be converted to [`jpeg` progressive](https://www.thewebmaster.com/progressive-jpegs/) which provide better user experience for content above the fold.
-- Images with alpha (aka transparency) will not be converted to [`jpeg` progressive](https://www.thewebmaster.com/progressive-jpegs/) because this format doesn't support alpha. Image will be converted to WebP instead.
+- Images will be converted to [`JPEG` progressive](https://www.thewebmaster.com/progressive-jpegs/) which provide better user experience for content above the fold.
+- Images with alpha (aka transparency) will not be converted to [`JPEG` progressive](https://www.thewebmaster.com/progressive-jpegs/) because this format doesn't support alpha. Image will be converted to WebP instead.
 
 The `<the-fold>` tag will be removed from the final output.
 
