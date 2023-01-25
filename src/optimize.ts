@@ -300,18 +300,12 @@ async function processImage(
     /*
      * Attribute 'srcset'
      */
-    const attr_srcset = img.attr('srcset');
-    const attr_sizes = img.attr('sizes');
-    if (attr_srcset || attr_sizes) {
-      // If srcset or sizes are set, don't touch it.
+    if (img.attr('srcset')) {
+      // If srcset are set, don't touch it.
       // The compress pass will compress the images
       // of the srcset
-      //
-      // TODO
-      // support if sizes alone is set (no srcset) and generate the appropriate srcset
     } else {
       // Generate image set
-
       // Avif => Avif
       // png, jpg, ... => WebP
       const targetFormat =
@@ -336,7 +330,7 @@ async function processImage(
         ? Math.min(newImage.data.length, await originalImage.getLen())
         : await originalImage.getLen();
 
-      while (valueW > config.image.srcset_min_width) {
+      while (valueW >= config.image.srcset_min_width) {
         const src = imageSrc(`@${valueW}w`);
 
         const absoluteFilename = translateSrc(
@@ -389,6 +383,10 @@ async function processImage(
 
       if (new_srcset) {
         img.attr('srcset', `${img.attr('src')} ${w}w` + new_srcset);
+      }
+
+      // Add sizes attribute if not specified
+      if (!img.attr('sizes')) {
         img.attr('sizes', '100vw');
       }
     }
