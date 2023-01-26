@@ -413,7 +413,7 @@ async function setImageSize(
   if (width !== undefined) {
     if (!isNumeric(width)) {
       $state.reportIssue(htmlfile, {
-        type: 'warn',
+        type: 'fix',
         msg: `Invalid width attribute format: "${width}" - overriding for ${image.src}`,
       });
       width = undefined;
@@ -422,7 +422,7 @@ async function setImageSize(
   if (height !== undefined) {
     if (!isNumeric(height)) {
       $state.reportIssue(htmlfile, {
-        type: 'warn',
+        type: 'fix',
         msg: `Invalid height attribute format: "${height}" - overriding for ${image.src}`,
       });
       height = undefined;

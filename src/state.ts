@@ -17,7 +17,7 @@ type Summary = {
 };
 
 type Issue = {
-  type: 'invalid' | 'a11y' | 'perf' | 'erro' | 'warn';
+  type: 'invalid' | 'a11y' | 'perf' | 'erro' | 'fix' | 'warn';
   msg: string;
 };
 

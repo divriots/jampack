@@ -4,7 +4,6 @@
     <style>
       img {
         max-width: 80%;
-        height: auto;
       }
     </style>
   </head>
@@ -48,6 +47,19 @@
       First step image (@1066w) is bigger than original size WebP, so step is
       ignore.
     </p>
-    <img src="./step1.png" alt="story.to.design screeshot" />
+    <img src="./step1_1366x1995.png" alt="story.to.design screeshot" />
+
+    <h2>Image without [width] attribute</h2>
+    <img src="./music_500x447.png" alt="Girl listening to music" height="447" />
+
+    <h2>Image without [height] attribute</h2>
+    <img src="./music_500x447.png" alt="Girl listening to music" width="500" />
+
+    <h2>Jam SVG</h2>
+    <img src="./jam.svg" alt="Jam pot" height="128" />
+
+    <h2>Bass SVG</h2>
+    <img src="./bass.svg" alt="Green bass" />
+    <p>(needs a fix for sizes)</p>
   </body>
 </html>
