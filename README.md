@@ -70,6 +70,7 @@ See [the list of features](https://jampack.divriots.com).
 - [Components.studio](https://components.studio)
 - [keycloak.ch](https://keycloak.ch)
 - [bayjs.org](https://bayjs.org/)
+- [qwind.pages.dev](https://qwind.pages.dev/)
 
 > Add yours here
 
