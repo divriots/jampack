@@ -35,12 +35,14 @@ Optimizes static websites for best user experience and best Core Web Vitals scor
 
 `jampack` is a post-processing tool that takes the output of your [Static Site Generator (aka SSG)](https://jamstack.org/generators/) and optimizes it for best user experience and best [Core Web Vitals](https://web.dev/learn-core-web-vitals/) scores.
 
-## Why `jampack`?
+## What can `jampack` do?
 
-- **Better user experience** for your website visitors. Specially on low-end devices.
-- **Better SEO**. Page experience now [affects ranking](https://developers.google.com/search/docs/appearance/page-experience).
-- **Easier maintenance**. Generating top performance webpages requires extra engineering in the composition of the pages that is counterproductive with the maintenance of the website.
-- **Time saving**. Spend less time optimizing and let `jampack` perform the heaving-lifting for you.
+- [Optimize images](https://jampack.divriots.com/features/optimize-images)
+- [Optimize assets above-the-fold](https://jampack.divriots.com/features/optimize-above-the-fold)
+- [Embed small images](https://jampack.divriots.com/features/embed-small-images)
+- [Compress all assets](https://jampack.divriots.com/features/compress-all)
+- [Automatically fixes assets](https://jampack.divriots.com/features/autofixes)
+- [Warnings for manual correction](https://jampack.divriots.com/features/warnings)
 
 ## Quick use
 
@@ -50,14 +52,6 @@ npx @divriots/jampack ./dist
 ```
 
 For more options see [CLI options](https://jampack.divriots.com/cli-options).
-
-<div>
-
-## What can `jampack` do?
-
-See [the list of features](https://jampack.divriots.com).
-
-</div>
 
 ## `jampack` use in the wild
 

@@ -8,3 +8,5 @@ jampack: "--onlyoptim"
 ## Wrong format for `width` and `height` in images
 
 Should be numerical values only.
+
+`jampack` will fix either or both values based on the dimensions of the image.

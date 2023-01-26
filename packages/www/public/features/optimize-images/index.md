@@ -58,7 +58,7 @@ See [`sizes` attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Eleme
 
 ### Lazy loading
 
-`jampack` will set all images to load in lazy by default. This gives the client browser the opportunity to load more critical data.
+`jampack` will set all images to load in lazy by default. This gives the browser the opportunity to load more critical data instead.
 
 Images will have new attributes:
 - `loading="lazy"`
@@ -76,7 +76,7 @@ Images will not be lazy loaded in the following conditions:
 [Lazy loading images above the fold can cause LCP issues](https://web.dev/lazy-loading-images/#effects-on-largest-contentful-paint-lcp),
 we recommend to use the `jampack`'s [`<the-fold>` feature](../optimize-above-the-fold/) or mark images with `loading="eager"` for images above the fold.
 
-### `width` and `height` settings
+### Sets `width` and `height` attributes
 
 `jampack` will set [image dimensions to avoid CLS issues](https://web.dev/optimize-cls/#images-without-dimensions).
 
