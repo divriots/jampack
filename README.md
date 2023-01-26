@@ -74,7 +74,8 @@ See [the list of features](https://jampack.divriots.com).
 - [keycloak.ch](https://keycloak.ch)
 - [bayjs.org](https://bayjs.org/)
 - [qwind.pages.dev](https://qwind.pages.dev/)
-
+- [Bloycey's Blog](https://bloycey.blog/)
+  
 > Add yours here
 
 </div>
