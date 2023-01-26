@@ -68,11 +68,16 @@ See [the list of features](https://jampack.divriots.com).
 - [WebComponents.dev](https://WebComponents.dev)
 - [LWC.studio](https://lwc.studio)
 - [Components.studio](https://components.studio)
+
+<div>
+
 - [keycloak.ch](https://keycloak.ch)
 - [bayjs.org](https://bayjs.org/)
 - [qwind.pages.dev](https://qwind.pages.dev/)
 
 > Add yours here
+
+</div>
 
 ## Why is it called `jampack`?
 
