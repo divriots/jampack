@@ -1,6 +1,7 @@
 ---
-import { transform } from "ultrahtml";
+import { attrs, html, transform } from "ultrahtml";
 import sanitize from "ultrahtml/transformers/sanitize";
+import swap from "ultrahtml/transformers/swap";
 import { compiledContent, getHeadings } from '../../../../README.md';
 import MainLayout from '../layouts/MainLayout.astro';
 
@@ -8,6 +9,16 @@ import MainLayout from '../layouts/MainLayout.astro';
 // Clean <div> to remove the ‹div›RIOTS banner
 const content = compiledContent();
 const output = await transform(content, [
+  swap({
+    a: (props, children) => {
+      const newProps = {...props};
+      const href = props.href;
+      if (!href.startsWith('https://jampack.divriots.com')) {
+        newProps.rel = "nofollow";
+      }
+      return html`<a ${attrs(newProps)}>${children}</a>`
+    },
+  }),
   sanitize({ dropElements: ["h1", "div"] }),
 ]);
 ---
