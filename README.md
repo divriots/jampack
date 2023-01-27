@@ -35,14 +35,16 @@ Optimizes static websites for best user experience and best Core Web Vitals scor
 
 `jampack` is a post-processing tool that takes the output of your [Static Site Generator (aka SSG)](https://jamstack.org/generators/) and optimizes it for best user experience and best [Core Web Vitals](https://web.dev/learn-core-web-vitals/) scores.
 
+[Read the introduction blog post](https://divriots.com/blog/introducing-jampack)
+
 ## What can `jampack` do?
 
 - [Optimize images](https://jampack.divriots.com/features/optimize-images)
 - [Optimize assets above-the-fold](https://jampack.divriots.com/features/optimize-above-the-fold)
 - [Embed small images](https://jampack.divriots.com/features/embed-small-images)
 - [Compress all assets](https://jampack.divriots.com/features/compress-all)
-- [Automatically fixes assets](https://jampack.divriots.com/features/autofixes)
-- [Warnings for manual correction](https://jampack.divriots.com/features/warnings)
+- [Fixes things automatically](https://jampack.divriots.com/features/autofixes)
+- [Raises recommandations](https://jampack.divriots.com/features/warnings)
 
 ## Quick use
 
@@ -53,7 +55,7 @@ npx @divriots/jampack ./dist
 
 For more options see [CLI options](https://jampack.divriots.com/cli-options).
 
-## `jampack` use in the wild
+## `jampack` used in the wild
 
 - [divRIOTS.com](https://divRIOTS.com)
 - [Backlight.dev](https://backlight.dev)
@@ -64,7 +66,9 @@ For more options see [CLI options](https://jampack.divriots.com/cli-options).
 - [Components.studio](https://components.studio)
 - [keycloak.ch](https://keycloak.ch)
 - [bayjs.org](https://bayjs.org/)
-
+- [qwind.pages.dev](https://qwind.pages.dev/)
+- [Bloycey's Blog](https://bloycey.blog/)
+  
 > Add yours here
 
 ## Why is it called `jampack`?
