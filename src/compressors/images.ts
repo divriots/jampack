@@ -6,12 +6,21 @@ import {
   computeCacheHash,
 } from '../cache.js';
 import config, { WebpOptions } from '../config.js';
+import { MimeType } from 'file-type';
+
+export type ImageMimeType = MimeType | 'image/svg+xml';
 
 export type ImageFormat = 'webp' | 'svg' | 'jpg' | 'png' | 'avif' | undefined;
 
 export type Image = {
   format: ImageFormat;
   data: Buffer;
+};
+
+export type ImageOutputOptions = {
+  resize?: sharp.ResizeOptions;
+  toFormat?: 'webp' | 'avif' | 'png' | 'jpeg' | 'unchanged';
+  progressive?: boolean;
 };
 
 function createWebpOptions(opt: WebpOptions | undefined): sharp.WebpOptions {
@@ -24,10 +33,7 @@ function createWebpOptions(opt: WebpOptions | undefined): sharp.WebpOptions {
 
 export async function compressImage(
   data: Buffer,
-  options: {
-    resize?: sharp.ResizeOptions;
-    toFormat?: 'webp' | 'pjpg' | 'avif' | 'unchanged';
-  }
+  options: ImageOutputOptions
 ): Promise<Image | undefined> {
   const cacheHash = computeCacheHash(data, options);
   const imageFromCache = await getFromCacheCompressImage(cacheHash);
@@ -72,6 +78,11 @@ export async function compressImage(
     return { format: 'svg', data: Buffer.from(newData.data, 'utf8') };
   }
 
+  // TODO
+  // Use information of input image to the destination format
+  // - Progressive (unless overriden)
+  // - Lossless
+
   // The bitmap images
   if (toFormat === 'unchanged') {
     switch (meta.format) {
@@ -90,19 +101,28 @@ export async function compressImage(
         );
         outputFormat = 'webp';
         break;
+      case 'heif':
       case 'avif':
-        sharpFile = sharpFile.avif();
+        sharpFile = sharpFile.avif({ effort: 4, quality: 50 }); // TODO create config for avif
         outputFormat = 'avif';
         break;
     }
   } else {
     // To format
     switch (toFormat) {
-      case 'pjpg':
+      case 'jpeg':
         sharpFile = sharpFile.jpeg(
-          { ...config.image.jpeg.options, progressive: true } || {}
+          { ...config.image.jpeg.options, progressive: options.progressive } ||
+            {}
         );
         outputFormat = 'jpg';
+        break;
+      case 'png':
+        sharpFile = sharpFile.png(
+          { ...config.image.png.options, progressive: options.progressive } ||
+            {}
+        );
+        outputFormat = 'png';
         break;
       case 'webp':
         sharpFile = sharpFile.webp(
@@ -115,7 +135,10 @@ export async function compressImage(
         outputFormat = 'webp';
         break;
       case 'avif':
-        sharpFile = sharpFile.avif({ effort: 6 });
+        sharpFile = sharpFile.avif({
+          effort: 4,
+          quality: meta.format === 'png' ? 80 : 60, // don't use lossless avif it doesn't compress well in most png uses cases
+        });
         outputFormat = 'avif';
         break;
     }

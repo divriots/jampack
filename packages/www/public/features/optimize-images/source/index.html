@@ -9,57 +9,56 @@
   </head>
   <body>
     <h1>Responsive images generation</h1>
-
     <p>
       The right image size will be used by the browser based on the device of
       the user.
     </p>
 
-    <h2>Hero image above the fold</h2>
-    <p>Above the fold, progressive jpg is used.</p>
-    <img src="./redpanda.jpg" alt="Red panda in the bush" />
+    <h2>PICTURE tag</h2>
 
-    <div>
-      <hr />
-      The fold is marked here
-      <the-fold></the-fold>
-      <hr />
-    </div>
+    <h3>picture_redpanda.jpg</h3>
 
-    <h2>Below the fold</h2>
-    <p>Above the fold, we use webp loaded lazily.</p>
-    <img src="./rudi-west.jpg" alt="Girl listening to music" />
-    <p>
-      Photo by
-      <a
-        href="https://unsplash.com/@rudi_west_photo?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText"
-        >Rudi West</a
-      >
-      on
-      <a
-        href="https://unsplash.com/?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText"
-        >Unsplash</a
-      >
-    </p>
+    <p>WebP and AVIF image sources with srcset created.</p>
 
-    <h2>Image PNG</h2>
-    <p>
-      First step image (@1066w) is bigger than original size WebP, so step is
-      ignore.
-    </p>
-    <img src="./step1_1366x1995.png" alt="story.to.design screeshot" />
+    <picture>
+      <img src="./picture_redpanda.jpg" alt="Red panda" />
+    </picture>
 
-    <h2>Image without [width] attribute</h2>
-    <img src="./music_500x447.png" alt="Girl listening to music" height="447" />
+    <h3>picture_music.png</h3>
 
-    <h2>Image without [height] attribute</h2>
-    <img src="./music_500x447.png" alt="Girl listening to music" width="500" />
+    <p>image too small -> no srcset</p>
 
-    <h2>Jam SVG</h2>
-    <img src="./jam.svg" alt="Jam pot" height="128" />
+    <picture>
+      <img src="./picture_music.png" alt="Girl listening to music" />
+    </picture>
 
-    <h2>Bass SVG</h2>
-    <img src="./bass.svg" alt="Green bass" />
-    <p>(needs a fix for sizes)</p>
+    <h3>picture_screenshot.png</h3>
+
+    <picture>
+      <img src="./picture_screenshot.png" alt="Girl listening to music" />
+    </picture>
+
+    <h2>IMG tag</h2>
+
+    <h3>JPEG image</h2>
+
+    <img src="./img_water.jpg" alt="beach" />
+
+    <h3>PNG image</h3>
+
+    First step image (@1066w) is bigger than original size WebP, so step is ignore.
+    <img src="./img_screenshot.png" alt="story.to.design screeshot" />
+
+    <h3>Image without [width] attribute</h3>
+    <img src="./img_music.png" alt="Girl listening to music" height="447" />
+
+    <h3>Image without [height] attribute</h3>
+    <img src="./img_music.png" alt="Girl listening to music" width="500" />
+
+    <h3>Jam SVG</h3>
+    <img src="./img_jam.svg" alt="Jam pot" height="128" />
+
+    <h3>Bass SVG</h3>
+    <img src="./img_bass.svg" alt="Green bass" />
   </body>
 </html>

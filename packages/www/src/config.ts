@@ -58,7 +58,7 @@ export const featuresDirs = [
   'embed-small-images',
   'compress-all',
   'autofixes',
-  'recommendations',
+  'warnings',
 ];
 
 const getTitle = (file: string) => {

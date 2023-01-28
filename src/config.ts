@@ -34,7 +34,7 @@ const default_options: Options = {
     compress: true,
     jpeg: {
       options: {
-        quality: 80,
+        quality: 75,
         mozjpeg: true,
       },
     },
@@ -46,12 +46,12 @@ const default_options: Options = {
     webp: {
       options_lossless: {
         effort: 4,
-        quality: 80,
+        quality: 77,
         mode: 'lossless',
       },
       options_lossly: {
         effort: 4,
-        quality: 80,
+        quality: 77,
         mode: 'lossly',
       },
     },

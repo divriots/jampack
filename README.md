@@ -44,7 +44,7 @@ Optimizes static websites for best user experience and best Core Web Vitals scor
 - [Embed small images](https://jampack.divriots.com/features/embed-small-images)
 - [Compress all assets](https://jampack.divriots.com/features/compress-all)
 - [Fixes things automatically](https://jampack.divriots.com/features/autofixes)
-- [Raises recommendations](https://jampack.divriots.com/features/recommendations)
+- [Raises warnings](https://jampack.divriots.com/features/warnings)
 
 ## Quick use
 

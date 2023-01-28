@@ -4,8 +4,13 @@ import * as fs from 'fs/promises';
 import cheerio from 'cheerio';
 import { isNumeric } from './utils.js';
 import config from './config.js';
-import { Image, compressImage } from './compressors/images.js';
-import svgToMiniDataURI from 'mini-svg-data-uri';
+import {
+  Image,
+  compressImage,
+  ImageMimeType,
+  ImageOutputOptions,
+} from './compressors/images.js';
+import svgToMiniDataURI, { toSrcset } from 'mini-svg-data-uri';
 import $state from './state.js';
 import kleur from 'kleur';
 import ora from 'ora';
@@ -92,8 +97,9 @@ function getTheFold($: cheerio.Root): number {
     return 0;
   }
 
+  // Pickup the position of the last `<the-fold>`
   // @ts-ignore
-  return theFolds[0].startIndex;
+  return theFolds[theFolds.length - 1].startIndex;
 }
 
 async function processImage(
@@ -195,22 +201,33 @@ async function processImage(
    */
   let newImage: Image | undefined;
 
-  const originalImageMeta = await originalImage.getImageMeta();
-  const canBeProgressiveJpeg =
-    isAboveTheFold && originalImageMeta && !originalImageMeta.hasAlpha;
+  const isInPicture: boolean = img.parent()?.is('picture');
+
+  let srcToFormat: 'webp' | 'avif' | 'unchanged' = 'unchanged';
+  if (isInPicture || isAboveTheFold) {
+    // srcToFormat should not change if in picture
+    // If above the fold, we will create progressive images
+  } else {
+    // Let's go to avif -> avif , webp -> webp, else * -> webp
+    srcToFormat =
+      (await originalImage.getMime()) === 'image/avif' ||
+      (await originalImage.getMime()) === 'image/webp'
+        ? 'unchanged'
+        : 'webp';
+  }
 
   if (!$state.optimizedFiles.has(originalImage.filePathAbsolute)) {
     // Let's avoid to optimize same images twice
     $state.optimizedFiles.add(originalImage.filePathAbsolute);
 
     newImage = await compressImage(await originalImage.getData(), {
-      toFormat: canBeProgressiveJpeg ? 'pjpg' : 'webp',
+      toFormat: srcToFormat,
+      progressive: isAboveTheFold,
     });
 
     if (
       newImage?.data &&
-      (newImage.data.length < (await originalImage.getLen()) ||
-        canBeProgressiveJpeg) // Progressive jpg above the fold should get replaced even if bigger
+      (newImage.data.length < (await originalImage.getLen()) || isAboveTheFold) // Always take the new image above to fold to benefit from progressive
     ) {
       // Do we need to add an new extension?
       const newExtension = `.${newImage.format}`;
@@ -304,6 +321,13 @@ async function processImage(
     return;
   }
 
+  // Image size to beat in srcsets
+  //
+  const imageLengthToBeatInSrcSet =
+    newImage?.data && newImage.data.length < (await originalImage.getLen())
+      ? newImage.data.length
+      : await originalImage.getLen();
+
   /*
    * Attribute 'srcset'
    */
@@ -312,91 +336,186 @@ async function processImage(
     // The compress pass will compress the images
     // of the srcset
   } else {
-    // Generate image set
-    // Avif => Avif
-    // png, jpg, ... => WebP
-    const targetFormat =
-      (await originalImage.getMime()) === 'image/avif' ? 'avif' : 'webp';
+    const new_srcset = await generateSrcSet(
+      htmlfile,
+      originalImage,
+      attrib_src,
+      w,
+      h,
+      true,
+      imageLengthToBeatInSrcSet,
+      { toFormat: srcToFormat, progressive: isAboveTheFold }
+    );
 
-    const ext = path.extname(attrib_src);
-    const fullbasename = attrib_src.slice(0, -ext.length);
-    const imageSrc = (addition: string) =>
-      `${fullbasename}${addition}.${
-        canBeProgressiveJpeg ? 'jpg' : targetFormat
-      }`;
-
-    // Start from original image
-    let new_srcset = '';
-
-    // Start reduction
-    const step = 300; //px
-    const ratio = w / h;
-    let valueW = w - step;
-    let valueH = Math.trunc(valueW / ratio);
-    let previousImageSize = newImage?.data
-      ? Math.min(newImage.data.length, await originalImage.getLen())
-      : await originalImage.getLen();
-
-    while (valueW >= config.image.srcset_min_width) {
-      const src = imageSrc(`@${valueW}w`);
-
-      const absoluteFilename = translateSrc(
-        $state.dir,
-        path.dirname(htmlfile),
-        src
-      );
-
-      let doAddToSrcSet = true;
-
-      // Don't generate srcset file twice
-      if (!$state.compressedFiles.has(absoluteFilename)) {
-        const compressedImage = await compressImage(
-          await originalImage.getData(),
-          {
-            resize: { width: valueW, height: valueH },
-            toFormat: canBeProgressiveJpeg ? 'pjpg' : targetFormat,
-          }
-        );
-
-        if (
-          !compressedImage?.data ||
-          compressedImage.data.length >= previousImageSize
-        ) {
-          // New image is not compressed or bigger than previous image in srcset
-          // Don't add to srcset
-          doAddToSrcSet = false;
-        } else {
-          // Write file
-          if (!$state.args.nowrite) {
-            fs.writeFile(absoluteFilename, compressedImage.data);
-          }
-
-          // Set new previous size to beat
-          previousImageSize = compressedImage.data.length;
-
-          // Add file to list avoid recompression
-          $state.compressedFiles.add(absoluteFilename);
-        }
-      }
-
-      if (doAddToSrcSet) {
-        new_srcset += `, ${src} ${valueW}w`;
-      }
-
-      // reduce size
-      valueW -= step;
-      valueH = Math.trunc(valueW / ratio);
-    }
-
-    if (new_srcset) {
-      img.attr('srcset', `${img.attr('src')} ${w}w` + new_srcset);
+    if (new_srcset !== null) {
+      img.attr('srcset', new_srcset);
     }
 
     // Add sizes attribute if not specified
-    if (!img.attr('sizes')) {
+    if (img.attr('srcset') && !img.attr('sizes')) {
       img.attr('sizes', '100vw');
     }
   }
+
+  /*
+   * Adding <source>'s to <picture>
+   */
+  if (isInPicture) {
+    const picture = img.parent();
+
+    // List of possible sources to generate
+    //
+    const sourcesToGenerate: {
+      mime: ImageMimeType;
+      format: 'avif' | 'webp';
+    }[] = [];
+
+    // Only try to generate better images
+    // TODO generate more compatible formats (avif => webp/jpeg/png)
+    //
+    switch (await originalImage.getMime()) {
+      case 'image/jpeg':
+      case 'image/png':
+        sourcesToGenerate.push({
+          mime: 'image/webp',
+          format: 'webp',
+        });
+      case 'image/webp':
+        sourcesToGenerate.push({
+          mime: 'image/avif',
+          format: 'avif',
+        });
+      case 'image/avif':
+        // Nothing better
+        break;
+    }
+
+    for (const s of sourcesToGenerate) {
+      const sourceWithThisMimeType = picture.children(
+        `source[type="${s.mime}"]`
+      );
+      if (sourceWithThisMimeType.length > 0) {
+        // Ignore the creation of sources that already exist
+        continue;
+      }
+
+      const srcset = await generateSrcSet(
+        htmlfile,
+        originalImage,
+        attrib_src,
+        w,
+        h,
+        false,
+        undefined,
+        {
+          toFormat: s.format,
+          progressive: false, // avif or webp don't have progressive support
+        }
+      );
+
+      if (!srcset) {
+        // No sourceset generated
+        // Image is too small or can't be compressed better
+        continue;
+      }
+
+      const source = `<source srcset="${srcset}" type="${s.mime}">`;
+      picture.prepend(source);
+    }
+
+    // Reorder sources to priority order 1)avif 2)webp
+    //
+    function popupSource(type: ImageMimeType): void {
+      const nodes = picture.children(`source[type="${type}"]`);
+      picture.prepend(nodes);
+    }
+    popupSource('image/webp');
+    popupSource('image/avif');
+  }
+}
+
+async function generateSrcSet(
+  htmlfile: string,
+  originalImage: Resource,
+  attrib_src: string,
+  imageWidth: number,
+  imageHeight: number,
+  startWithOriginalImage: boolean,
+  originalImageLengthToBeat: number | undefined,
+  options: ImageOutputOptions
+): Promise<string | null> {
+  const ext = path.extname(attrib_src);
+  const fullbasename = attrib_src.slice(0, -ext.length);
+  const imageSrc = (addition: string) =>
+    `${fullbasename}${addition}${
+      options.toFormat === 'unchanged' ? ext : '.' + options.toFormat
+    }`;
+
+  // Start from original image
+  let new_srcset = '';
+
+  // Start reduction
+  const step = 300; //px
+  const ratio = imageWidth / imageHeight;
+  let valueW = !startWithOriginalImage ? imageWidth : imageWidth - step;
+  let valueH = Math.trunc(valueW / ratio);
+  let previousImageSize = originalImageLengthToBeat || Number.MAX_VALUE;
+
+  while (valueW >= config.image.srcset_min_width) {
+    const src = imageSrc(`@${valueW}w`);
+
+    const absoluteFilename = translateSrc(
+      $state.dir,
+      path.dirname(htmlfile),
+      src
+    );
+
+    let doAddToSrcSet = true;
+
+    // Don't generate srcset file twice
+    if (!$state.compressedFiles.has(absoluteFilename)) {
+      const compressedImage = await compressImage(
+        await originalImage.getData(),
+        { ...options, resize: { width: valueW, height: valueH } }
+      );
+
+      if (
+        !compressedImage?.data ||
+        compressedImage.data.length >= previousImageSize
+      ) {
+        // New image is not compressed or bigger than previous image in srcset
+        // Don't add to srcset
+        doAddToSrcSet = false;
+      } else {
+        // Write file
+        if (!$state.args.nowrite) {
+          fs.writeFile(absoluteFilename, compressedImage.data);
+        }
+
+        // Set new previous size to beat
+        previousImageSize = compressedImage.data.length;
+
+        // Add file to list avoid recompression
+        $state.compressedFiles.add(absoluteFilename);
+      }
+    }
+
+    if (doAddToSrcSet) {
+      new_srcset += `, ${src} ${valueW}w`;
+    }
+
+    // reduce size
+    valueW -= step;
+    valueH = Math.trunc(valueW / ratio);
+  }
+
+  if (new_srcset) {
+    return startWithOriginalImage
+      ? `${attrib_src} ${imageWidth}w` + new_srcset
+      : new_srcset.slice(2);
+  }
+
+  return null;
 }
 
 async function setImageSize(
