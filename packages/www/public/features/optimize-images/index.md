@@ -84,4 +84,28 @@ we recommend to use the `jampack`'s [`<the-fold>` feature](../optimize-above-the
 
 ## `<picture>` tags
 
-Not supported yet.
+`jampack` will enrich `<picture>` tags with `AVIF` and `WebP` sources when they are missing.
+
+```html
+<picture>
+    <img src="./redpanda.jpg" alt="Red panda">
+</picture>
+```
+
+will become
+
+```html
+<picture>
+    <source type="image/avif" srcset="./redpanda@1936w.avif 1936w, ./redpanda@1636w.avif 1636w, ./redpanda@1336w.avif 1336w, ./redpanda@1036w.avif 1036w, ./redpanda@736w.avif 736w">
+    <source type="image/webp" srcset="./redpanda@1936w.webp 1936w, ./redpanda@1636w.webp 1636w, ./redpanda@1336w.webp 1336w, ./redpanda@1036w.webp 1036w, ./redpanda@736w.webp 736w">
+    <img src="./redpanda.jpg" alt loading="lazy" decoding="async" width="1936" height="1296" srcset="./redpanda.jpg 1936w, ./redpanda@1636w.jpg 1636w, ./redpanda@1336w.jpg 1336w, ./redpanda@1036w.jpg 1036w, ./redpanda@736w.jpg 736w" sizes="100vw">
+</picture>
+```
+
+If the original image is lossless (`PNG`) then:
+- The `AVIF` image set will be compressed with very high quality settings.
+- The `WebP` image set will be compressed with [near_lossless option](https://sharp.pixelplumbing.com/api-output#webp).
+
+If the original image is lossly (`JPEG`) then:
+- The `AVIF` image set will be compressed with normal quality settings.
+- The `WebP` image set will be lossly compressed.
