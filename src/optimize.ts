@@ -209,6 +209,8 @@ async function processImage(
     // Above the fold, nothing beats progressive JPEG for LCP
     // but it's not transparent
     if ((await originalImage.getImageMeta())?.hasAlpha) {
+      // TODO some images have Alpha metadata but have 0 alpha pixels
+      // We should be able to detect these to take advantage of Progressive JPEG
       srcToFormat =
         (await originalImage.getMime()) === 'image/avif' ||
         (await originalImage.getMime()) === 'image/webp'
