@@ -5,17 +5,33 @@
 
     <p>You want images above the fold to arrive as soon as possible.</p>
 
-    <h2>Hero image above the fold</h2>
-    <img src="./redpanda_500x335.jpg" alt="Red panada in the bush" />
+    <h2>Non-progressive JPEG => Progressive JPEG</h2>
+    <img
+      src="./redpanda_500x335.jpg"
+      alt="Red panada in the bush"
+      height="128"
+    />
+
+    <h2>Transparent PNG => WebP</h2>
+    <img src="./music_500x447.png" alt="Girl listening to music" height="128" />
+
+    <h2>Non-transparent PNG => Progressive JPEG</h2>
+    <img src="./html.to.design.png" alt="html.to.design banner" height="256" />
+
+    <h2>JPEG in picture tag => no sources required</h2>
+    <picture>
+      <img
+        src="./redpanda_500x335.jpg"
+        alt="Red panada in the bush"
+        height="128"
+      />
+    </picture>
 
     <div>
       <hr />
-      The fold is marked here
+      The fold is marked here Everything after that if "below the fold"
       <the-fold></the-fold>
       <hr />
     </div>
-
-    <h2>Below the fold</h2>
-    <img src="./music_500x447.png" alt="Girl listening to music" />
   </body>
 </html>

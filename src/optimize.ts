@@ -203,10 +203,22 @@ async function processImage(
 
   const isInPicture: boolean = img.parent()?.is('picture');
 
-  let srcToFormat: 'webp' | 'avif' | 'unchanged' = 'unchanged';
-  if (isInPicture || isAboveTheFold) {
+  let srcToFormat: 'webp' | 'avif' | 'jpeg' | 'jpeg+progressive' | 'unchanged' =
+    'unchanged';
+  if (isAboveTheFold) {
+    // Above the fold, nothing beats progressive JPEG for LCP
+    // but it's not transparent
+    if ((await originalImage.getImageMeta())?.hasAlpha) {
+      srcToFormat =
+        (await originalImage.getMime()) === 'image/avif' ||
+        (await originalImage.getMime()) === 'image/webp'
+          ? 'unchanged'
+          : 'webp';
+    } else {
+      srcToFormat = 'jpeg+progressive';
+    }
+  } else if (isInPicture) {
     // srcToFormat should not change if in picture
-    // If above the fold, we will create progressive images
   } else {
     // Let's go to avif -> avif , webp -> webp, else * -> webp
     srcToFormat =
@@ -222,12 +234,12 @@ async function processImage(
 
     newImage = await compressImage(await originalImage.getData(), {
       toFormat: srcToFormat,
-      progressive: isAboveTheFold,
     });
 
     if (
       newImage?.data &&
-      (newImage.data.length < (await originalImage.getLen()) || isAboveTheFold) // Always take the new image above to fold to benefit from progressive
+      (newImage.data.length < (await originalImage.getLen()) ||
+        srcToFormat === 'jpeg+progressive') // Progressive override all even if worse
     ) {
       // Do we need to add an new extension?
       const newExtension = `.${newImage.format}`;
@@ -343,7 +355,7 @@ async function processImage(
       h,
       img.attr('src'),
       imageLengthToBeatInSrcSet,
-      { toFormat: srcToFormat, progressive: isAboveTheFold }
+      { toFormat: srcToFormat }
     );
 
     if (new_srcset !== null) {
@@ -362,73 +374,78 @@ async function processImage(
   if (isInPicture) {
     const picture = img.parent();
 
-    // List of possible sources to generate
-    //
-    const sourcesToGenerate: {
-      mime: ImageMimeType;
-      format: 'avif' | 'webp';
-    }[] = [];
+    if (isAboveTheFold && srcToFormat === 'jpeg+progressive') {
+      // We don't need anything else than jpeg progressive above the fold
+      const nodes = picture.children(`source`);
+      nodes.remove();
+    } else {
+      // List of possible sources to generate
+      //
+      const sourcesToGenerate: {
+        mime: ImageMimeType;
+        format: 'avif' | 'webp';
+      }[] = [];
 
-    // Only try to generate better images
-    // TODO generate more compatible formats (avif => webp/jpeg/png)
-    //
-    switch (await originalImage.getMime()) {
-      case 'image/jpeg':
-      case 'image/png':
-        sourcesToGenerate.push({
-          mime: 'image/webp',
-          format: 'webp',
-        });
-      case 'image/webp':
-        sourcesToGenerate.push({
-          mime: 'image/avif',
-          format: 'avif',
-        });
-      case 'image/avif':
-        // Nothing better
-        break;
-    }
-
-    for (const s of sourcesToGenerate) {
-      const sourceWithThisMimeType = picture.children(
-        `source[type="${s.mime}"]`
-      );
-      if (sourceWithThisMimeType.length > 0) {
-        // Ignore the creation of sources that already exist
-        continue;
+      // Only try to generate better images
+      // TODO generate more compatible formats (avif => webp/jpeg/png)
+      //
+      switch (await originalImage.getMime()) {
+        case 'image/jpeg':
+        case 'image/png':
+          sourcesToGenerate.push({
+            mime: 'image/webp',
+            format: 'webp',
+          });
+        case 'image/webp':
+          sourcesToGenerate.push({
+            mime: 'image/avif',
+            format: 'avif',
+          });
+        case 'image/avif':
+          // Nothing better
+          break;
       }
 
-      const srcset = await generateSrcSet(
-        htmlfile,
-        originalImage,
-        w,
-        h,
-        undefined,
-        undefined,
-        {
-          toFormat: s.format,
-          progressive: false, // avif or webp don't have progressive support
+      for (const s of sourcesToGenerate) {
+        const sourceWithThisMimeType = picture.children(
+          `source[type="${s.mime}"]`
+        );
+        if (sourceWithThisMimeType.length > 0) {
+          // Ignore the creation of sources that already exist
+          continue;
         }
-      );
 
-      if (!srcset) {
-        // No sourceset generated
-        // Image is too small or can't be compressed better
-        continue;
+        const srcset = await generateSrcSet(
+          htmlfile,
+          originalImage,
+          w,
+          h,
+          undefined,
+          undefined,
+          {
+            toFormat: s.format,
+          }
+        );
+
+        if (!srcset) {
+          // No sourceset generated
+          // Image is too small or can't be compressed better
+          continue;
+        }
+
+        const source = `<source srcset="${srcset}" type="${s.mime}">`;
+        picture.prepend(source);
       }
 
-      const source = `<source srcset="${srcset}" type="${s.mime}">`;
-      picture.prepend(source);
+      // Reorder sources to priority order 1)avif 2)webp
+      //
+      function popupSource(type: ImageMimeType): void {
+        const nodes = picture.children(`source[type="${type}"]`);
+        picture.prepend(nodes);
+      }
+      popupSource('image/webp');
+      popupSource('image/avif');
     }
-
-    // Reorder sources to priority order 1)avif 2)webp
-    //
-    function popupSource(type: ImageMimeType): void {
-      const nodes = picture.children(`source[type="${type}"]`);
-      picture.prepend(nodes);
-    }
-    popupSource('image/webp');
-    popupSource('image/avif');
   }
 }
 

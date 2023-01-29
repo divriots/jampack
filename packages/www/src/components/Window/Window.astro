@@ -19,16 +19,25 @@ const { title, open_url } = Astro.props as Props;
 	  <span>{ title }</span>
 	  { open_url ? <a href={open_url} target="_blank"><img src={externalSvg} alt="Open in new tab" title="Open in new tab"/></a> : <div></div> }
 	</div>
-	<slot></slot>
+  <div class="slot">
+    <slot></slot>
+  </div>
 </section>
 
 <style lang="scss">
 
 .window {
+  display: grid;
+  height: 100%;
   border: 1px solid #acacac;
   border-radius: 6px;
   background-color: black;
   overflow: hidden;
+}
+
+.slot {
+  overflow: hidden;
+  height: 100%;
 }
 
 .title {
