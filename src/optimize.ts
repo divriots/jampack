@@ -339,10 +339,9 @@ async function processImage(
     const new_srcset = await generateSrcSet(
       htmlfile,
       originalImage,
-      attrib_src,
       w,
       h,
-      true,
+      img.attr('src'),
       imageLengthToBeatInSrcSet,
       { toFormat: srcToFormat, progressive: isAboveTheFold }
     );
@@ -402,10 +401,9 @@ async function processImage(
       const srcset = await generateSrcSet(
         htmlfile,
         originalImage,
-        attrib_src,
         w,
         h,
-        false,
+        undefined,
         undefined,
         {
           toFormat: s.format,
@@ -437,15 +435,14 @@ async function processImage(
 async function generateSrcSet(
   htmlfile: string,
   originalImage: Resource,
-  attrib_src: string,
   imageWidth: number,
   imageHeight: number,
-  startWithOriginalImage: boolean,
-  originalImageLengthToBeat: number | undefined,
+  startSrc: string | undefined,
+  startSrcLength: number | undefined,
   options: ImageOutputOptions
 ): Promise<string | null> {
-  const ext = path.extname(attrib_src);
-  const fullbasename = attrib_src.slice(0, -ext.length);
+  const ext = path.extname(originalImage.src);
+  const fullbasename = originalImage.src.slice(0, -ext.length);
   const imageSrc = (addition: string) =>
     `${fullbasename}${addition}${
       options.toFormat === 'unchanged' ? ext : '.' + options.toFormat
@@ -457,9 +454,9 @@ async function generateSrcSet(
   // Start reduction
   const step = 300; //px
   const ratio = imageWidth / imageHeight;
-  let valueW = !startWithOriginalImage ? imageWidth : imageWidth - step;
+  let valueW = !startSrc ? imageWidth : imageWidth - step;
   let valueH = Math.trunc(valueW / ratio);
-  let previousImageSize = originalImageLengthToBeat || Number.MAX_VALUE;
+  let previousImageSize = startSrcLength || Number.MAX_VALUE;
 
   while (valueW >= config.image.srcset_min_width) {
     const src = imageSrc(`@${valueW}w`);
@@ -510,8 +507,8 @@ async function generateSrcSet(
   }
 
   if (new_srcset) {
-    return startWithOriginalImage
-      ? `${attrib_src} ${imageWidth}w` + new_srcset
+    return startSrc
+      ? `${startSrc} ${imageWidth}w` + new_srcset
       : new_srcset.slice(2);
   }
 
