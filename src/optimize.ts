@@ -353,8 +353,6 @@ async function processImage(
     const new_srcset = await generateSrcSet(
       htmlfile,
       originalImage,
-      w,
-      h,
       img.attr('src'),
       imageLengthToBeatInSrcSet,
       { toFormat: srcToFormat }
@@ -408,6 +406,8 @@ async function processImage(
           break;
       }
 
+      const sizes = img.attr('sizes');
+
       for (const s of sourcesToGenerate) {
         const sourceWithThisMimeType = picture.children(
           `source[type="${s.mime}"]`
@@ -420,8 +420,6 @@ async function processImage(
         const srcset = await generateSrcSet(
           htmlfile,
           originalImage,
-          w,
-          h,
           undefined,
           undefined,
           {
@@ -435,7 +433,9 @@ async function processImage(
           continue;
         }
 
-        const source = `<source srcset="${srcset}" type="${s.mime}">`;
+        const source = `<source ${
+          sizes ? `sizes="${sizes}"` : ''
+        } srcset="${srcset}" type="${s.mime}">`;
         picture.prepend(source);
       }
 
@@ -454,8 +454,6 @@ async function processImage(
 async function generateSrcSet(
   htmlfile: string,
   originalImage: Resource,
-  imageWidth: number,
-  imageHeight: number,
   startSrc: string | undefined,
   startSrcLength: number | undefined,
   options: ImageOutputOptions
@@ -469,6 +467,14 @@ async function generateSrcSet(
 
   // Start from original image
   let new_srcset = '';
+
+  const meta = await originalImage.getImageMeta();
+  const imageWidth = meta?.width || 0;
+  const imageHeight = meta?.height || 0;
+  if (!imageWidth || !imageHeight) {
+    // Forget about srcset
+    return null;
+  }
 
   // Start reduction
   const step = 300; //px
