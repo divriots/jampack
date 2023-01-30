@@ -163,7 +163,7 @@ a > code {
 }
 
 a > code::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   right: 0;
@@ -312,7 +312,7 @@ button {
   gap: 0.25em;
   border-radius: 99em;
   color: var(--theme-text);
-  background-color: var(--theme-bg);
+  background-color: var(--theme-accent);
 }
 
 h2.heading {
