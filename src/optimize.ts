@@ -93,13 +93,31 @@ async function analyse(file: string): Promise<void> {
 
 function getTheFold($: cheerio.Root): number {
   const theFolds = $('the-fold');
-  if (!theFolds[0]) {
-    return 0;
+
+  // If you have the-fold
+  if (theFolds[0]) {
+    // Pickup the position of the last `<the-fold>`
+    // @ts-ignore
+    return theFolds[theFolds.length - 1].startIndex;
   }
 
-  // Pickup the position of the last `<the-fold>`
-  // @ts-ignore
-  return theFolds[theFolds.length - 1].startIndex;
+  const theMains = $('main');
+
+  // If you have main
+  if (theMains[0]) {
+    // @ts-ignore
+    return theMains[0].startIndex + 5000;
+  }
+
+  const theBodys = $('body');
+  // If you have main
+  if (theBodys[0]) {
+    // Pickup the position of the last `<the-fold>`
+    // @ts-ignore
+    return theBodys[0].startIndex + 10000;
+  }
+
+  return 0;
 }
 
 async function processImage(
