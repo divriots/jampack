@@ -462,7 +462,9 @@ async function generateSrcSet(
   const fullbasename = originalImage.src.slice(0, -ext.length);
   const imageSrc = (addition: string) =>
     `${fullbasename}${addition}${
-      options.toFormat === 'unchanged' ? ext : '.' + options.toFormat
+      options.toFormat === 'unchanged'
+        ? ext
+        : `.${options.toFormat?.split('+')[0]}`
     }`;
 
   // Start from original image
