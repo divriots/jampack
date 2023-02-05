@@ -1,0 +1,6 @@
+---
+export async function getStaticPaths() {
+  const listOfPosts = (await Astro.glob('./*/index.md'));
+  return listOfPosts.map(p => ({params: {log: p.url.split('/').pop()}}));
+}
+---

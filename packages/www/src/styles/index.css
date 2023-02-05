@@ -19,6 +19,27 @@
   }
 }
 
+/* custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #aaaaaa40;
+  border-radius: 6px;
+  background-clip: content-box;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    scroll-behavior: smooth;
+  }
+}
+
 body {
   display: flex;
   flex-direction: column;
@@ -313,6 +334,7 @@ button {
   border-radius: 99em;
   color: var(--theme-text);
   background-color: var(--theme-accent);
+  cursor: pointer;
 }
 
 h2.heading {

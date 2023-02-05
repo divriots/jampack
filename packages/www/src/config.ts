@@ -2,8 +2,9 @@ import fs from 'fs';
 import fm from 'front-matter';
 
 export const SITE = {
-  title: 'jampack',
-  description: 'Your website description.',
+  title: 'Jampack',
+  description:
+    'Optimizes static websites for best user experience and best Core Web Vitals scores.',
   defaultLanguage: 'en_US',
 };
 
@@ -24,6 +25,8 @@ export type Frontmatter = {
   dir?: 'ltr' | 'rtl';
   ogLocale?: string;
   lang?: string;
+  author?: string;
+  date?: string;
 };
 
 export const KNOWN_LANGUAGES = {
@@ -47,10 +50,6 @@ export type Sidebar = Record<
   typeof KNOWN_LANGUAGE_CODES[number],
   Record<string, { text: string; link: string }[]>
 >;
-
-// const featuresDirs = fs.readdirSync( './public/features', { withFileTypes: true })
-//   .filter(dirent => dirent.isDirectory())
-//   .map(dirent => dirent.name);
 
 export const featuresDirs = [
   'optimize-images',

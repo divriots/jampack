@@ -4,6 +4,7 @@ import sanitize from "ultrahtml/transformers/sanitize";
 import swap from "ultrahtml/transformers/swap";
 import { compiledContent, getHeadings } from '../../../../README.md';
 import MainLayout from '../layouts/MainLayout.astro';
+import * as CONFIG from '../config';
 
 // Clean content of <h1> because already created by the layout
 // Clean <div> to remove the ‹div›RIOTS banner
@@ -23,6 +24,6 @@ const output = await transform(content, [
 ]);
 ---
 
-<MainLayout frontmatter={{ title: 'Jampack', description: 'Optimizes static websites for best user experience and best Core Web Vitals scores.', layout: undefined}} headings={getHeadings()}>
+<MainLayout frontmatter={{ title: 'Jampack', description: undefined, layout: undefined}} headings={getHeadings()}>
    <div set:html={output}/>
 </MainLayout>

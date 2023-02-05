@@ -10,16 +10,50 @@ type Props = {
 
 const { frontmatter } = Astro.props as Props;
 const title = frontmatter.title;
+
+const dateLog = frontmatter.date && frontmatter.date.slice(0,10);
+const dateFormated = new Date(dateLog).toDateString();
 ---
 
 <article id="article" class="content">
 	<section class="main-section">
+		<dl class="post-header">
+			{ dateLog && 
+				<dt class="sr-only">Date</dt>
+			    <dd><time datetime={dateLog}>{dateFormated}</time></dd> }
+			{ frontmatter.author && 
+			   	<dt class="sr-only">Author</dt>
+			   	<dd>
+					<a class="author" href={`https://github.com/${frontmatter.author}`} target="_blank">
+					 <img src={`https://github.com/${frontmatter.author}.png?size=64`} alt="" width="32"/>
+					 {frontmatter.author}
+					</a>
+			 	</dd>
+			}	
+		</dl>
 		<h1 class="content-title" id="overview">{title}</h1>
 		<slot />
 	</section>
 </article>
 
-<style>
+<style lang="scss">
+	.post-header {
+		time {
+			opacity: 0.6;
+		}
+
+		.author {
+			display: inline-flex;
+			color: inherit;
+			text-decoration: none;
+
+			img {
+				border-radius: 9999px;
+			}
+		}
+	}
+
+
 	.content {
 		padding: 0;
 		max-width: 75ch;

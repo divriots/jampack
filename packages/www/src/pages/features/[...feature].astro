@@ -42,7 +42,7 @@ const dirCompare = compareSync(source, packed, { compareContent: true, compareSi
 const iframeSource = `/features/${feature}/source/index.html`;
 const iframePacked = `/features/${feature}/packed/index.html`;
 ---
-<MainLayout frontmatter={{ title: content.frontmatter.title, description: 'todo', layout: undefined}} headings={content.getHeadings()}>
+<MainLayout frontmatter={{ title: content.frontmatter.title, description: content.frontmatter.description, layout: undefined}} headings={content.getHeadings()}>
 
   <section set:html={ content.compiledContent() }>
   </section>

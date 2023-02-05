@@ -13,14 +13,23 @@ const currentPageMatch = currentPage.endsWith('/')
 	: currentPage.slice(1);
 const langCode = getLanguageFromURL(currentPage);
 const sidebar = SIDEBAR[langCode];
+
+// Dev logs
+const logs = (await Astro.glob('../../pages/devlog/*/index.md')).sort((a, b) => {
+    const date_a = new Date(a.frontmatter.date).getTime();
+    const date_b = new Date(b.frontmatter.date).getTime();
+    return date_b - date_a;
+  });;
+
+const isDevLog = currentPageMatch.startsWith('devlog/');
 ---
 
 <nav aria-labelledby="grid-left">
-	<ul class="nav-groups">
-		<li>
-			<h2>Brought to you by</h2>
-			<a class="div-logo" href="https://divRIOTS.com" target="_blank" set:html={logoRiots}></a>	
-		</li>
+	<div class="tabs">
+		<button id="button-docs" class={ !isDevLog ? 'active' : '' }>Docs</button>		
+		<button id="button-devlog" class={ isDevLog ? 'active' : '' }>Devlog</button>
+	</div>
+	<ul id="tab-docs" class={ "nav-groups" + (!isDevLog ? ' active' : '') }>
 		{Object.entries(sidebar).map(([header, children]) => (
 			<li>
 				<div class="nav-group">
@@ -40,6 +49,21 @@ const sidebar = SIDEBAR[langCode];
 				</div>
 			</li>
 		))}
+		<li>
+			<h2>Brought to you by</h2>
+			<a class="div-logo" href="https://divRIOTS.com" target="_blank" set:html={logoRiots}></a>	
+		</li>
+	</ul>
+	<ul id="tab-devlog" class={ "nav-groups" + (isDevLog ? ' active' : '') }>
+		<div class="nav-group">
+			{ logs.map(log => (
+				<li class="nav-link">
+					<a href={log.url} aria-current={'/'+currentPageMatch === log.url ? 'page' : false}>
+						{ log.frontmatter.title }
+					</a>
+				</li>
+			)) }
+		</div>
 	</ul>
 </nav>
 
@@ -50,9 +74,46 @@ const sidebar = SIDEBAR[langCode];
 			document.querySelector('.nav-groups').scrollTop = target.offsetTop;
 		}
 	});
+
+	// Overly complex tab management
+	const buttonDocs = document.getElementById('button-docs');
+	const buttonDevlog = document.getElementById('button-devlog');
+	const tabDocs = document.getElementById('tab-docs');
+	const tabDevlog = document.getElementById('tab-devlog');
+	const onTabClink = (e) => {
+		if (e.target.classList.contains('active')) return;
+		buttonDocs.classList.toggle('active');
+		buttonDevlog.classList.toggle('active');
+		tabDocs.classList.toggle('active');
+		tabDevlog.classList.toggle('active');
+	}
+	buttonDocs.addEventListener('click', onTabClink);
+	buttonDevlog.addEventListener('click', onTabClink);
 </script>
 
-<style>
+<style lang="scss">
+	.tabs {
+		display: flex;
+		justify-content: space-evenly;
+
+		& > button {
+			display: block;
+			width: 100%;
+			text-align: center;
+			margin: auto;
+			padding: 6px 0;
+			background-color: transparent;
+			border-radius: 0;
+			border-bottom: 3px solid;
+			border-color: transparent;
+			font-size: 1.1rem;
+
+			&.active {
+				border-color: var(--theme-accent);
+			}
+		}
+	}
+
 	h2 {
 		font-size: 0.9rem;
 		font-weight: normal;
@@ -62,17 +123,18 @@ const sidebar = SIDEBAR[langCode];
 
 	nav {
 		width: 100%;
+		max-height: 100vh;
 		margin-left: 1rem;
 		margin-right: 1rem;
 		background-color: var(--theme-bg);
+		overflow-y: scroll;
 	}
 
 	.nav-groups {
-		height: 100%;
-		padding: 2rem 0;
-		overflow-x: visible;
-		overflow-y: auto;
-		max-height: 100vh;
+		display: none;
+		&.active {
+			display: block;
+		}
 	}
 
 	.nav-groups > li + li {
