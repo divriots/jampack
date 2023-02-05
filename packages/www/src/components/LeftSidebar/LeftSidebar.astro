@@ -57,8 +57,9 @@ const isDevLog = currentPageMatch.startsWith('devlog/');
 	<ul id="tab-devlog" class={ "nav-groups" + (isDevLog ? ' active' : '') }>
 		<div class="nav-group">
 			{ logs.map(log => (
-				<li class="nav-link">
+				<li class="nav-link devlog-link">
 					<a href={log.url} aria-current={'/'+currentPageMatch === log.url ? 'page' : false}>
+						<time>{log.frontmatter.date.slice(0, 10)}</time>
 						{ log.frontmatter.title }
 					</a>
 				</li>
@@ -74,7 +75,9 @@ const isDevLog = currentPageMatch.startsWith('devlog/');
 			document.querySelector('.nav-groups').scrollTop = target.offsetTop;
 		}
 	});
+</script>
 
+<script>
 	// Overly complex tab management
 	const buttonDocs = document.getElementById('button-docs');
 	const buttonDevlog = document.getElementById('button-devlog');
@@ -177,6 +180,12 @@ const isDevLog = currentPageMatch.startsWith('devlog/');
 		color: var(--theme-text-accent);
 		background-color: var(--theme-bg-accent);
 		font-weight: 600;
+	}
+
+	.nav-link a > time {
+		display: block;
+		font-size: 0.8rem;
+		opacity: 0.6;
 	}
 
 	@media (min-width: 50em) {
