@@ -9,4 +9,4 @@ I want to document the journey on `jampack`.
 
 I'm not into streaming or vlogs. I clearly don't have time to edit videos.
 
-This will feel like journal.
+This will feel like a journal.
