@@ -7,12 +7,29 @@ import $state from './state.js';
 
 const CACHE_FOLDER = '.jampack/cache';
 
-async function cleanCache() {
-  try {
-    await fs.rm(CACHE_FOLDER, { recursive: true });
-  } catch (e) {
-    // Nothing to do, probably not present
+async function cleanCache(full: boolean) {
+  if (full) {
+    try {
+      await fs.rm(CACHE_FOLDER, { recursive: true });
+    } catch (e) {
+      // Nothing to do, probably not present
+    }
+    return;
   }
+
+  // List versions in cache
+  let files: string[];
+  try {
+    files = await fs.readdir(CACHE_FOLDER);
+  } catch (e) {
+    // Nothing to do probably no cache available
+    return;
+  }
+
+  // Delete old cache versions
+  await files
+    .filter((f) => f !== VERSION)
+    .forEach(async (f) => fs.rmdir(path.join(CACHE_FOLDER, f), {}));
 }
 
 function computeCacheHash(buffer: Buffer, options?: any) {

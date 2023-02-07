@@ -53,9 +53,7 @@ program
     }
 
     // Clean cache
-    if (options.cleancache) {
-      cleanCache();
-    }
+    cleanCache(options.cleancache);
 
     if (!options.onlycomp) {
       printTitle('PASS 1 - Optimizing');
