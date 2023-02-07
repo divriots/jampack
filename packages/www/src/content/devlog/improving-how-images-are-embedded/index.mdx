@@ -8,7 +8,7 @@ import wcd from './wcd.png?url';
 import requestsBefore from './requests-before.png?url';
 import requestsAfter from './requests-after.png?url';
 
-Up until now, `jampack v0.8.1` embeds small images (&lt;400 bytes).
+Up until now, `jampack v0.8.1` embeds **ALL** small images (&lt;400 bytes).
 
 The reasoning was: An HTTP header response is already around 400 bytes, why bother with an HTTP
 roundtrip? This is also using an HTTP request that could be used to retrieve something more important for the page.
