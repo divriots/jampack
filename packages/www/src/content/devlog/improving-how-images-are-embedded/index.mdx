@@ -88,15 +88,19 @@ What is the impact of embedding these small images into HTML?
 In this particular example, a lot of small SVG images.
 
 Before:
-HTML Uncompressed = 30.4 KB
-HTML Download = 4.0 KB (brotli)
+
+- HTML Uncompressed = 30.4 KB
+- HTML Download = 4.0 KB (brotli)
 
 After:
-HTML Uncompressed = 38.4 KB
-HTML Download = 5.6 KB (brotli)
+
+- HTML Uncompressed = 38.4 KB
+- HTML Download = 5.6 KB (brotli)
 
 So in this example, `jampack` removed 4 requests of images above the fold for maximum
 performance and added 1.6 KB of data into the HTML download.
+
+Knowing that, anyway, an HTTP header would cost ~400 bytes of download, makes me feel good about the trade-off.
 
 ## Released
 
