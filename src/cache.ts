@@ -29,7 +29,9 @@ async function cleanCache(full: boolean) {
   // Delete old cache versions
   await files
     .filter((f) => f !== VERSION)
-    .forEach(async (f) => fs.rmdir(path.join(CACHE_FOLDER, f), {}));
+    .forEach(async (f) =>
+      fs.rm(path.join(CACHE_FOLDER, f), { recursive: true })
+    );
 }
 
 function computeCacheHash(buffer: Buffer, options?: any) {

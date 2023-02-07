@@ -306,10 +306,9 @@ async function processImage(
    * Only above the fold
    */
   let isEmbed = false;
-  let imageToEmbed: Image | undefined;
 
   if (isAboveTheFold) {
-    imageToEmbed = newImage;
+    let imageToEmbed: Image | undefined = newImage;
 
     // If new image was not generated then take the old image
     if (!imageToEmbed) {
@@ -353,7 +352,7 @@ async function processImage(
     }
   }
 
-  if (isEmbed && imageToEmbed?.format === 'svg') {
+  if (isEmbed && (await originalImage.getExt()) === 'svg') {
     // SVG has a different behaviour with image size
     // Needs to be tested more
     // For the moment skip image size for SVG
