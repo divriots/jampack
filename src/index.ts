@@ -35,6 +35,7 @@ program
   .command('pack', { isDefault: true })
   .description('todo')
   .argument('<dir>', 'Directory to pack')
+  .option('--include <include>', 'Glob to include')
   .option('--exclude <exclude>', 'Glob to exclude')
   .option('--nowrite', 'No write')
   .option('--fast', 'Go fast. Mostly no compression just checks for issues.')
@@ -58,7 +59,7 @@ program
     if (!options.onlycomp) {
       printTitle('PASS 1 - Optimizing');
       console.time('Done');
-      await optimize(options.exclude);
+      await optimize(options.include, options.exclude);
       console.timeEnd('Done');
     }
 

@@ -2,6 +2,7 @@
 import { getLanguageFromURL } from '../../languages';
 import { SIDEBAR } from '../../config';
 import logoRiots from './divRIOTS.svg?raw';
+import { getCollection } from 'astro:content';
 
 type Props = {
 	currentPage: string;
@@ -15,12 +16,8 @@ const langCode = getLanguageFromURL(currentPage);
 const sidebar = SIDEBAR[langCode];
 
 // Dev logs
-const logs = (await Astro.glob('../../pages/devlog/*/index.md')).sort((a, b) => {
-    const date_a = new Date(a.frontmatter.date).getTime();
-    const date_b = new Date(b.frontmatter.date).getTime();
-    return date_b - date_a;
-  });;
-
+// Get all entries from a collection. Requires the name of the collection as an argument.
+const logs = await getCollection('devlog');
 const isDevLog = currentPageMatch.startsWith('devlog/');
 ---
 
@@ -58,9 +55,9 @@ const isDevLog = currentPageMatch.startsWith('devlog/');
 		<div class="nav-group">
 			{ logs.map(log => (
 				<li class="nav-link devlog-link">
-					<a href={log.url} aria-current={'/'+currentPageMatch === log.url ? 'page' : false}>
-						<time>{log.frontmatter.date.slice(0, 10)}</time>
-						{ log.frontmatter.title }
+					<a href={'/devlog/'+log.slug} aria-current={currentPageMatch === 'devlog/'+log.slug ? 'page' : false}>
+						<time>{log.data.date.toISOString().slice(0, 10)}</time>
+						{ log.data.title }
 					</a>
 				</li>
 			)) }
@@ -85,13 +82,13 @@ const isDevLog = currentPageMatch.startsWith('devlog/');
 	const tabDevlog = document.getElementById('tab-devlog');
 	const onTabClink = (e) => {
 		if (e.target.classList.contains('active')) return;
-		buttonDocs.classList.toggle('active');
-		buttonDevlog.classList.toggle('active');
-		tabDocs.classList.toggle('active');
-		tabDevlog.classList.toggle('active');
+		buttonDocs?.classList.toggle('active');
+		buttonDevlog?.classList.toggle('active');
+		tabDocs?.classList.toggle('active');
+		tabDevlog?.classList.toggle('active');
 	}
-	buttonDocs.addEventListener('click', onTabClink);
-	buttonDevlog.addEventListener('click', onTabClink);
+	buttonDocs?.addEventListener('click', onTabClink);
+	buttonDevlog?.addEventListener('click', onTabClink);
 </script>
 
 <style lang="scss">

@@ -1,7 +1,7 @@
 ---
 date: 2023-02-07
 author: ['georges-gomes']
-title: Embedding images improvement
+title: Improving how images are embedded
 ---
 
 import wcd from './wcd.png';
@@ -9,11 +9,13 @@ import requestsBefore from './requests-before.png';
 
 Up until now, `jampack v0.8.1` embeds small images (&lt;400 bytes).
 
-The reasoning was: An HTTP header response is already around 400 bytes, why bother with an HTTP roundtrip? This is also using an HTTP request that could be used to retrieve something more important for the page.
+The reasoning was: An HTTP header response is already around 400 bytes, why bother with an HTTP
+roundtrip? This is also using an HTTP request that could be used to retrieve something more important for the page.
 
-Actually, all this concern is only valuable above the fold. Below the fold, images are only loaded when scrolling with `loading="lazy"`. So, embedding images after the fold is actually not an improvement.
+Actually, all this concern is only valuable above the fold. Below the fold, images are only
+loaded when scrolling with `loading="lazy"`. So, embedding images after the fold is actually not an improvement.
 
-## Embedding images only above the fold
+## Target
 
 I'm gonna use one of our websites to test it out: [https://webcomponents.dev](https://webcomponents.dev)
 
@@ -21,7 +23,7 @@ I'm gonna use one of our websites to test it out: [https://webcomponents.dev](ht
   <img src={wcd} alt="Landing screenshot of WebComponents.dev" />
 </picture>
 
-In this landing, `jampack` embedded the WebComponents.dev logo but not the Twitter, Discord or GitHub.
+In this landing, `jampack` embedded the WebComponents.dev logo but not much.
 
 Good performance already 😋.
 
@@ -33,9 +35,32 @@ Good performance already 😋.
   <img src={requestsBefore} alt="Browser request view from WebPageTest.org" />
 </picture>
 
-Let see if we can remove some of the request out of the picture by embedding more aggressively above the fold.
+Let see if we can improve this.
 
-### Bumping to embedding threshold
+## Change 1: Embedding images only above the fold
 
-Let's bump the embedding limit to 1024 bytes when above the fold. We will embed more
+Just add a little branch. Easy.
+
+## Change 2: Bumping the embedding threshold
+
+Let's bump the embedding limit to 1500 bytes when above the fold. We will embed more
 images but only when it matters: above the fold.
+
+## Change 3: Uncompressed images should be embedded too
+
+`jampack v0.8.1` would embed images only if they were successfully compressed to webp or smaller svg.
+For example, uncompressible svgs where not embedded even it below 400 bytes.
+
+## Change 4: Image dimensions
+
+I initially thought that image dimensions were not necessary when the image is embedded.
+But I may be wrong.
+
+Lighthouse is complaining and apparently images are loaded asynchronously anyway.
+https://github.com/GoogleChrome/lighthouse/issues/12233
+
+Let's add image dimension to embedded images too!
+
+## Results
+
+TODO after deployment

@@ -1,18 +1,16 @@
 ---
 import type { Frontmatter } from '../../config';
-import type { MarkdownHeading } from 'astro';
 
 type Props = {
 	frontmatter: Frontmatter;
-	headings: MarkdownHeading[];
 	githubEditUrl: string;
 };
 
 const { frontmatter } = Astro.props as Props;
 const title = frontmatter.title;
 
-const dateLog = frontmatter.date && frontmatter.date.slice(0,10);
-const dateFormated = new Date(dateLog).toDateString();
+const dateLog = frontmatter?.date && frontmatter.date.toISOString().slice(0,10);
+const dateFormated = dateLog && new Date(dateLog).toDateString();
 ---
 
 <article id="article" class="content">

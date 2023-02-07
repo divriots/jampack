@@ -10,7 +10,8 @@ import { MimeType } from 'file-type';
 
 export type ImageMimeType = MimeType | 'image/svg+xml';
 
-export type ImageFormat = 'webp' | 'svg' | 'jpg' | 'png' | 'avif' | undefined;
+export const AllImageFormat = ['webp', 'svg', 'jpg', 'png', 'avif'];
+export type ImageFormat = typeof AllImageFormat[number] | undefined;
 
 export type Image = {
   format: ImageFormat;

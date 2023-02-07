@@ -289,6 +289,9 @@ async function processImage(
 
       img.attr('src', attrib_src + additionalExtension);
     } else {
+      // Drop new Image
+      newImage = undefined;
+
       // Report non-compression
       $state.reportSummary({
         action: path.extname(originalImage.filePathAbsolute),
@@ -300,44 +303,60 @@ async function processImage(
 
   /*
    * Embed small images
-   *
-   * TODO this is only embedding images that have
-   * successfully be compressed. Should embed original
-   * image if it fits the size.
+   * Only above the fold
    */
   let isEmbed = false;
-  if (newImage && newImage.data.length <= config.image.embed_size) {
-    let datauri = undefined;
+  let imageToEmbed: Image | undefined;
 
-    switch (newImage.format) {
-      case 'svg':
-        datauri = svgToMiniDataURI(newImage.data.toString());
-        break;
-      case 'webp':
-        datauri = `data:image/webp;base64,${newImage.data.toString('base64')}`;
-        break;
-      case 'jpg':
-      case 'png':
-        // TODO but not possible in current code
-        break;
+  if (isAboveTheFold) {
+    imageToEmbed = newImage;
+
+    // If new image was not generated then take the old image
+    if (!imageToEmbed) {
+      imageToEmbed = {
+        data: await originalImage.getData(),
+        format: await originalImage.getImageFormat(),
+      };
     }
 
-    if (datauri) {
-      isEmbed = true;
-      img.attr('src', datauri);
-      img.removeAttr('loading');
-      img.removeAttr('decoding');
+    // Only embed small images
+    // matching the embed size
+    if (imageToEmbed.data.length <= config.image.embed_size) {
+      let datauri = undefined;
 
-      $state.reportSummary({
-        action: `${newImage.format}->embed`,
-        originalSize: await originalImage.getLen(),
-        compressedSize: newImage.data.length,
-      });
+      const ifmt = imageToEmbed.format;
+      switch (ifmt) {
+        case 'svg':
+          datauri = svgToMiniDataURI(imageToEmbed.data.toString());
+          break;
+        case 'webp':
+        case 'jpg':
+        case 'png':
+          datauri = `data:image/${
+            ifmt === 'jpg' ? 'jpeg' : ifmt
+          };base64,${imageToEmbed.data.toString('base64')}`;
+          break;
+      }
+
+      if (datauri) {
+        isEmbed = true;
+        img.attr('src', datauri);
+        img.removeAttr('loading');
+        img.removeAttr('decoding');
+
+        $state.reportSummary({
+          action: `${imageToEmbed.format}->embed`,
+          originalSize: await originalImage.getLen(),
+          compressedSize: imageToEmbed.data.length,
+        });
+      }
     }
   }
 
-  if (isEmbed) {
-    // Image is embed, no need for more processing
+  if (isEmbed && imageToEmbed?.format === 'svg') {
+    // SVG has a different behaviour with image size
+    // Needs to be tested more
+    // For the moment skip image size for SVG
     return;
   }
 
@@ -345,6 +364,11 @@ async function processImage(
    * Attribute 'width' & 'height'
    */
   const [w, h] = await setImageSize(htmlfile, img, originalImage);
+
+  if (isEmbed) {
+    // Image is embed, no need for more processing
+    return;
+  }
 
   //
   // Stop here if svg
@@ -697,8 +721,11 @@ async function setImageSize(
   throw new Error(`Unexpected issue when resolving image size "${image.src}"`);
 }
 
-export async function optimize(exclude?: string): Promise<void> {
-  const glob = ['**/*.{htm,html}'];
+export async function optimize(
+  include?: string,
+  exclude?: string
+): Promise<void> {
+  const glob = include ? [include] : ['**/*.{htm,html}'];
   if (exclude) glob.push('!' + exclude);
 
   const paths = await globby(glob, { cwd: $state.dir });

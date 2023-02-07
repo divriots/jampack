@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import { fileTypeFromBuffer, FileExtension, MimeType } from 'file-type';
 import sharp from 'sharp';
+import { AllImageFormat, ImageFormat } from '../compressors/images.js';
 
 type ImageMeta = {
   width: number | undefined;
@@ -75,6 +76,12 @@ export class Resource {
     }
 
     return this.ext!;
+  }
+
+  public async getImageFormat(): Promise<ImageFormat | undefined> {
+    const ext = (await this.getExt()) as string;
+    if (AllImageFormat.includes(ext)) return ext as ImageFormat;
+    return undefined;
   }
 
   public async getMime(): Promise<MimeType | 'image/svg+xml'> {

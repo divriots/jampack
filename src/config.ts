@@ -29,7 +29,7 @@ export type Options = {
 
 const default_options: Options = {
   image: {
-    embed_size: 400,
+    embed_size: 1500,
     srcset_min_width: 640,
     compress: true,
     jpeg: {
