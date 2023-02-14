@@ -2,6 +2,7 @@
 date: 2023-02-14
 author: ['georges-gomes']
 title: Optimizing Swyx's personal site
+draft: true
 ---
 
 import original_www from './original-www.png';
@@ -9,6 +10,8 @@ import original_waterfall from './original-waterfall.png';
 import later from './20min.jpg';
 import jampack_waterfall_s1_static from './jampack-waterfall-s1-static.png';
 import jampack_waterfall_s2_jp091 from './jampack-waterfall-s2-jp091.png';
+import jampack_waterfall_s3_jp093 from './jampack-waterfall-s3-jp093.png';
+import jampack_waterfall_s4_jp093 from './jampack-waterfall-s3-jp093.png';
 
 On January 31th 2023, 15 days ago, [Swyx updated his personal website for 2023](https://twitter.com/swyx/status/1620346633778262018?s=20&t=HgXgTwdohENbYJviU64Fzw).
 
@@ -229,17 +232,59 @@ Download: 2.592MB
 
 ## Let's add lazy `<iframe>` to `jampack`
 
-The Youtube embeds are `iframe`s.
+The Youtube embeds are `<iframe>`s. They are located way below the fold. There is no point in
+loading them eagerly. Let's free some resources by loading them lazy.
 
-They are located way below the fold.
+`Jampack` release `v0.9.3` now adds `loading="lazy"` to iframes below the fold.
 
-## Conclusion
+### Performance results
+
+<picture>
+  <img
+    src={jampack_waterfall_s2_jp091}
+    alt="Request Waterfall after iframe lazy"
+  />
+</picture>
+
+> 🤯🤯🤯🤯 Absolutely no impact at all.
+
+`<iframe>`s are still loaded eagerly.
+
+### But Why?!
+
+Because SvelteKit re-hydrate the whole page that has been pre-rendered and replaces ALL content.
+
+`<iframe>` are no longer lazy when Javascript is loaded.
+Everything that `jampack` setup to load in lazy is reverted immediately to load eagerly.
+
+But I don't need Javascript for this page!
+
+Let's try to [turn hydration off](https://kit.svelte.dev/docs/page-options#csr) for this page.
+
+### New Performance results
+
+<picture>
+  <img
+    src={jampack_waterfall_s4_jp093}
+    alt="Request Waterfall after no hydration"
+  />
+</picture>
+
+## Close thoughts
+
+That's enough for today 😅
+
+Try yourself:
+
+> Reminder: Only the homepage has been improved
+
+- Official website: https://swyx.io
+- Copy of the official website: https://swyxdotio-original.netlify.app
+- Jampacked website: https://swyxdotio-jampack.netlify.app
 
 I'm sad I couldn't work with more pages. There are very good performance improvements
-in the blog post pages. Specially with images.
-
-Indeed, the blog uses GitHub issues as a CMS. It's very clever but images are very large
-and slow. `jampack` would have done miracles here.
+in the blog post pages. Specially with images. Indeed, the blog uses GitHub issues as a CMS.
+It's very clever but images are very large and slow. `jampack` would have done miracles here.
 
 I will probably come back to it later when I'm capable of building more static pages
-from Shawn's site.
+with SvelteKit.
