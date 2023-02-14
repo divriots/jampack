@@ -2,7 +2,6 @@
 date: 2023-02-14
 author: ['georges-gomes']
 title: Optimizing Swyx's personal site
-draft: true
 ---
 
 import original_www from './original-www.png';
@@ -11,7 +10,7 @@ import later from './20min.jpg';
 import jampack_waterfall_s1_static from './jampack-waterfall-s1-static.png';
 import jampack_waterfall_s2_jp091 from './jampack-waterfall-s2-jp091.png';
 import jampack_waterfall_s3_jp093 from './jampack-waterfall-s3-jp093.png';
-import jampack_waterfall_s4_jp093 from './jampack-waterfall-s3-jp093.png';
+import jampack_waterfall_s4_jp093 from './jampack-waterfall-s4-jp093.png';
 
 On January 31th 2023, 15 days ago, [Swyx updated his personal website for 2023](https://twitter.com/swyx/status/1620346633778262018?s=20&t=HgXgTwdohENbYJviU64Fzw).
 
@@ -263,6 +262,15 @@ Let's try to [turn hydration off](https://kit.svelte.dev/docs/page-options#csr) 
 
 ### New Performance results
 
+```
+SpeedIndex: 1.321s
+LCP: 0.677s
+CLS: 0
+TBT: 1.204s
+56 requests
+Download: 1.250MB
+```
+
 <picture>
   <img
     src={jampack_waterfall_s4_jp093}
@@ -270,21 +278,32 @@ Let's try to [turn hydration off](https://kit.svelte.dev/docs/page-options#csr) 
   />
 </picture>
 
+> WOW now we are talking!
+
+### Observations
+
+- By removing Javascript, the light/dark mode switch is broken.
+- Otherwise the entire page is as the original.
+- The browser keep loading YouTube data because it has nothing else to do!
+- The HTML page is reduced from 4MB uncompressed to 20KB uncompressed (6KB compressed).
+- Interesting to see how SvelteKit hydration is taxing the HTML page.
+
 ## Close thoughts
 
 That's enough for today 😅
 
 Try yourself:
 
-> Reminder: Only the homepage has been improved
+> Reminder: Only the homepage works properly
 
 - Official website: https://swyx.io
 - Copy of the official website: https://swyxdotio-original.netlify.app
 - Jampacked website: https://swyxdotio-jampack.netlify.app
+- Jampacked website code branch: https://github.com/divriots/swyxdotio/tree/jampack
 
 I'm sad I couldn't work with more pages. There are very good performance improvements
 in the blog post pages. Specially with images. Indeed, the blog uses GitHub issues as a CMS.
 It's very clever but images are very large and slow. `jampack` would have done miracles here.
 
-I will probably come back to it later when I'm capable of building more static pages
+I will probably come back to it later when I'm able to build more static pages
 with SvelteKit.
