@@ -22,15 +22,17 @@ This is fairly easy to do with Github Actions, using the [actions/cache@v3](http
     - uses: actions/cache@v3
       with:
         path: '.jampack'
-        key: 'jampack'
+        key: jampack-${{ github.run_id }}
+        restore-keys: |
+          jampack
     - name: Build
       shell: bash
       run: npm run build
 ```
 
-This will effectively:
-- save the `.jampack` folder to a cache named 'jampack' (you may want to have different keys if running `jampack` on different sites) after the job runs
-- restore that `.jampack` folder before the `Build` step, allowing `jampack` to reuse the cache
+[This is the recommended setup](https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache) as at the moment there is no easy way to compute a hash for the `jampack` cache. This will effectively:
+- save the `.jampack` folder to a new cache named 'jampack' suffixed by the run ID, after the job runs. Do notice that you may want to have different keys if running `jampack` on different sites. Caches that have not been used for the longest time are evicted automatically, so this is safe
+- restore the last saved cached `.jampack` folder before the `Build` step, allowing `jampack` to reuse the cache
 
 ## Versioning
 
