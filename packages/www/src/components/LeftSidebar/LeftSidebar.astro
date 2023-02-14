@@ -17,7 +17,10 @@ const sidebar = SIDEBAR[langCode];
 
 // Dev logs
 // Get all entries from a collection. Requires the name of the collection as an argument.
-const logs = await getCollection('devlog');
+const logs = (await getCollection('devlog')).sort( (a, b) => 
+	b.data.date.getTime() - a.data.date.getTime()
+);
+
 const isDevLog = currentPageMatch.startsWith('devlog/');
 ---
 

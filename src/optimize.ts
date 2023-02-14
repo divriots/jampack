@@ -39,7 +39,7 @@ async function analyse(file: string): Promise<void> {
     const imgElement = imgsArray[i];
 
     spinnerImg.text = kleur.dim(
-      `<img> [${i + 1}/${imgsArray.length}] ${$(imgElement).attr('src')} `
+      `<img> [${i + 1}/${imgsArray.length}] ${$(imgElement).attr('src')}`
     );
 
     const isAboveTheFold = imgElement.startIndex! < theFold;
@@ -59,6 +59,40 @@ async function analyse(file: string): Promise<void> {
   // Reset spinner
   spinnerImg.text = kleur.dim(
     `<img> [${imgsArray.length}/${imgsArray.length}]`
+  );
+
+  const iframes = $('iframe');
+  const iframesArray: cheerio.Element[] = [];
+  iframes.each(async (index, ifElement) => {
+    iframesArray.push(ifElement);
+  });
+
+  // Process iframes sequentially
+  const spinnerIframe = ora({ prefixText: ' ' }).start();
+  for (let i = 0; i < iframesArray.length; i++) {
+    const ifElement = iframesArray[i];
+
+    spinnerIframe.text = kleur.dim(
+      `<iframe> [${i + 1}/${iframesArray.length}] ${$(ifElement).attr('src')}`
+    );
+
+    const isAboveTheFold = ifElement.startIndex! < theFold;
+
+    try {
+      await processIframe(file, $, ifElement, isAboveTheFold);
+    } catch (e) {
+      $state.reportIssue(file, {
+        type: 'erro',
+        msg:
+          (e as Error).message ||
+          `Unexpected error while processing image: ${JSON.stringify(e)}`,
+      });
+    }
+  }
+
+  // Reset spinner
+  spinnerIframe.text = kleur.dim(
+    `<iframe> [${imgsArray.length}/${imgsArray.length}]`
   );
 
   // Notify issues
@@ -718,6 +752,19 @@ async function setImageSize(
 
   // Something when wrong
   throw new Error(`Unexpected issue when resolving image size "${image.src}"`);
+}
+
+async function processIframe(
+  htmlfile: string,
+  $: cheerio.Root,
+  imgElement: cheerio.Element,
+  isAboveTheFold: boolean
+): Promise<void> {
+  const iframe = $(imgElement);
+
+  if (!isAboveTheFold) {
+    iframe.attr('loading', 'lazy');
+  }
 }
 
 export async function optimize(

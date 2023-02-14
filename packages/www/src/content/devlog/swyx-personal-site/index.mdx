@@ -1,0 +1,241 @@
+---
+date: 2023-02-13
+author: ['georges-gomes']
+title: Optimizing Swyx's personal site
+---
+
+import original_www from './original-www.png';
+import original_waterfall from './original-waterfall.png';
+import later from './20min.jpg';
+import jampack_waterfall_s1_static from './jampack-waterfall-s1-static.png';
+import jampack_waterfall_s2_jp091 from './jampack-waterfall-s2-jp091.png';
+
+On January 31th 2023, 15 days ago, [Swyx updated his personal website for 2023](https://twitter.com/swyx/status/1620346633778262018?s=20&t=HgXgTwdohENbYJviU64Fzw).
+
+Following Swyx mantra: [Pick Up What They Put Down](https://www.swyx.io/puwtpd), I decided to see if I
+can improve the performance of his website using `jampack` 😋
+
+## Who is Swyx?
+
+[Shawn Wang (aka @swyx)](https://twitter.com/swyx) is a Writer,
+Speaker and Developer Advocate.
+
+He is best known for his essay about [learning in public](https://www.swyx.io/learn-in-public)
+that includes ["Pick Up What They Put Down"](https://www.swyx.io/puwtpd).
+
+You can learn more about him in [his bio](https://www.swyx.io/about).
+
+If you don't follow him yet, you should 👍
+
+## Swyx's Personal site
+
+https://swyx.io
+
+<picture>
+  <img src={original_www} alt="Screenshot of swyx website in light mode" />
+</picture>
+
+The 2022 version of the website was a rewrite in [SvelteKit](https://kit.svelte.dev/) and [TailwindCSS](https://tailwindcss.com/).
+
+This 2023 millesime is an upgrade to [SvelteKit 1.0 released in Mid-December 2022](https://svelte.dev/blog/announcing-sveltekit-1.0).
+
+## Let's build our own copy
+
+I'm gonna build my own copy of the Swyx's site and host it on [Netlify](https://netlify.com).
+This way I'm not impacted by any of what could be going on in production.
+
+- Clone here: https://github.com/divriots/swyxdotio
+- Hosted here: https://swyxdotio-original.netlify.app
+
+### Checking performance
+
+**Original on https://swyx.io**
+
+```
+SpeedIndex: 4.603ms
+LCP: 5.108s
+CLS: 0
+TBT: 1.315s
+76 requests
+Download: 2.575MB
+```
+
+**My copy on https://swyxdotio-original.netlify.app**
+
+```
+SpeedIndex: 4.308s
+LCP: 4.897s
+CLS: 0
+TBT: 1.263s
+76 requests
+Download: 2.575MB
+```
+
+Looks close enough.
+
+**Request waterfall**
+
+<picture>
+  <img src={original_waterfall} alt="Requests waterfall from WebPageTest.org" />
+</picture>
+
+### Observations
+
+- LCP is bad at 4.8s. Should be below 2.5s for "GOOD" score.
+- CLS is at 0. Perfect.
+- TBT is at a woping 1.2s - It should be below 0.2s I think 🤔
+- The HMTL page is a massive 4MB uncompressed (1.3MB compressed). This looks way to big. Why?
+- It take a full 3 seconds for the assets (`CSS` and `JS`) to start downloading... Why?
+
+## Okay! Let's go optimizing!
+
+- Optimized branch will be here: https://github.com/divriots/swyxdotio/tree/jampack
+- Optimized branch will be deployed here: https://swyxdotio-jampack.netlify.app
+
+## First surprise
+
+There is no `.html` files on the output build 😂. `jampack` is not going to do much without HTML files 🫠.
+`jampack` can minify the 60 images present in the output build but that's about it.
+
+There is no `.html` because SvelteKit is configured to use the
+[Netlify adapter](https://kit.svelte.dev/docs/adapter-netlify) to render in functions.
+This is actually not a static site... 🤦‍♂️
+
+I will not give up so easily!
+
+## Let's turn it into a static site!
+
+Apparently, I can swap [`@sveltejs/adapter-netlify`](https://kit.svelte.dev/docs/adapter-netlify)
+with [`@sveltejs/adapter-static`](https://kit.svelte.dev/docs/adapter-static) and have a static site
+on the output.
+
+<picture>
+  <img src={later} alt="20 minutes later" />
+</picture>
+
+Not an easy task - some things are specifically dynamic routes.
+
+After a long battle with SvelteKit, I focused by efforts on rendering just the home page.
+
+### Performance result
+
+```
+SpeedIndex: 1.224s
+LCP: 2.508s
+CLS: 0
+TBT: 1.123s
+76 requests
+Download: 2.575MB
+```
+
+<picture>
+  <img
+    src={jampack_waterfall_s1_static}
+    alt="Request Waterfall after turning prerendering"
+  />
+</picture>
+
+### Observations
+
+- LCP is very close to 2.5s.
+- CLS is at 0. Perfect.
+- TBT is unchanged.
+
+I guess this had to be expected. Without browser cache (as used here in benchmarks), the
+original site had to generate the HTML page by functions. Kickstarting the function and
+generating a 4MB HTML is not a blazing fast task.
+
+The new static version of the page shows tremendous performance benefits.
+
+## Let's run `jampack` out-of-the-box
+
+Install `jampack v0.9.1`
+
+```
+npm i -D @divriots/jampack
+```
+
+Add to build
+
+```js
+"build": "vite build && jampack ./build",
+```
+
+### `jampack` output
+
+```
+ PASS 1 - Optimizing
+▶ index.html
+  ✔ <img> [1/1]
+Done: 90.38ms
+
+ PASS 2 - Compressing the rest
+✔ 69 files | 15.30 MB → 14.66 MB | -647.94 KB
+Done: 1.123s
+
+ Summary
+╔══════════════╤════════════╤═══════════╤════════════╤════════════╗
+║ Action       │ Compressed │  Original │ Compressed │       Gain ║
+╟──────────────┼────────────┼───────────┼────────────┼────────────╢
+║ jpg->jpg     │      1 / 1 │  24.98 KB │   21.69 KB │   -3.30 KB ║
+║ .js          │    29 / 32 │ 228.31 KB │  226.59 KB │   -1.72 KB ║
+║ .css         │      3 / 3 │  45.04 KB │   42.96 KB │   -2.08 KB ║
+║ .png         │     8 / 13 │   1.85 MB │    1.84 MB │  -10.61 KB ║
+║ .jpeg        │      5 / 5 │ 587.34 KB │  444.34 KB │ -143.00 KB ║
+║ .jpg         │      5 / 5 │   3.06 MB │    2.58 MB │ -486.99 KB ║
+║ .html        │      1 / 1 │   3.93 MB │    3.93 MB │  -242.00 B ║
+║ .xml         │      0 / 1 │  246.00 B │   246.00 B │            ║
+║ .ico         │      0 / 1 │  14.73 KB │   14.73 KB │            ║
+║ .txt         │      0 / 1 │  191.00 B │   191.00 B │            ║
+║ .webmanifest │      0 / 1 │  426.00 B │   426.00 B │            ║
+║ .json        │      0 / 2 │   3.77 MB │    3.77 MB │            ║
+║ .md          │      0 / 1 │   89.00 B │    89.00 B │            ║
+║ .gif         │      0 / 1 │   1.81 MB │    1.81 MB │            ║
+╟──────────────┼────────────┼───────────┼────────────┼────────────╢
+║ Total        │    52 / 69 │  15.30 MB │   14.66 MB │ -647.94 KB ║
+╚══════════════╧════════════╧═══════════╧════════════╧════════════╝
+```
+
+Only one `index.html` processed and a few assets minified.
+
+Not much to do on this page.
+The avatar image of Shawn has been transformed to progressive JPEG to optimise CLS - shaving 3.3KB in the process.
+The rest is _in situe_ compression and minification.
+
+### Performance result
+
+```
+SpeedIndex: 1.321s
+LCP: 2.449s
+CLS: 0
+TBT: 1.150s
+77 requests
+Download: 2.592MB
+```
+
+<picture>
+  <img
+    src={jampack_waterfall_s2_jp091}
+    alt="Request Waterfall after turning prerendering"
+  />
+</picture>
+
+### Observations
+
+- Not a tremendous improvement over pure static.
+- But we manage to get LCP below 2.5s :)
+- Mobile phone users with low bandwidth will benefit most from the progressive JPEG.
+- There are way too many `youtube.com` requests from 4 embed after the fold. We should make them load lazy.
+
+## Let's add lazy `<iframe>` to `jampack`
+
+## Conclusion
+
+I'm sad I couldn't work with more pages. There are very good performance improvements
+in the blog post pages. Specially with images.
+
+Indeed, the blog uses GitHub issues as a CMS. It's very clever but images are very large
+and slow. `jampack` would have done miracles here.
+
+I will probably come back to it later when I'm capable of building more static pages
+from Shawn's site.
