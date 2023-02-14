@@ -61,6 +61,17 @@ async function analyse(file: string): Promise<void> {
     `<img> [${imgsArray.length}/${imgsArray.length}]`
   );
 
+  // Notify issues
+  const issues = $state.issues.get(file);
+  if (issues) {
+    spinnerImg.fail();
+    console.log(
+      kleur.red(`  ${issues.length} issue${issues.length > 1 ? 's' : ''}`)
+    );
+  } else {
+    spinnerImg.succeed();
+  }
+
   const iframes = $('iframe');
   const iframesArray: cheerio.Element[] = [];
   iframes.each(async (index, ifElement) => {
@@ -95,16 +106,7 @@ async function analyse(file: string): Promise<void> {
     `<iframe> [${imgsArray.length}/${imgsArray.length}]`
   );
 
-  // Notify issues
-  const issues = $state.issues.get(file);
-  if (issues) {
-    spinnerImg.fail();
-    console.log(
-      kleur.red(`  ${issues.length} issue${issues.length > 1 ? 's' : ''}`)
-    );
-  } else {
-    spinnerImg.succeed();
-  }
+  spinnerIframe.succeed();
 
   // Remove the fold
   if (theFold) {
