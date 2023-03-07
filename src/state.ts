@@ -26,7 +26,6 @@ export class GlobalState {
   args: Args = {};
 
   compressedFiles: Set<string> = new Set();
-  optimizedFiles: Set<string> = new Set();
 
   issues: Map<string, Issue[]> = new Map();
 

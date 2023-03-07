@@ -284,57 +284,46 @@ async function processImage(
         : 'webp';
   }
 
-  if (!$state.optimizedFiles.has(originalImage.filePathAbsolute)) {
-    // Let's avoid to optimize same images twice
-    $state.optimizedFiles.add(originalImage.filePathAbsolute);
+  newImage = await compressImage(await originalImage.getData(), {
+    toFormat: srcToFormat,
+  });
 
-    newImage = await compressImage(await originalImage.getData(), {
-      toFormat: srcToFormat,
+  if (
+    newImage?.data &&
+    (newImage.data.length < (await originalImage.getLen()) ||
+      srcToFormat === 'jpeg+progressive') // Progressive override all even if worse
+  ) {
+    const additionalExtension = `.${newImage.format}`;
+    const newFilename = originalImage.filePathAbsolute + additionalExtension;
+
+    if (!$state.compressedFiles.has(newFilename) && !$state.args.nowrite) {
+      fs.writeFile(newFilename, newImage.data);
+    }
+
+    // Mark new file as compressed
+    $state.compressedFiles.add(newFilename);
+
+    // Report compression result
+    $state.reportSummary({
+      action:
+        newFilename !== originalImage.filePathAbsolute
+          ? `${await originalImage.getExt()}->${newImage.format}`
+          : path.extname(originalImage.filePathAbsolute),
+      originalSize: await originalImage.getLen(),
+      compressedSize: newImage.data.length,
     });
 
-    if (
-      newImage?.data &&
-      (newImage.data.length < (await originalImage.getLen()) ||
-        srcToFormat === 'jpeg+progressive') // Progressive override all even if worse
-    ) {
-      // Do we need to add an new extension?
-      const newExtension = `.${newImage.format}`;
-      const additionalExtension =
-        path.extname(originalImage.filePathAbsolute) === newExtension
-          ? ''
-          : newExtension;
+    img.attr('src', attrib_src + additionalExtension);
+  } else {
+    // Drop new Image
+    newImage = undefined;
 
-      const newFilename = originalImage.filePathAbsolute + additionalExtension;
-
-      if (!$state.args.nowrite) {
-        fs.writeFile(newFilename, newImage.data);
-      }
-
-      // Mark new file as optimized
-      $state.compressedFiles.add(newFilename);
-
-      // Report compression result
-      $state.reportSummary({
-        action:
-          newFilename !== originalImage.filePathAbsolute
-            ? `${await originalImage.getExt()}->${newImage.format}`
-            : path.extname(originalImage.filePathAbsolute),
-        originalSize: await originalImage.getLen(),
-        compressedSize: newImage.data.length,
-      });
-
-      img.attr('src', attrib_src + additionalExtension);
-    } else {
-      // Drop new Image
-      newImage = undefined;
-
-      // Report non-compression
-      $state.reportSummary({
-        action: path.extname(originalImage.filePathAbsolute),
-        originalSize: await originalImage.getLen(),
-        compressedSize: await originalImage.getLen(),
-      });
-    }
+    // Report non-compression
+    $state.reportSummary({
+      action: path.extname(originalImage.filePathAbsolute),
+      originalSize: await originalImage.getLen(),
+      compressedSize: await originalImage.getLen(),
+    });
   }
 
   /*
