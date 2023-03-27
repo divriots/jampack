@@ -40,6 +40,7 @@ program
   .option('--nowrite', 'No write')
   .option('--fast', 'Go fast. Mostly no compression just checks for issues.')
   .option('--fail', 'Exits with a non-zero return code if issues.')
+  .option('--xoptim [exclusion...]', 'Exclude specific optimizations.')
   .option('--onlyoptim', 'Only optimize (PASS 1).')
   .option('--onlycomp', 'Only compress (PASS 2).')
   .option('--cleancache', 'Clean cache before running')
@@ -59,14 +60,14 @@ program
     if (!options.onlycomp) {
       printTitle('PASS 1 - Optimizing');
       console.time('Done');
-      await optimize(options.include, options.exclude);
+      await optimize(options);
       console.timeEnd('Done');
     }
 
     if (!options.onlyoptim && !options.fast) {
       printTitle('PASS 2 - Compressing the rest');
       console.time('Done');
-      await compressFolder(options.exclude);
+      await compressFolder(options);
       console.timeEnd('Done');
     }
 

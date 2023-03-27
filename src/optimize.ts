@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import cheerio from 'cheerio';
 import { isNumeric } from './utils.js';
-import config from './config.js';
+import config, { CLIOptions } from './config.js';
 import {
   Image,
   compressImage,
@@ -16,7 +16,38 @@ import kleur from 'kleur';
 import ora from 'ora';
 import { isLocal, Resource, translateSrc } from './utils/resource.js';
 
-async function analyse(file: string): Promise<void> {
+type ExcludeOptimization = {
+  img?: boolean;
+  imglazy?: boolean;
+  imgcompress?: boolean;
+  imgembed?: boolean;
+  imgsize?: boolean;
+  imgsrcset?: boolean;
+  imgpicture?: boolean;
+  iframe?: boolean;
+};
+
+type OptimizeOptions = {
+  exclude: ExcludeOptimization;
+};
+
+function getOptimizeOptions(options: CLIOptions) {
+  const optimizeOptions: OptimizeOptions = {
+    exclude: {},
+  };
+
+  const xoptim = options.xoptim as (keyof ExcludeOptimization)[];
+
+  if (xoptim && xoptim.length) {
+    for (const exclusion of xoptim) {
+      optimizeOptions.exclude[exclusion] = true;
+    }
+  }
+
+  return optimizeOptions;
+}
+
+async function analyse(file: string, options: OptimizeOptions): Promise<void> {
   console.log('▶ ' + file);
 
   const html = (await fs.readFile(path.join($state.dir, file))).toString();
@@ -33,80 +64,84 @@ async function analyse(file: string): Promise<void> {
     imgsArray.push(imgElement);
   });
 
-  // Process images sequentially
-  const spinnerImg = ora({ prefixText: ' ' }).start();
-  for (let i = 0; i < imgsArray.length; i++) {
-    const imgElement = imgsArray[i];
+  if (!options.exclude.img) {
+    // Process images sequentially
+    const spinnerImg = ora({ prefixText: ' ' }).start();
+    for (let i = 0; i < imgsArray.length; i++) {
+      const imgElement = imgsArray[i];
 
+      spinnerImg.text = kleur.dim(
+        `<img> [${i + 1}/${imgsArray.length}] ${$(imgElement).attr('src')}`
+      );
+
+      const isAboveTheFold = imgElement.startIndex! < theFold;
+
+      try {
+        await processImage(file, $, imgElement, isAboveTheFold, options);
+      } catch (e) {
+        $state.reportIssue(file, {
+          type: 'erro',
+          msg:
+            (e as Error).message ||
+            `Unexpected error while processing image: ${JSON.stringify(e)}`,
+        });
+      }
+    }
+
+    // Reset spinner
     spinnerImg.text = kleur.dim(
-      `<img> [${i + 1}/${imgsArray.length}] ${$(imgElement).attr('src')}`
+      `<img> [${imgsArray.length}/${imgsArray.length}]`
     );
 
-    const isAboveTheFold = imgElement.startIndex! < theFold;
-
-    try {
-      await processImage(file, $, imgElement, isAboveTheFold);
-    } catch (e) {
-      $state.reportIssue(file, {
-        type: 'erro',
-        msg:
-          (e as Error).message ||
-          `Unexpected error while processing image: ${JSON.stringify(e)}`,
-      });
+    // Notify issues
+    const issues = $state.issues.get(file);
+    if (issues) {
+      spinnerImg.fail();
+      console.log(
+        kleur.red(`  ${issues.length} issue${issues.length > 1 ? 's' : ''}`)
+      );
+    } else {
+      spinnerImg.succeed();
     }
   }
 
-  // Reset spinner
-  spinnerImg.text = kleur.dim(
-    `<img> [${imgsArray.length}/${imgsArray.length}]`
-  );
+  if (!options.exclude.iframe) {
+    const iframes = $('iframe');
+    const iframesArray: cheerio.Element[] = [];
+    iframes.each(async (index, ifElement) => {
+      iframesArray.push(ifElement);
+    });
 
-  // Notify issues
-  const issues = $state.issues.get(file);
-  if (issues) {
-    spinnerImg.fail();
-    console.log(
-      kleur.red(`  ${issues.length} issue${issues.length > 1 ? 's' : ''}`)
-    );
-  } else {
-    spinnerImg.succeed();
-  }
+    // Process iframes sequentially
+    const spinnerIframe = ora({ prefixText: ' ' }).start();
+    for (let i = 0; i < iframesArray.length; i++) {
+      const ifElement = iframesArray[i];
 
-  const iframes = $('iframe');
-  const iframesArray: cheerio.Element[] = [];
-  iframes.each(async (index, ifElement) => {
-    iframesArray.push(ifElement);
-  });
+      spinnerIframe.text = kleur.dim(
+        `<iframe> [${i + 1}/${iframesArray.length}] ${$(ifElement).attr('src')}`
+      );
 
-  // Process iframes sequentially
-  const spinnerIframe = ora({ prefixText: ' ' }).start();
-  for (let i = 0; i < iframesArray.length; i++) {
-    const ifElement = iframesArray[i];
+      const isAboveTheFold = ifElement.startIndex! < theFold;
 
+      try {
+        await processIframe(file, $, ifElement, isAboveTheFold);
+      } catch (e) {
+        $state.reportIssue(file, {
+          type: 'erro',
+          msg:
+            (e as Error).message ||
+            `Unexpected error while processing image: ${JSON.stringify(e)}`,
+        });
+      }
+    }
+
+    // Reset spinner
     spinnerIframe.text = kleur.dim(
-      `<iframe> [${i + 1}/${iframesArray.length}] ${$(ifElement).attr('src')}`
+      `<iframe> [${imgsArray.length}/${imgsArray.length}]`
     );
 
-    const isAboveTheFold = ifElement.startIndex! < theFold;
-
-    try {
-      await processIframe(file, $, ifElement, isAboveTheFold);
-    } catch (e) {
-      $state.reportIssue(file, {
-        type: 'erro',
-        msg:
-          (e as Error).message ||
-          `Unexpected error while processing image: ${JSON.stringify(e)}`,
-      });
-    }
+    spinnerIframe.succeed();
   }
-
-  // Reset spinner
-  spinnerIframe.text = kleur.dim(
-    `<iframe> [${imgsArray.length}/${imgsArray.length}]`
-  );
-
-  spinnerIframe.succeed();
 
   // Remove the fold
   if (theFold) {
@@ -160,7 +195,8 @@ async function processImage(
   htmlfile: string,
   $: cheerio.Root,
   imgElement: cheerio.Element,
-  isAboveTheFold: boolean
+  isAboveTheFold: boolean,
+  options: OptimizeOptions
 ): Promise<void> {
   const img = $(imgElement);
 
@@ -194,30 +230,32 @@ async function processImage(
     return;
   }
 
-  /*
-   * Attribute 'loading'
-   */
-  const attr_loading = img.attr('loading');
-  if (isAboveTheFold) {
-    img.removeAttr('loading');
-    img.attr('fetchpriority', 'high');
-  } else {
-    switch (attr_loading) {
-      case undefined:
-        // Go lazy by default
-        img.attr('loading', 'lazy');
-        break;
-      case 'eager':
-        img.removeAttr('loading');
-        break;
-      case 'lazy':
-        // Don't touch it
-        break;
-      default:
-        $state.reportIssue(htmlfile, {
-          type: 'invalid',
-          msg: `Invalid [loading]="${attr_loading}" on img src="${attrib_src}"`,
-        });
+  if (!options.exclude.imglazy) {
+    /*
+     * Attribute 'loading'
+     */
+    const attr_loading = img.attr('loading');
+    if (isAboveTheFold) {
+      img.removeAttr('loading');
+      img.attr('fetchpriority', 'high');
+    } else {
+      switch (attr_loading) {
+        case undefined:
+          // Go lazy by default
+          img.attr('loading', 'lazy');
+          break;
+        case 'eager':
+          img.removeAttr('loading');
+          break;
+        case 'lazy':
+          // Don't touch it
+          break;
+        default:
+          $state.reportIssue(htmlfile, {
+            type: 'invalid',
+            msg: `Invalid [loading]="${attr_loading}" on img src="${attrib_src}"`,
+          });
+      }
     }
   }
 
@@ -259,6 +297,7 @@ async function processImage(
 
   let srcToFormat: 'webp' | 'avif' | 'jpeg' | 'jpeg+progressive' | 'unchanged' =
     'unchanged';
+
   if (isAboveTheFold) {
     // Above the fold, nothing beats progressive JPEG for LCP
     // but it's not transparent
@@ -284,46 +323,48 @@ async function processImage(
         : 'webp';
   }
 
-  newImage = await compressImage(await originalImage.getData(), {
-    toFormat: srcToFormat,
-  });
+  if (!options.exclude.imgcompress) {
+    newImage = await compressImage(await originalImage.getData(), {
+      toFormat: srcToFormat,
+    });
 
-  if (
-    newImage?.data &&
-    (newImage.data.length < (await originalImage.getLen()) ||
-      srcToFormat === 'jpeg+progressive') // Progressive override all even if worse
-  ) {
-    const additionalExtension = `.${newImage.format}`;
-    const newFilename = originalImage.filePathAbsolute + additionalExtension;
+    if (
+      newImage?.data &&
+      (newImage.data.length < (await originalImage.getLen()) ||
+        srcToFormat === 'jpeg+progressive') // Progressive override all even if worse
+    ) {
+      const additionalExtension = `.${newImage.format}`;
+      const newFilename = originalImage.filePathAbsolute + additionalExtension;
 
-    if (!$state.compressedFiles.has(newFilename) && !$state.args.nowrite) {
-      fs.writeFile(newFilename, newImage.data);
+      if (!$state.compressedFiles.has(newFilename) && !$state.args.nowrite) {
+        fs.writeFile(newFilename, newImage.data);
+      }
+
+      // Mark new file as compressed
+      $state.compressedFiles.add(newFilename);
+
+      // Report compression result
+      $state.reportSummary({
+        action:
+          newFilename !== originalImage.filePathAbsolute
+            ? `${await originalImage.getExt()}->${newImage.format}`
+            : path.extname(originalImage.filePathAbsolute),
+        originalSize: await originalImage.getLen(),
+        compressedSize: newImage.data.length,
+      });
+
+      img.attr('src', attrib_src + additionalExtension);
+    } else {
+      // Drop new Image
+      newImage = undefined;
+
+      // Report non-compression
+      $state.reportSummary({
+        action: path.extname(originalImage.filePathAbsolute),
+        originalSize: await originalImage.getLen(),
+        compressedSize: await originalImage.getLen(),
+      });
     }
-
-    // Mark new file as compressed
-    $state.compressedFiles.add(newFilename);
-
-    // Report compression result
-    $state.reportSummary({
-      action:
-        newFilename !== originalImage.filePathAbsolute
-          ? `${await originalImage.getExt()}->${newImage.format}`
-          : path.extname(originalImage.filePathAbsolute),
-      originalSize: await originalImage.getLen(),
-      compressedSize: newImage.data.length,
-    });
-
-    img.attr('src', attrib_src + additionalExtension);
-  } else {
-    // Drop new Image
-    newImage = undefined;
-
-    // Report non-compression
-    $state.reportSummary({
-      action: path.extname(originalImage.filePathAbsolute),
-      originalSize: await originalImage.getLen(),
-      compressedSize: await originalImage.getLen(),
-    });
   }
 
   /*
@@ -343,36 +384,38 @@ async function processImage(
       };
     }
 
-    // Only embed small images
-    // matching the embed size
-    if (imageToEmbed.data.length <= config.image.embed_size) {
-      let datauri = undefined;
+    if (!options.exclude.imgembed) {
+      // Only embed small images
+      // matching the embed size
+      if (imageToEmbed.data.length <= config.image.embed_size) {
+        let datauri = undefined;
 
-      const ifmt = imageToEmbed.format;
-      switch (ifmt) {
-        case 'svg':
-          datauri = svgToMiniDataURI(imageToEmbed.data.toString());
-          break;
-        case 'webp':
-        case 'jpg':
-        case 'png':
-          datauri = `data:image/${
-            ifmt === 'jpg' ? 'jpeg' : ifmt
-          };base64,${imageToEmbed.data.toString('base64')}`;
-          break;
-      }
+        const ifmt = imageToEmbed.format;
+        switch (ifmt) {
+          case 'svg':
+            datauri = svgToMiniDataURI(imageToEmbed.data.toString());
+            break;
+          case 'webp':
+          case 'jpg':
+          case 'png':
+            datauri = `data:image/${
+              ifmt === 'jpg' ? 'jpeg' : ifmt
+            };base64,${imageToEmbed.data.toString('base64')}`;
+            break;
+        }
 
-      if (datauri) {
-        isEmbed = true;
-        img.attr('src', datauri);
-        img.removeAttr('loading');
-        img.removeAttr('decoding');
+        if (datauri) {
+          isEmbed = true;
+          img.attr('src', datauri);
+          img.removeAttr('loading');
+          img.removeAttr('decoding');
 
-        $state.reportSummary({
-          action: `${imageToEmbed.format}->embed`,
-          originalSize: await originalImage.getLen(),
-          compressedSize: imageToEmbed.data.length,
-        });
+          $state.reportSummary({
+            action: `${imageToEmbed.format}->embed`,
+            originalSize: await originalImage.getLen(),
+            compressedSize: imageToEmbed.data.length,
+          });
+        }
       }
     }
   }
@@ -384,10 +427,12 @@ async function processImage(
     return;
   }
 
-  /*
-   * Attribute 'width' & 'height'
-   */
-  const [w, h] = await setImageSize(htmlfile, img, originalImage);
+  if (!options.exclude.imgsize) {
+    /*
+     * Attribute 'width' & 'height'
+     */
+    const [w, h] = await setImageSize(htmlfile, img, originalImage);
+  }
 
   if (isEmbed) {
     // Image is embed, no need for more processing
@@ -401,118 +446,122 @@ async function processImage(
     return;
   }
 
-  // Image size to beat in srcsets
-  //
-  const imageLengthToBeatInSrcSet =
-    newImage?.data && newImage.data.length < (await originalImage.getLen())
-      ? newImage.data.length
-      : await originalImage.getLen();
+  if (!options.exclude.imgsrcset) {
+    // Image size to beat in srcsets
+    //
+    const imageLengthToBeatInSrcSet =
+      newImage?.data && newImage.data.length < (await originalImage.getLen())
+        ? newImage.data.length
+        : await originalImage.getLen();
 
-  /*
-   * Attribute 'srcset'
-   */
-  if (img.attr('srcset')) {
-    // If srcset are set, don't touch it.
-    // The compress pass will compress the images
-    // of the srcset
-  } else {
-    const new_srcset = await generateSrcSet(
-      htmlfile,
-      originalImage,
-      img.attr('src'),
-      imageLengthToBeatInSrcSet,
-      { toFormat: srcToFormat }
-    );
+    /*
+     * Attribute 'srcset'
+     */
+    if (img.attr('srcset')) {
+      // If srcset are set, don't touch it.
+      // The compress pass will compress the images
+      // of the srcset
+    } else {
+      const new_srcset = await generateSrcSet(
+        htmlfile,
+        originalImage,
+        img.attr('src'),
+        imageLengthToBeatInSrcSet,
+        { toFormat: srcToFormat }
+      );
 
-    if (new_srcset !== null) {
-      img.attr('srcset', new_srcset);
-    }
+      if (new_srcset !== null) {
+        img.attr('srcset', new_srcset);
+      }
 
-    // Add sizes attribute if not specified
-    if (img.attr('srcset') && !img.attr('sizes')) {
-      img.attr('sizes', '100vw');
+      // Add sizes attribute if not specified
+      if (img.attr('srcset') && !img.attr('sizes')) {
+        img.attr('sizes', '100vw');
+      }
     }
   }
 
-  /*
-   * Adding <source>'s to <picture>
-   */
-  if (isInPicture) {
-    const picture = img.parent();
+  if (!options.exclude.imgpicture) {
+    /*
+     * Adding <source>'s to <picture>
+     */
+    if (isInPicture) {
+      const picture = img.parent();
 
-    if (isAboveTheFold && srcToFormat === 'jpeg+progressive') {
-      // We don't need anything else than jpeg progressive above the fold
-      const nodes = picture.children(`source`);
-      nodes.remove();
-    } else {
-      // List of possible sources to generate
-      //
-      const sourcesToGenerate: {
-        mime: ImageMimeType;
-        format: 'avif' | 'webp';
-      }[] = [];
+      if (isAboveTheFold && srcToFormat === 'jpeg+progressive') {
+        // We don't need anything else than jpeg progressive above the fold
+        const nodes = picture.children(`source`);
+        nodes.remove();
+      } else {
+        // List of possible sources to generate
+        //
+        const sourcesToGenerate: {
+          mime: ImageMimeType;
+          format: 'avif' | 'webp';
+        }[] = [];
 
-      // Only try to generate better images
-      // TODO generate more compatible formats (avif => webp/jpeg/png)
-      //
-      switch (await originalImage.getMime()) {
-        case 'image/jpeg':
-        case 'image/png':
-          sourcesToGenerate.push({
-            mime: 'image/webp',
-            format: 'webp',
-          });
-        case 'image/webp':
-          sourcesToGenerate.push({
-            mime: 'image/avif',
-            format: 'avif',
-          });
-        case 'image/avif':
-          // Nothing better
-          break;
-      }
-
-      const sizes = img.attr('sizes');
-
-      for (const s of sourcesToGenerate) {
-        const sourceWithThisMimeType = picture.children(
-          `source[type="${s.mime}"]`
-        );
-        if (sourceWithThisMimeType.length > 0) {
-          // Ignore the creation of sources that already exist
-          continue;
+        // Only try to generate better images
+        // TODO generate more compatible formats (avif => webp/jpeg/png)
+        //
+        switch (await originalImage.getMime()) {
+          case 'image/jpeg':
+          case 'image/png':
+            sourcesToGenerate.push({
+              mime: 'image/webp',
+              format: 'webp',
+            });
+          case 'image/webp':
+            sourcesToGenerate.push({
+              mime: 'image/avif',
+              format: 'avif',
+            });
+          case 'image/avif':
+            // Nothing better
+            break;
         }
 
-        const srcset = await generateSrcSet(
-          htmlfile,
-          originalImage,
-          undefined,
-          undefined,
-          {
-            toFormat: s.format,
+        const sizes = img.attr('sizes');
+
+        for (const s of sourcesToGenerate) {
+          const sourceWithThisMimeType = picture.children(
+            `source[type="${s.mime}"]`
+          );
+          if (sourceWithThisMimeType.length > 0) {
+            // Ignore the creation of sources that already exist
+            continue;
           }
-        );
 
-        if (!srcset) {
-          // No sourceset generated
-          // Image is too small or can't be compressed better
-          continue;
+          const srcset = await generateSrcSet(
+            htmlfile,
+            originalImage,
+            undefined,
+            undefined,
+            {
+              toFormat: s.format,
+            }
+          );
+
+          if (!srcset) {
+            // No sourceset generated
+            // Image is too small or can't be compressed better
+            continue;
+          }
+
+          const source = `<source ${
+            sizes ? `sizes="${sizes}"` : ''
+          } srcset="${srcset}" type="${s.mime}">`;
+          picture.prepend(source);
         }
 
-        const source = `<source ${
-          sizes ? `sizes="${sizes}"` : ''
-        } srcset="${srcset}" type="${s.mime}">`;
-        picture.prepend(source);
+        // Reorder sources to priority order 1)avif 2)webp
+        //
+        function popupSource(type: ImageMimeType): void {
+          const nodes = picture.children(`source[type="${type}"]`);
+          picture.prepend(nodes);
+        }
+        popupSource('image/webp');
+        popupSource('image/avif');
       }
-
-      // Reorder sources to priority order 1)avif 2)webp
-      //
-      function popupSource(type: ImageMimeType): void {
-        const nodes = picture.children(`source[type="${type}"]`);
-        picture.prepend(nodes);
-      }
-      popupSource('image/webp');
-      popupSource('image/avif');
     }
   }
 }
@@ -758,17 +807,17 @@ async function processIframe(
   }
 }
 
-export async function optimize(
-  include?: string,
-  exclude?: string
-): Promise<void> {
+export async function optimize(options: CLIOptions): Promise<void> {
+  const { include, exclude } = options;
   const glob = include ? [include] : ['**/*.{htm,html}'];
   if (exclude) glob.push('!' + exclude);
 
   const paths = await globby(glob, { cwd: $state.dir });
 
+  const parsedOptions = getOptimizeOptions(options);
+
   // Sequential async
   for (const file of paths) {
-    await analyse(file);
+    await analyse(file, parsedOptions);
   }
 }

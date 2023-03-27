@@ -27,6 +27,19 @@ export type Options = {
   };
 };
 
+export type CLIOptions = {
+  include?: string;
+  exclude?: string;
+  nowrite?: boolean;
+  fast?: boolean;
+  fail?: boolean;
+  xoptim?: string[];
+  onlyoptim?: boolean;
+  onlycomp?: boolean;
+  cleanache?: boolean;
+  nocache?: boolean;
+};
+
 const default_options: Options = {
   image: {
     embed_size: 1500,

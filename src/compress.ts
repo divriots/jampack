@@ -9,6 +9,7 @@ import { compressCSS } from './compressors/css.js';
 import { compressJS } from './compressors/js.js';
 import { compressHTML } from './compressors/html.js';
 import { compressImage } from './compressors/images.js';
+import { CLIOptions } from './config.js';
 
 const processFile = async (file: string, stats: Stats): Promise<void> => {
   let writeData: Buffer | string | undefined = undefined;
@@ -75,7 +76,9 @@ const processFile = async (file: string, stats: Stats): Promise<void> => {
   $state.reportSummary(result);
 };
 
-export async function compressFolder(exclude: string): Promise<void> {
+export async function compressFolder(options: CLIOptions): Promise<void> {
+  const { exclude } = options;
+
   const spinner = ora(getProgressText()).start();
 
   const globs = ['**/**'];
