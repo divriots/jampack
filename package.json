@@ -16,7 +16,7 @@
     "/dist"
   ],
   "dependencies": {
-    "@swc/core": "^1.3.30",
+    "@swc/core": "^1.3.44",
     "@types/cheerio": "^0.22.31",
     "@types/csso": "^5.0.0",
     "@types/html-minifier-terser": "^7.0.0",
