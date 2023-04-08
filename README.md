@@ -68,6 +68,7 @@ For more options see [CLI options](https://jampack.divriots.com/cli-options).
 - [bayjs.org](https://bayjs.org/)
 - [qwind.pages.dev](https://qwind.pages.dev/)
 - [Bloycey's Blog](https://bloycey.blog/)
+- [codenanshu.in](https://codenanshu.in/)
   
 > Add yours here
 
