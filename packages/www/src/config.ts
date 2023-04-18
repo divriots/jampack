@@ -60,7 +60,8 @@ export const featuresDirs = [
   'warnings',
 ];
 
-const getTitle = (file: string) => {
+const getTitle = (file: string): string => {
+  // @ts-ignore
   return fm(fs.readFileSync(file, 'utf8')).attributes['title'];
 };
 
@@ -76,7 +77,7 @@ export const SIDEBAR: Sidebar = {
       text: getTitle('./public/features/' + dir + '/index.md'),
       link: 'features/' + dir,
     })),
-    Advanced: [, { text: 'Cache', link: 'cache' }],
+    Advanced: [{ text: 'Cache', link: 'cache' }],
     Community: [
       { text: 'GitHub', link: 'https://github.com/divriots/jampack' },
       { text: 'Discord', link: 'https://jampack.divriots.com/chat' },
