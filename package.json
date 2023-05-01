@@ -20,7 +20,7 @@
     "@types/cheerio": "^0.22.31",
     "@types/csso": "^5.0.0",
     "@types/html-minifier-terser": "^7.0.0",
-    "@types/sharp": "^0.31.1",
+    "@types/sharp": "^0.32.0",
     "@types/svgo": "^2.6.4",
     "cheerio": "0.22.0",
     "commander": "^9.4.1",
