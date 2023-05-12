@@ -1,0 +1,23 @@
+---
+date: 2023-05-12
+author: ['georges-gomes']
+title: Adding config
+---
+
+[Jampack](/) is now using [Nate Moore](https://github.com/natemoo-re)'s
+[proload](https://github.com/natemoo-re/proload) package to load a configuration file.
+
+It supports any of the following files:
+
+- jampack.config.js (in ESM or CJS format)
+- jampack.config.mjs
+- jampack.config.cjs
+- config/jampack.config.js (in ESM or CJS format)
+- config/jampack.config.mjs
+- config/jampack.config.cjs
+
+Or in a top-level `jampack` property in your `package.json`.
+
+This will be great to offer some flexibility and also add new experimental features behind flags!
+
+See the [Configuration](/configuration) page for the available options so far.
