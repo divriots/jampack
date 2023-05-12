@@ -11,7 +11,7 @@ import { MimeType } from 'file-type';
 export type ImageMimeType = MimeType | 'image/svg+xml';
 
 export const AllImageFormat = ['webp', 'svg', 'jpg', 'png', 'avif'];
-export type ImageFormat = typeof AllImageFormat[number] | undefined;
+export type ImageFormat = (typeof AllImageFormat)[number] | undefined;
 
 export type Image = {
   format: ImageFormat;
@@ -64,24 +64,25 @@ export async function compressImage(
 
   // Special case for svg
   if (meta.format === 'svg') {
-    const newData = svgo(data, {
-      multipass: true,
-      plugins: [
-        {
-          name: 'preset-default',
-          params: {
-            overrides: {
-              removeViewBox: false,
+    try {
+      const output = svgo(data.toString(), {
+        multipass: true,
+        plugins: [
+          {
+            name: 'preset-default',
+            params: {
+              overrides: {
+                removeViewBox: false,
+              },
             },
           },
-        },
-      ],
-    });
-    if (newData.error || newData.modernError) {
-      console.log(`Error processing svg ${data}`);
+        ],
+      });
+      return { format: 'svg', data: Buffer.from(output.data, 'utf8') };
+    } catch (e) {
+      // In case of any issue with svg compression:
       return undefined;
     }
-    return { format: 'svg', data: Buffer.from(newData.data, 'utf8') };
   }
 
   // TODO
