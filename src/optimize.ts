@@ -1,7 +1,7 @@
 import { globby } from 'globby';
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import cheerio from 'cheerio';
+import * as cheerio from '@divriots/cheerio';
 import { isNumeric } from './utils.js';
 import config from './config.js';
 import {
@@ -20,16 +20,13 @@ async function analyse(file: string): Promise<void> {
   console.log('▶ ' + file);
 
   const html = (await fs.readFile(path.join($state.dir, file))).toString();
-  const $ = cheerio.load(html, {
-    withStartIndices: true,
-    decodeEntities: false,
-  });
+  const $ = cheerio.load(html, { sourceCodeLocationInfo: true });
 
   const theFold = getTheFold($);
 
   const imgs = $('img');
   const imgsArray: cheerio.Element[] = [];
-  imgs.each(async (index, imgElement) => {
+  imgs.each((index, imgElement) => {
     imgsArray.push(imgElement);
   });
 
@@ -74,7 +71,7 @@ async function analyse(file: string): Promise<void> {
 
   const iframes = $('iframe');
   const iframesArray: cheerio.Element[] = [];
-  iframes.each(async (index, ifElement) => {
+  iframes.each((index, ifElement) => {
     iframesArray.push(ifElement);
   });
 
@@ -127,7 +124,7 @@ async function analyse(file: string): Promise<void> {
   }
 }
 
-function getTheFold($: cheerio.Root): number {
+function getTheFold($: cheerio.CheerioAPI): number {
   const theFolds = $('the-fold');
 
   // If you have the-fold
@@ -158,7 +155,7 @@ function getTheFold($: cheerio.Root): number {
 
 async function processImage(
   htmlfile: string,
-  $: cheerio.Root,
+  $: cheerio.CheerioAPI,
   imgElement: cheerio.Element,
   isAboveTheFold: boolean
 ): Promise<void> {
@@ -610,7 +607,7 @@ async function generateSrcSet(
 
 async function setImageSize(
   htmlfile: string,
-  img: cheerio.Cheerio,
+  img: cheerio.Cheerio<cheerio.Element>,
   image: Resource
 ): Promise<number[]> {
   let width = img.attr('width');
@@ -747,7 +744,7 @@ async function setImageSize(
 
 async function processIframe(
   htmlfile: string,
-  $: cheerio.Root,
+  $: cheerio.CheerioAPI,
   imgElement: cheerio.Element,
   isAboveTheFold: boolean
 ): Promise<void> {
