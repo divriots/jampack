@@ -5,7 +5,8 @@ import {
   addToCacheCompressImage,
   computeCacheHash,
 } from '../cache.js';
-import config, { WebpOptions } from '../config.js';
+import { WebpOptions } from '../config-types.js';
+import config from '../config.js';
 import { MimeType } from 'file-type';
 
 export type ImageMimeType = MimeType | 'image/svg+xml';

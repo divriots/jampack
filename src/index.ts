@@ -6,7 +6,7 @@ import { optimize } from './optimize.js';
 import $state from './state.js';
 import { table, TableUserConfig } from 'table';
 import { formatBytes } from './utils.js';
-import { fast } from './config.js';
+import { fast, loadConfig } from './config.js';
 import { printTitle } from './logger.js';
 import { exit } from 'process';
 import kleur from 'kleur';
@@ -48,7 +48,10 @@ program
     $state.dir = dir;
     $state.args = options;
 
-    // Override config with fast options
+    // Override default config with config file
+    await loadConfig();
+
+    // Override config with fast options if set
     if (options.fast) {
       fast();
     }

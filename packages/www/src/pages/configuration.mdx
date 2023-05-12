@@ -1,0 +1,51 @@
+---
+title: Configuration
+description: Configuration file for `jampack`.
+layout: ../layouts/MainLayout.astro
+---
+
+import config_type from '../../../../src/config-types.ts?raw';
+import config_default from '../../../../src/config-default.ts?raw';
+
+The configuration file can be one of these files
+
+- `jampack.config.js` (in ESM or CJS format)
+- `jampack.config.mjs`
+- `jampack.config.cjs`
+- `config/jampack.config.js` (in ESM or CJS format)
+- `config/jampack.config.mjs`
+- `config/jampack.config.cjs`
+
+Or in a top-level `jampack` property in your `package.json`.
+
+### Example
+
+```js
+// jampack.config.js
+
+export default {
+  image: {
+    compress: false,
+  },
+};
+```
+
+## Options
+
+Available in [config-types.js](https://github.com/divriots/jampack/blob/main/src/config-types.ts).
+
+<pre class="astro-code">
+  <code>{config_type}</code>
+</pre>
+
+## Default values
+
+Available in [config-default.js](https://github.com/divriots/jampack/blob/main/src/config-default.ts).
+
+<pre class="astro-code">
+  <code>{config_default}</code>
+</pre>
+
+## Technical notes
+
+[Jampack](/) is using [Nate Moore](https://github.com/natemoo-re)'s [proload](https://github.com/natemoo-re/proload) package to load configuration.
