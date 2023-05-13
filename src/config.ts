@@ -8,7 +8,7 @@ import fast_options_override from './config-fast.js';
 const options = default_options;
 
 export function fast() {
-  deepmerge(options, fast_options_override);
+  Object.assign(options, deepmerge(options, fast_options_override));
 }
 
 export async function loadConfig() {
@@ -16,7 +16,7 @@ export async function loadConfig() {
   if (proload) {
     console.log('Overriding default config with:');
     console.log(JSON.stringify(proload.value, null, 2));
-    deepmerge(options, proload.value);
+    Object.assign(options, deepmerge(options, proload.value));
   }
 }
 

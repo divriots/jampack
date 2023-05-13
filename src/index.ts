@@ -48,6 +48,12 @@ program
     $state.dir = dir;
     $state.args = options;
 
+    if (options) {
+      console.log('Options:');
+      console.log(options);
+      console.log('');
+    }
+
     // Override default config with config file
     await loadConfig();
 
