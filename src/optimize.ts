@@ -111,12 +111,14 @@ async function analyse(file: string): Promise<void> {
   }
 
   // Add CSS to head
-  const CSS = `<style>:where(img){height:auto;}</style>`;
-  const heads = $('head');
-  if (heads.length > 0) {
-    heads.prepend(CSS);
-  } else {
-    $('html')?.prepend(`<head>${CSS}</head>`);
+  if (config.html.add_css_reset_as === 'inline') {
+    const CSS = `<style>:where(img){height:auto;width:auto}</style>`;
+    const heads = $('head');
+    if (heads.length > 0) {
+      heads.prepend(CSS);
+    } else {
+      $('html')?.prepend(`<head>${CSS}</head>`);
+    }
   }
 
   if (!$state.args.nowrite) {

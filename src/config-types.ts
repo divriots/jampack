@@ -5,6 +5,15 @@ export type WebpOptions = {
 };
 
 export type Options = {
+  html: {
+    /*
+      jampack adds a little bit of css to make
+      image keep correct aspect ratio after adding
+      image dimensions.
+      ":where(img){height:auto;width:auto}"
+    */
+    add_css_reset_as: 'inline' | 'off';
+  };
   image: {
     embed_size: number;
     srcset_min_width: number;

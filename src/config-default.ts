@@ -1,6 +1,9 @@
 import { Options } from './config-types.js';
 
 const default_options: Options = {
+  html: {
+    add_css_reset_as: 'inline',
+  },
   image: {
     embed_size: 1500,
     srcset_min_width: 640,
