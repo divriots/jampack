@@ -39,12 +39,74 @@ Optimizes static websites for best user experience and best Core Web Vitals scor
 
 ## What can `jampack` do?
 
-- [Optimize images](https://jampack.divriots.com/features/optimize-images)
-- [Optimize assets above-the-fold](https://jampack.divriots.com/features/optimize-above-the-fold)
-- [Embed small images](https://jampack.divriots.com/features/embed-small-images)
-- [Compress all assets](https://jampack.divriots.com/features/compress-all)
-- [Fix things automatically](https://jampack.divriots.com/features/autofixes)
-- [Raise warnings](https://jampack.divriots.com/features/warnings)
+### `<img>`
+
+```html
+<img src="./redpanda.jpg" alt="Red panda">
+```
+
+becomes responsive with dimensions:
+
+```html
+<img src="./redpanda.jpg.webp" alt="Red panda" 
+     srcset="./redpanda.jpg.webp 3872w, ./redpanda@3572w.jpg.webp 3572w, ./redpanda@3272w.jpg.webp 3272w, ./redpanda@2972w.jpg.webp 2972w, ./redpanda@2672w.jpg.webp 2672w, ./redpanda@2372w.jpg.webp 2372w, ./redpanda@2072w.jpg.webp 2072w, ./redpanda@1772w.jpg.webp 1772w, ./redpanda@1472w.jpg.webp 1472w, ./redpanda@1172w.jpg.webp 1172w, ./redpanda@872w.jpg.webp 872w"
+     sizes="100vw"
+     loading="lazy"
+     decoding="async"
+     width="3872" 
+     height="2592">
+```
+
+### `<picture>`
+
+```html
+<picture>
+    <img src="./redpanda.jpg" alt="Red panda">
+</picture>
+```
+
+becomes responsive with multiple formats including AVIF:
+
+```html
+<picture>
+    <source type="image/avif" srcset="./redpanda@1936w.avif 1936w, ./redpanda@1636w.avif 1636w, ./redpanda@1336w.avif 1336w, ./redpanda@1036w.avif 1036w, ./redpanda@736w.avif 736w">
+    <source type="image/webp" srcset="./redpanda@1936w.webp 1936w, ./redpanda@1636w.webp 1636w, ./redpanda@1336w.webp 1336w, ./redpanda@1036w.webp 1036w, ./redpanda@736w.webp 736w">
+    <img src="./redpanda.jpg" alt="Red panda" loading="lazy" decoding="async" width="1936" height="1296" srcset="./redpanda.jpg 1936w, ./redpanda@1636w.jpg 1636w, ./redpanda@1336w.jpg 1336w, ./redpanda@1036w.jpg 1036w, ./redpanda@736w.jpg 736w" sizes="100vw">
+</picture>
+```
+
+### Above & below-the-fold
+
+`jampack` optimizes assets above-the-fold ⬆️.
+
+- Images are loaded with higher priority.
+- Images are compress as Progressive JPEG.
+- Small images are embedded in HTML.
+
+Lazy-load assets below-the-fold ⬇️.
+
+- Images and Iframes are lazy loaded.
+
+See [details](/features/optimize-above-the-fold).
+
+### All assets are compressed
+
+In a 2nd PASS, `jampack` compresses all untouched assets and keep the same name and the same format.
+
+| Extension       | Compressor            | 
+| --------------- | --------------------- | 
+| `.html`,`.htm`  | [`html-minifier-terser`](https://github.com/terser/html-minifier-terser) |   
+| `.css`          | Best of [`csso`](https://github.com/css/csso) & [`lightningCSS`](https://lightningcss.dev)  |
+| `.js`           | [`swc`](https://swc.rs/)                   |   
+| `.svg`          | [`svgo`](https://github.com/svg/svgo)                  |  
+| `.jpg`,`.jpeg`  | [`sharp`](https://sharp.pixelplumbing.com/)                 |  
+| `.png`          | [`sharp`](https://sharp.pixelplumbing.com/)                |    
+| `.webp`         | [`sharp`](https://sharp.pixelplumbing.com/)                 |  
+| `.avif`         | [`sharp`](https://sharp.pixelplumbing.com/)                 |  
+
+### And more!
+
+See [Documentation](https://jampack.divriots.com/) for all feature list and examples.
 
 ## Quick use
 
