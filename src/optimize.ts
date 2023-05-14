@@ -166,6 +166,14 @@ async function processImage(
    */
   const attrib_src = img.attr('src');
   if (!attrib_src) {
+    const attrib_data_src = img.attr('data-src');
+    if (attrib_data_src) {
+      // Contains attribute [data-src]
+      // Most likely, this is a Javascript lazy-loaded image
+      // Let's not mess with it and hope it's well done
+      return; // No warnings
+    }
+
     $state.reportIssue(htmlfile, {
       type: 'warn',
       msg: `Missing [src] on img - processing skipped.`,
