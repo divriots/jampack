@@ -10,11 +10,15 @@ async function minifyJSinHTML(originalCode: string): Promise<string> {
 
 async function minifyCSSinHTML(
   originalCode: string,
-  type: 'inline' | undefined
+  type: 'inline' | 'media' | undefined
 ): Promise<string> {
+  // Don't compress media
+  if (type === 'media') return originalCode;
+
   const originalBuffer = Buffer.from(originalCode);
   const newCSS = await compressCSS(originalBuffer, type);
-  if (newCSS && newCSS.length < originalBuffer.length) return newCSS.toString();
+  if (newCSS && newCSS.length > 0 && newCSS.length < originalBuffer.length)
+    return newCSS.toString();
   return originalCode;
 }
 
