@@ -35,7 +35,7 @@ Optimizes static websites for best user experience and best Core Web Vitals scor
 
 `jampack` is a post-processing tool that takes the output of your [Static Site Generator (aka SSG)](https://jamstack.org/generators/) and optimizes it for best user experience and best [Core Web Vitals](https://web.dev/learn-core-web-vitals/) scores.
 
-[Read the introduction blog post](https://divriots.com/blog/introducing-jampack)
+[Read the introduction blog post](https://divriots.com/blog/introducing-jampack/)
 
 ## What can `jampack` do?
 
@@ -87,7 +87,7 @@ Lazy-load assets below-the-fold ⬇️.
 
 - Images and Iframes are lazy loaded.
 
-See [details](/features/optimize-above-the-fold).
+See [details](https://jampack.divriots.com/features/optimize-above-the-fold/).
 
 ### All assets are compressed
 
@@ -115,7 +115,7 @@ See [Documentation](https://jampack.divriots.com/) for all feature list and exam
 npx @divriots/jampack ./dist
 ```
 
-For more options see [CLI options](https://jampack.divriots.com/cli-options).
+For more options see [CLI options](https://jampack.divriots.com/cli-options/).
 
 ## `jampack` used in the wild
 

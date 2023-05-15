@@ -46,7 +46,7 @@ becomes
 In other words, you can have a single image in your static site and `jampack` will create the different smaller versions to serve the most optimized image for smaller devices.
 
 If `srcset` is already present in source `<img>` then nothing is done and images are just compressed in
-[PASS 2](../compress-all).
+[PASS 2](../compress-all/).
 
 #### Responsives sizes
 

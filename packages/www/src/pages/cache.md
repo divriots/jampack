@@ -42,4 +42,4 @@ Consequently, when you upgrade to a new version of `jampack`, it will build a fu
 
 ## Options
 
-See [CLI Options](./cli-options) for options around cache management.
+See [CLI Options](./cli-options/) for options around cache management.

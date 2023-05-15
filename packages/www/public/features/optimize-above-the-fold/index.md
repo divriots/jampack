@@ -25,7 +25,7 @@ The tag `<the-fold>` will be removed from the final output.
 - Images will have higher priority: set `fetchpriority="high"` attribute.
 - Images will be converted to [`JPEG` progressive](https://www.thewebmaster.com/progressive-jpegs/) which provide better user experience for content above the fold.
 - Images with alpha (aka transparency) will not be converted to [`JPEG` progressive](https://www.thewebmaster.com/progressive-jpegs/) because this format doesn't support alpha. Image will be converted to WebP instead.
-- [Small images will be embed in HTML](/features/embed-small-images)
+- [Small images will be embed in HTML](/features/embed-small-images/)
 
 ## Recommended use
 
