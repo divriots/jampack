@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+User-agent: *
+Disallow: /features/*/source/index.html
+Disallow: /features/*/packed/index.html
