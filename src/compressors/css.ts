@@ -1,4 +1,3 @@
-import { minify as csso } from 'csso';
 import {
   transform as lightcss,
   transformStyleAttribute as lightcssStyleAttribute,
@@ -8,17 +7,8 @@ export async function compressCSS(
   originalCode: Buffer,
   type?: 'inline' | undefined
 ): Promise<Buffer> {
-  // csso only support css files. No inline style
-  let cssoCSSData: Buffer | undefined = undefined;
-  if (type !== 'inline') {
-    // Compress with csso
-    cssoCSSData = Buffer.from(
-      await csso(originalCode.toString(), { comments: false }).css
-    );
-  }
-
   // Compress with lightningcss
-  let lightCSSData;
+  let lightCSSData: Buffer | undefined = undefined;
   try {
     const options = {
       code: originalCode,
@@ -32,18 +22,11 @@ export async function compressCSS(
     }
   } catch (e) {
     // Error while processing with lightningcss
-    // Ignore, we have csso as backup
+    // Take original code
   }
 
   let resultBuffer: Buffer | undefined = undefined;
-
-  // Pick the best
-  if (cssoCSSData && lightCSSData) {
-    resultBuffer =
-      cssoCSSData.length <= lightCSSData.length ? cssoCSSData : lightCSSData;
-  } else if (cssoCSSData && !lightCSSData) {
-    resultBuffer = cssoCSSData;
-  } else if (!cssoCSSData && lightCSSData) {
+  if (lightCSSData && lightCSSData.length < originalCode.length) {
     resultBuffer = lightCSSData;
   }
 
