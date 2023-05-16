@@ -23,6 +23,7 @@ export async function compressCSS(
   } catch (e) {
     // Error while processing with lightningcss
     // Take original code
+    // TODO catch SyntaxError and report a Warning
   }
 
   let resultBuffer: Buffer | undefined = undefined;
