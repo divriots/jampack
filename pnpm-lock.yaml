@@ -4,13 +4,11 @@ specifiers:
   '@divriots/cheerio': 1.0.0-rc.12
   '@proload/core': ^0.3.3
   '@swc/core': ^1.3.57
-  '@types/csso': ^5.0.0
   '@types/html-minifier-terser': ^7.0.0
   '@types/node': ^16.18.28
   '@types/sharp': ^0.32.0
   '@types/svgo': ^3.0.0
   commander: ^10.0.1
-  csso: ^5.0.5
   deepmerge: ^4.3.1
   file-type: ^18.4.0
   globby: ^13.1.4
@@ -32,12 +30,10 @@ dependencies:
   '@divriots/cheerio': 1.0.0-rc.12
   '@proload/core': 0.3.3
   '@swc/core': 1.3.57
-  '@types/csso': 5.0.0
   '@types/html-minifier-terser': 7.0.0
   '@types/sharp': 0.32.0
   '@types/svgo': 3.0.0
   commander: 10.0.1
-  csso: 5.0.5
   deepmerge: 4.3.1
   file-type: 18.4.0
   globby: 13.1.4
@@ -279,16 +275,6 @@ packages:
   /@tsconfig/node16/1.0.3:
     resolution: {integrity: sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==}
     dev: true
-
-  /@types/css-tree/2.0.0:
-    resolution: {integrity: sha512-mY2sXRLBnUPMYw6mkOT+6dABeaNxAEKZz6scE9kQPNJx8fKe1fOsm8Honl7+xFYe6TKX8WNk2+7oMp2vBArJ9Q==}
-    dev: false
-
-  /@types/csso/5.0.0:
-    resolution: {integrity: sha512-EMrCTGpXRUsbFfZBzn2jcW6Sqg8kxWXkJcpvAGYSEzFqAJ2THDJSwiMeS2fPUw+0p6RQNT/n8F/skEc9hUBc0g==}
-    dependencies:
-      '@types/css-tree': 2.0.0
-    dev: false
 
   /@types/html-minifier-terser/7.0.0:
     resolution: {integrity: sha512-hw3bhStrg5e3FQT8qZKCJTrzt/UbEaunU1xRWJ+aNOTmeBMvE3S4Ml2HiiNnZgL8izu0LFVkHUoPFXL1s5QNpQ==}
