@@ -7,6 +7,11 @@ const default_options: Options = {
   image: {
     embed_size: 1500,
     srcset_min_width: 640,
+    external: {
+      process: 'off',
+      src_include: /^.*$/,
+      src_exclude: null,
+    },
     compress: true,
     jpeg: {
       options: {

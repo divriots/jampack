@@ -17,6 +17,15 @@ export type Options = {
   image: {
     embed_size: number;
     srcset_min_width: number;
+    external: {
+      process:
+        | 'download'
+        | 'cdn-srcset-when-possible'
+        | 'add-dimensions-only'
+        | 'off';
+      src_include: RegExp;
+      src_exclude: RegExp | null;
+    };
     compress: boolean;
     jpeg: {
       options: {

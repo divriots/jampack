@@ -112,7 +112,7 @@ async function analyse(file: string): Promise<void> {
 
   // Add CSS to head
   if (config.html.add_css_reset_as === 'inline') {
-    const CSS = `<style>:where(img){height:auto;width:auto}</style>`;
+    const CSS = `<style>:where(img){height:auto;}</style>`;
     const heads = $('head');
     if (heads.length > 0) {
       heads.prepend(CSS);
@@ -233,15 +233,33 @@ async function processImage(
    */
   img.attr('decoding', 'async');
 
+  /*
+   * Check for external images
+   */
   if (!isLocal(attrib_src)) {
-    // Image not local, don't touch it
-    return;
+    switch (config.image.external.process) {
+      case 'off':
+        // Don't process external images
+        return;
+      case 'download':
+        // Download external image for local processing
+        break;
+      case 'cdn-srcset-when-possible':
+        // Use unpic to use CDN capabilities
+        throw new Error(
+          'External images with `cdn-srcset-when-possible` is not implemented yet.'
+        );
+      case 'add-dimensions-only':
+        // Only add dimensions of image
+        throw new Error(
+          'External images with `add-dimensions-only` is not implemented yet.'
+        );
+    }
   }
 
   /*
    * Loading image
    */
-
   const originalImage = await Resource.loadResource(
     $state.dir,
     htmlfile,
