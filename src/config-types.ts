@@ -10,7 +10,7 @@ export type Options = {
       jampack adds a little bit of css to make
       image keep correct aspect ratio after adding
       image dimensions.
-      ":where(img){height:auto;width:auto}"
+      ":where(img){height:auto}"
     */
     add_css_reset_as: 'inline' | 'off';
   };
@@ -19,10 +19,10 @@ export type Options = {
     srcset_min_width: number;
     external: {
       process:
-        | 'download'
-        | 'cdn-srcset-when-possible'
-        | 'add-dimensions-only'
-        | 'off';
+        | 'off' // Default
+        | 'download' // Experimental
+        | 'cdn-srcset-when-possible' // Not implemented
+        | 'add-dimensions-only'; // Not implemented
       src_include: RegExp;
       src_exclude: RegExp | null;
     };
