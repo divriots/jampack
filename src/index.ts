@@ -12,6 +12,8 @@ import { exit } from 'process';
 import kleur from 'kleur';
 import { cleanCache } from './cache.js';
 import { VERSION } from './version.js';
+import { mkdirSync } from 'fs';
+import { join } from 'path';
 
 const logo = `     __                                    __    
     |__|____    _____ ___________    ____ |  | __
@@ -64,6 +66,14 @@ program
 
     // Clean cache
     cleanCache(options.cleancache);
+
+    // Create _jampack folder
+    try {
+      mkdirSync(join($state.dir, '_jampack'));
+    } catch (e: any) {
+      console.error(e.message);
+      exit(1);
+    }
 
     if (!options.onlycomp) {
       printTitle('PASS 1 - Optimizing');

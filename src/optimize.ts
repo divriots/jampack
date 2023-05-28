@@ -10,11 +10,12 @@ import {
   ImageMimeType,
   ImageOutputOptions,
 } from './compressors/images.js';
-import svgToMiniDataURI, { toSrcset } from 'mini-svg-data-uri';
+import svgToMiniDataURI from 'mini-svg-data-uri';
 import $state from './state.js';
 import kleur from 'kleur';
 import ora from 'ora';
 import { isLocal, Resource, translateSrc } from './utils/resource.js';
+import { downloadExternalImage } from './optimizers/img-external.js';
 
 async function analyse(file: string): Promise<void> {
   console.log('▶ ' + file);
@@ -166,7 +167,7 @@ async function processImage(
   /*
    * Attribute 'src'
    */
-  const attrib_src = img.attr('src');
+  let attrib_src = img.attr('src');
   if (!attrib_src) {
     const attrib_data_src = img.attr('data-src');
     if (attrib_data_src) {
@@ -238,21 +239,27 @@ async function processImage(
    */
   if (!isLocal(attrib_src)) {
     switch (config.image.external.process) {
-      case 'off':
-        // Don't process external images
+      case 'off': // Don't process external images
         return;
-      case 'download':
-        // Download external image for local processing
+      case 'download': // Download external image for local processing
+        try {
+          attrib_src = await downloadExternalImage(attrib_src);
+          img.attr('src', attrib_src);
+        } catch (e: any) {
+          $state.reportIssue(htmlfile, {
+            type: 'warn',
+            msg: `Failed to download image: ${attrib_src} - ${e.message}`,
+          });
+          return; // No more processing
+        }
         break;
-      case 'cdn-srcset-when-possible':
-        // Use unpic to use CDN capabilities
-        throw new Error(
-          'External images with `cdn-srcset-when-possible` is not implemented yet.'
-        );
-      case 'add-dimensions-only':
-        // Only add dimensions of image
+      case 'add-dimensions-only': // Only add dimensions of image
         throw new Error(
           'External images with `add-dimensions-only` is not implemented yet.'
+        );
+      case 'cdn-srcset-when-possible': // Use unpic to use CDN capabilities
+        throw new Error(
+          'External images with `cdn-srcset-when-possible` is not implemented yet.'
         );
     }
   }

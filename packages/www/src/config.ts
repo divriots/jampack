@@ -52,6 +52,7 @@ export type Sidebar = Record<
 
 export const featuresDirs = [
   'optimize-images',
+  'optimize-images-external',
   'optimize-above-the-fold',
   'embed-small-images',
   'iframe',

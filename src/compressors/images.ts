@@ -1,10 +1,6 @@
 import sharp from 'sharp';
 import { optimize as svgo } from 'svgo';
-import {
-  getFromCacheCompressImage,
-  addToCacheCompressImage,
-  computeCacheHash,
-} from '../cache.js';
+import { getFromCache, addToCache, computeCacheHash } from '../cache.js';
 import { WebpOptions } from '../config-types.js';
 import config from '../config.js';
 import { MimeType } from 'file-type';
@@ -43,9 +39,9 @@ export async function compressImage(
   options: ImageOutputOptions
 ): Promise<Image | undefined> {
   const cacheHash = computeCacheHash(data, options);
-  const imageFromCache = await getFromCacheCompressImage(cacheHash);
+  const imageFromCache = await getFromCache('img', cacheHash);
   if (imageFromCache) {
-    return imageFromCache;
+    return { data: imageFromCache.buffer, format: imageFromCache.meta };
   }
 
   // Load modifiable toFormat
@@ -175,7 +171,10 @@ export async function compressImage(
     data: await sharpFile.toBuffer(),
   };
 
-  await addToCacheCompressImage(cacheHash, outputImage);
+  await addToCache('img', cacheHash, {
+    buffer: outputImage.data,
+    meta: outputImage.format,
+  });
 
   // Go
   return outputImage;

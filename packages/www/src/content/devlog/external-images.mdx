@@ -1,0 +1,133 @@
+---
+date: 2023-05-29
+author: ['georges-gomes']
+title: Optimizing external images
+---
+
+As of today, [jampack](/) only processes and optimizes local images available in the static source of files.
+
+What about external images stored in a CDN or remote storage?
+
+## Step 1: Config
+
+Because this may not be suitable for everybody we will use our brand new config to optionaly make it available.
+
+```js
+image: {
+    external: {
+      process: 'off' | 'download',
+    },
+}
+```
+
+Later, I would like to introduce other options like:
+
+- `add-dimensions-only`: Only add dimensions to the images when missing and no image is downloaded.
+- `cdn-srcset-when-possible`: using image CDN capabilities for resize and image format for `srcset` images.
+
+## Step 2: Download
+
+External images will be download and stored in folder `_jampack/` at the root of the static website and
+they will be processed and optimized as local images.
+
+And with this, [we have the demo working](/features/optimize-images-external/)!
+
+## Step 3: Caching
+
+We don't want to download all images and reprocess them for every run of `jampack`.
+
+If the image didn't change we should not re-download.
+
+Let's use [HTTP Caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching)!
+
+### Adding downloaded images to the cache
+
+`jampack` already has a [cache for processed images](/cache) located in folder `.jampack`.
+
+Let use it as well for downloaded images.
+
+- Processed images by `sharp` will go to subfolder `img`.
+- Downloaded images will go to subfolder `img-ext`.
+
+### Let's ask if the image has changed
+
+`jampack` will call all external images with `If-Modified-Since` HTTP header (when image is in cache).
+The server should respond status `200 OK` if a new image exist or `304 Not modified` if the image is the same.
+CDNs are good at that!
+
+If the server respond with `304 Not modified` we will then source the image directly from the cache.
+
+```
+# Performance results (Processing 10 external images)
+- Without cache => ~8s
+- With 304 => ~2.5s
+(this will obviously vary with image size and network speed)
+```
+
+**Success!**
+
+But this means we still have to make a HTTP request for each image.
+For websites with thousands of external images this could still be
+a performance issue.
+
+### If we know the image is still fresh, don't even ask
+
+In the HTTP response, the server tells us how long we can cache the image and don't even ask for it.
+
+This is done though headers properties [`Expires` or `Cache-Control: max-age`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching#expires_or_max-age).
+
+`jampack` will calculate the expiration time of the image and take the image directly from the cache without any HTTP call. Exactly like a browser.
+
+**Success!**
+
+```
+# Performance results (Processing 10 external images)
+- Without cache => ~8s
+- With 304 => ~2.5s
+- Direct from cache => ~0.25s
+```
+
+We have now an efficient external image download 👍
+
+External images are usually immutable when served from a CDN for example. So we can expect very high rate of cache use.
+Only new external images are likely to be downloaded.
+
+### Support for no-cache directive
+
+Sometimes images should not be cache because they are generated on demand.
+
+So `jampack` implements the following directives in HTTP Header:
+
+- `Cache-Control: no-cache`
+- `Cache-Control: max-age=0, must-revalidate`
+
+As explained in [HTTP Caching "Force Revalidation"](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching#force_revalidation).
+
+### What about the same image on multiple pages?
+
+The same image should be downloaded only once. The cache will take care of this usecase 👍
+
+## It's not perfect
+
+There are a little bit more subtleties in proper HTTP cache management. But this first version should be good
+enough to cover the common ones.
+
+We will improve the cache as we go and as we encounter performance issues or bugs.
+
+## The result
+
+`jampack` has a now an [configuration](/configuration/) to [download and process external images](/features/optimize-images-external/):
+
+```js
+image: {
+    external: {
+      process: 'off' | 'download',
+    },
+}
+```
+
+combined with a cache that tries to make it not too slow 💪
+
+## Released
+
+- `jampack 0.12.0+`

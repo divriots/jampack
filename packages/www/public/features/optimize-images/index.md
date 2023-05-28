@@ -3,7 +3,7 @@ title: 'Optimize images'
 jampack: '--onlyoptim'
 ---
 
-`jampack` optimizes images for faster download on any device and better [Core Web Vitals](https://web.dev/learn-core-web-vitals/) scores.
+`jampack` optimizes local images for faster download on any device and better [Core Web Vitals](https://web.dev/learn-core-web-vitals/) scores.
 
 - Compresses images using better compressors or modern formats.
 - Generates responsive image sets for smaller devices.

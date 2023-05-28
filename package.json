@@ -1,6 +1,6 @@
 {
   "name": "@divriots/jampack",
-  "version": "0.11.7",
+  "version": "0.12.0",
   "description": "Packer for static websites",
   "author": "Georges Gomes @georges-gomes",
   "bin": {
@@ -49,7 +49,7 @@
     "prepublishOnly": "pnpm build"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=18.0.0"
   },
   "bugs": "https://github.com/divriots/jampack/issues",
   "keywords": [],
