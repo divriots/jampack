@@ -1,7 +1,9 @@
 ---
-title: 'Optimize external images (Experimental)'
+title: 'Optimize external images'
 jampack: '--onlyoptim'
 ---
+
+> This feature is experimental
 
 `jampack` can optionally optimizes external images for faster download on any device and better [Core Web Vitals](https://web.dev/learn-core-web-vitals/) scores.
 
