@@ -1,5 +1,5 @@
 ---
-title: 'Optimize external images'
+title: 'Optimize external images (Experimental)'
 jampack: '--onlyoptim'
 ---
 
