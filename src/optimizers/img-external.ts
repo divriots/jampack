@@ -5,6 +5,7 @@ import { fileTypeFromBuffer } from 'file-type';
 import { addToCache, getFromCache } from '../cache.js';
 import { parse } from '../utils/cache-control-parser.js';
 import $state from '../state.js';
+import '../utils/polyfill-fetch.js';
 
 export async function downloadExternalImage(href: string): Promise<string> {
   const hash = hasha(href, {

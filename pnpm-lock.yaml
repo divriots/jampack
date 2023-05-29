@@ -23,6 +23,7 @@ specifiers:
   ts-node: ^10.2.1
   tslib: ^2.5.0
   typescript: ^5.0.4
+  undici: ^5.22.1
 
 dependencies:
   '@divriots/cheerio': 1.0.0-rc.12
@@ -41,6 +42,7 @@ dependencies:
   sharp: 0.32.1
   svgo: 3.0.2
   table: 6.8.1
+  undici: 5.22.1
 
 devDependencies:
   '@types/html-minifier-terser': 7.0.0
