@@ -243,7 +243,10 @@ async function processImage(
         return;
       case 'download': // Download external image for local processing
         try {
-          attrib_src = await downloadExternalImage(attrib_src);
+          const htmlFolder = path.dirname(
+            path.resolve(path.join($state.dir, htmlfile))
+          );
+          attrib_src = await downloadExternalImage(attrib_src, htmlFolder);
           img.attr('src', attrib_src);
         } catch (e: any) {
           $state.reportIssue(htmlfile, {

@@ -4,10 +4,12 @@ import hasha from 'hasha';
 import { fileTypeFromBuffer } from 'file-type';
 import { addToCache, getFromCache } from '../cache.js';
 import { parse } from '../utils/cache-control-parser.js';
-import $state from '../state.js';
 import '../utils/polyfill-fetch.js';
 
-export async function downloadExternalImage(href: string): Promise<string> {
+export async function downloadExternalImage(
+  href: string,
+  dir: string
+): Promise<string> {
   const hash = hasha(href, {
     algorithm: 'md5',
   });
@@ -102,9 +104,14 @@ export async function downloadExternalImage(href: string): Promise<string> {
 
   // Construct local filename
   if (!ext) throw new Error('Unknown image format');
-  const filename = `/_jampack/${hash}.${ext}`;
+  const filename = `./_jampack/${hash}.${ext}`;
 
-  fs.writeFile(path.join($state.dir, filename), buffer);
+  try {
+    await fs.mkdir(path.join(dir, '_jampack'));
+  } catch (e) {
+    // Nothing to do - folder is probably already present
+  }
+  fs.writeFile(path.join(dir, filename), buffer);
 
   return filename;
 }

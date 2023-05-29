@@ -67,14 +67,6 @@ program
     // Clean cache
     cleanCache(options.cleancache);
 
-    // Create _jampack folder
-    try {
-      mkdirSync(join($state.dir, '_jampack'));
-    } catch (e: any) {
-      console.error(e.message);
-      exit(1);
-    }
-
     if (!options.onlycomp) {
       printTitle('PASS 1 - Optimizing');
       console.time('Done');
