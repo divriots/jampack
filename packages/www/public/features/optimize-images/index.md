@@ -1,5 +1,5 @@
 ---
-title: 'Optimize images'
+title: 'Optimize local images'
 jampack: '--onlyoptim'
 ---
 

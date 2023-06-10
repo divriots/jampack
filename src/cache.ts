@@ -1,15 +1,18 @@
 import hasha from 'hasha';
 import path from 'path';
 import * as fs from 'fs/promises';
-import type { Image, ImageFormat } from './compressors/images.js';
-import { VERSION } from './version.js';
 import $state from './state.js';
 
-export type Category = 'img' | 'img-ext';
-export type CacheData = { buffer: Buffer; meta: any };
+const listOfCategories = ['img', 'img-ext'] as const;
+export type Category = (typeof listOfCategories)[number];
 
 const CACHE_FOLDER = '.jampack/cache';
-const CACHE_FOLDER_VERSION = CACHE_FOLDER + '/' + VERSION;
+const CACHE_VERSIONS: Record<string, string> = {
+  img: 'v1',
+  'img-ext': 'v1',
+} satisfies Record<Category, string>;
+
+export type CacheData = { buffer: Buffer; meta: any };
 
 async function cleanCache(full: boolean) {
   if (full) {
@@ -21,21 +24,37 @@ async function cleanCache(full: boolean) {
     return;
   }
 
-  // List versions in cache
-  let files: string[];
+  // Delete old cache category
+  let catFolders: string[] = [];
   try {
-    files = await fs.readdir(CACHE_FOLDER);
+    catFolders = await fs.readdir(CACHE_FOLDER);
   } catch (e) {
-    // Nothing to do probably no cache available
-    return;
+    // No problem
   }
 
-  // Delete old cache versions
-  await files
-    .filter((f) => f !== VERSION)
-    .forEach(async (f) =>
-      fs.rm(path.join(CACHE_FOLDER, f), { recursive: true })
-    );
+  for (const f of catFolders) {
+    // @ts-ignore
+    if (!listOfCategories.includes(f))
+      fs.rm(path.join(CACHE_FOLDER, f), { recursive: true });
+  }
+
+  // Loop cache folders
+  for (const cat of listOfCategories) {
+    const location = path.join(CACHE_FOLDER, cat);
+    // List versions in cache
+    let folders: string[];
+    try {
+      folders = await fs.readdir(location);
+    } catch (e) {
+      continue;
+    }
+
+    // Delete old cache versions
+    for (const f of folders) {
+      if (f !== CACHE_VERSIONS[cat])
+        fs.rm(path.join(location, f), { recursive: true });
+    }
+  }
 }
 
 function computeCacheHash(buffer: Buffer, options?: any) {
@@ -50,8 +69,17 @@ function computeCacheHash(buffer: Buffer, options?: any) {
   return hash;
 }
 
+function getVersionOfCategory(category: Category): string {
+  return CACHE_VERSIONS[category];
+}
+
 function getLocation(hash: string, category: Category): string {
-  return path.join(CACHE_FOLDER_VERSION, category, hash);
+  return path.join(
+    CACHE_FOLDER,
+    category,
+    getVersionOfCategory(category),
+    hash
+  );
 }
 
 async function getFromCache(

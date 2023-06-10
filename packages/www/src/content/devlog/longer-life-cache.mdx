@@ -1,0 +1,52 @@
+---
+date: 2023-06-10
+author: ['georges-gomes']
+title: Longer life for cache
+---
+
+Up until now (`jampack v0.12.2`), the cache was versionned with the version of `jampack`.
+This was a guarantee that the cache consumed by `jampack` was always up-to-date with the code.
+Avoiding bugs to stay in the cache.
+
+This means that everytime, the user upgraded to a new `jampack` version, everything would need to processed
+and cached again. And when you have thousands of images, it's not a small job.
+
+It was OK at the begining because so much changes were going on in with the image processing that
+pretty much every new version required a fresh new cache.
+
+But now, new versions are just adding new features or fixing bugs that are unrelated to images. Reprocessing
+the cache for these updates is a waste of time.
+
+Also, with the recent addition of new cache category for [external images](/devlog/external-images),
+the cache is splitted in different types of data and they don't need to be affected together.
+
+## Cache structure before
+
+```
+/.jampack/cache/0.12.2/img/...
+/.jampack/cache/0.12.2/img-ext/...
+```
+
+## Cache structure now (0.13.0+)
+
+```
+/.jampack/cache/img/v1/...
+/.jampack/cache/img-ext/v1/...
+```
+
+`v1` is the version number of the cache and it can now be adjusted individually for `img` (local image processing cache) and `img-ext` (external images).
+
+## Migration
+
+`jampack` will automatically delete all cache structure and create the new one. There is no need to delete the old cache manually.
+
+## Downside
+
+The downside is that the version number of the caches must be manually ajusted before release if bug fixes or features
+affecting the cache are not backward compatible with older caches.
+
+It requires more discipline. But it's easy to fix in a patch.
+
+## Release
+
+- `0.13.0`
