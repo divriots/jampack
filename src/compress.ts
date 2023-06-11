@@ -78,7 +78,7 @@ const processFile = async (file: string, stats: Stats): Promise<void> => {
 export async function compressFolder(exclude: string): Promise<void> {
   const spinner = ora(getProgressText()).start();
 
-  const globs = ['**/**'];
+  const globs = ['**/**', '!_jampack/**']; // Exclude jampack folder because already compressed
   if (exclude) globs.push('!' + exclude);
   const paths = await globby(globs, { cwd: $state.dir, absolute: true });
 
