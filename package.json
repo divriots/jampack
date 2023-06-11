@@ -47,7 +47,8 @@
     "try": "shx rm -fr demo && cp -R demo_rf demo && node ./dist/index.js ./demo --nocache --onlyoptim",
     "build": "shx rm -rf dist && tsc -b",
     "lint": "eslint . --ext .ts --config .eslintrc",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "pnpm build",
+    "cleanAllDotJampack": "find -s . | grep '.jampack$' | xargs rm -fr"
   },
   "engines": {
     "node": ">=14.0.0"
