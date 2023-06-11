@@ -35,17 +35,19 @@ becomes
 
 ```html
 <img
-     src="/_jampack/ab99b9d280ce4cf7cfc810b59f3a7739.jpg.webp"
+     src="_jampack/ab99b9d280ce4cf7cfc810b59f3a7739.jpg.webp"
      alt="Clouds in the sky by Taylor Van Riper"
      loading="lazy"
      decoding="async"
      width="1287"
      height="1931"
      srcset="
-        /_jampack/ab99b9d280ce4cf7cfc810b59f3a7739.jpg.webp  1287w,
-        /_jampack/ab99b9d280ce4cf7cfc810b59f3a7739@987w.webp  987w,
-        /_jampack/ab99b9d280ce4cf7cfc810b59f3a7739@687w.webp  687w
+        _jampack/ab99b9d280ce4cf7cfc810b59f3a7739.jpg.webp  1287w,
+        _jampack/ab99b9d280ce4cf7cfc810b59f3a7739@987w.webp  987w,
+        _jampack/ab99b9d280ce4cf7cfc810b59f3a7739@687w.webp  687w
      "
      sizes="100vw"
     />
 ```
+
+For more details, see [how local images are optimized](/features/optimize-images).

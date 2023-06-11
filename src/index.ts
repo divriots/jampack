@@ -67,6 +67,14 @@ program
     // Clean cache
     await cleanCache(options.cleancache);
 
+    // Make _jampack folder
+    try {
+      mkdirSync(join(dir, '_jampack'));
+    } catch (e) {
+      console.error('Failed to create `_jampack` folder.');
+      exit(1);
+    }
+
     if (!options.onlycomp) {
       printTitle('PASS 1 - Optimizing');
       console.time('Done');

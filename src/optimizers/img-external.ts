@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import $state from '../state.js';
 import hasha from 'hasha';
 import { fileTypeFromBuffer } from 'file-type';
 import { addToCache, getFromCache } from '../cache.js';
@@ -7,8 +8,8 @@ import { parse } from '../utils/cache-control-parser.js';
 import '../utils/polyfill-fetch.js';
 
 export async function downloadExternalImage(
-  href: string,
-  dir: string
+  htmlfile: string,
+  href: string
 ): Promise<string> {
   const hash = hasha(href, {
     algorithm: 'md5',
@@ -102,16 +103,18 @@ export async function downloadExternalImage(
   // buffer can't be undefined here
   if (!buffer) throw new Error('Buffer is undefined');
 
-  // Construct local filename
-  if (!ext) throw new Error('Unknown image format');
-  const filename = `./_jampack/${hash}.${ext}`;
+  // Construct contenthash
+  const contentHash = hasha(buffer, { algorithm: 'md5' });
 
-  try {
-    await fs.mkdir(path.join(dir, '_jampack'));
-  } catch (e) {
-    // Nothing to do - folder is probably already present
-  }
-  fs.writeFile(path.join(dir, filename), buffer);
+  // Construct local filename relative to root dir
+  if (!ext) throw new Error('Unknown image format');
+  const htmlFolder = path.dirname(htmlfile);
+  const filename = path.relative(
+    path.join($state.dir, htmlFolder),
+    path.join($state.dir, `_jampack/${contentHash}.${ext}`)
+  );
+
+  await fs.writeFile(path.join($state.dir, htmlFolder, filename), buffer);
 
   return filename;
 }
