@@ -20,9 +20,7 @@ export type Options = {
     external: {
       process:
         | 'off' // Default
-        | 'download' // Experimental
-        | 'cdn-srcset-when-possible' // Not implemented
-        | 'add-dimensions-only'; // Not implemented
+        | 'download'; // Experimental
       src_include: RegExp;
       src_exclude: RegExp | null;
     };

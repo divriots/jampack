@@ -253,14 +253,6 @@ async function processImage(
           return; // No more processing
         }
         break;
-      case 'add-dimensions-only': // Only add dimensions of image
-        throw new Error(
-          'External images with `add-dimensions-only` is not implemented yet.'
-        );
-      case 'cdn-srcset-when-possible': // Use unpic to use CDN capabilities
-        throw new Error(
-          'External images with `cdn-srcset-when-possible` is not implemented yet.'
-        );
     }
   }
 
