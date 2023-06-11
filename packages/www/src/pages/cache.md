@@ -34,12 +34,6 @@ This is fairly easy to do with Github Actions, using the [actions/cache@v3](http
 - save the `.jampack` folder to a new cache named 'jampack' suffixed by the run ID, after the job runs. Do notice that you may want to have different keys if running `jampack` on different sites. Caches that have not been used for the longest time are evicted automatically, so this is safe
 - restore the last saved cached `.jampack` folder before the `Build` step, allowing `jampack` to reuse the cache
 
-## Versioning
-
-`jampack` versions the cache.
-
-Consequently, when you upgrade to a new version of `jampack`, it will build a full new cache.
-
 ## Options
 
 See [CLI Options](./cli-options/) for options around cache management.
