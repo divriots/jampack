@@ -4,6 +4,7 @@ description: Configuration file for `jampack`.
 layout: ../layouts/MainLayout.astro
 ---
 
+import { Code } from 'astro/components';
 import config_type from '../../../../src/config-types.ts?raw';
 import config_default from '../../../../src/config-default.ts?raw';
 
@@ -34,17 +35,13 @@ export default {
 
 Available in [config-types.js](https://github.com/divriots/jampack/blob/main/src/config-types.ts).
 
-<pre class="astro-code">
-  <code>{config_type}</code>
-</pre>
+<Code code={config_type} lang="js" theme="dark-plus" />
 
 ## Default values
 
 Available in [config-default.js](https://github.com/divriots/jampack/blob/main/src/config-default.ts).
 
-<pre class="astro-code">
-  <code>{config_default}</code>
-</pre>
+<Code code={config_default} lang="js" theme="dark-plus" />
 
 ## Technical notes
 
