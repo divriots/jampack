@@ -30,7 +30,8 @@
     "preact": "^10.7.3",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
-    "sass": "^1.56.1"
+    "sass": "^1.56.1",
+    "shiki": "^0.14.3"
   },
   "devDependencies": {
     "ultrahtml": "^1.0.0"
