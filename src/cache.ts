@@ -2,15 +2,12 @@ import hasha from 'hasha';
 import path from 'path';
 import * as fs from 'fs/promises';
 import $state from './state.js';
+import { CACHE_VERSIONS } from './packagejson.js';
 
 const listOfCategories = ['img', 'img-ext'] as const;
 export type Category = (typeof listOfCategories)[number];
 
 const CACHE_FOLDER = '.jampack/cache';
-const CACHE_VERSIONS: Record<string, string> = {
-  img: 'v1',
-  'img-ext': 'v1',
-} satisfies Record<Category, string>;
 
 export type CacheData = { buffer: Buffer; meta: any };
 

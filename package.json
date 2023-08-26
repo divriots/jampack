@@ -1,6 +1,10 @@
 {
   "name": "@divriots/jampack",
   "version": "0.13.0",
+  "cache-version": {
+    "img": "v1",
+    "img-ext": "v1"
+  },
   "description": "Packer for static websites",
   "author": "Georges Gomes @georges-gomes",
   "bin": {

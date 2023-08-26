@@ -11,7 +11,7 @@ import { printTitle } from './logger.js';
 import { exit } from 'process';
 import kleur from 'kleur';
 import { cleanCache } from './cache.js';
-import { VERSION } from './version.js';
+import { VERSION } from './packagejson.js';
 import { mkdirSync } from 'fs';
 import { join } from 'path';
 
