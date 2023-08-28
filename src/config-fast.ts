@@ -1,3 +1,5 @@
+import { Options } from './config-types.js';
+
 const fast_options_override: any = {
   image: {
     embed_size: 0,
@@ -20,6 +22,9 @@ const fast_options_override: any = {
       options_lossly: {
         effort: 0,
       },
+    },
+    svg: {
+      optimization: false,
     },
   },
 };

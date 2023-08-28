@@ -42,5 +42,8 @@ export type Options = {
       options_lossless: WebpOptions;
       options_lossly: WebpOptions;
     };
+    svg: {
+      optimization: boolean;
+    };
   };
 };

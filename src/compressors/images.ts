@@ -59,6 +59,8 @@ export async function compressImage(
 
   // Special case for svg
   if (meta.format === 'svg') {
+    if (!config.image.svg.optimization) return undefined;
+
     try {
       const output = svgo(data.toString(), {
         multipass: true,

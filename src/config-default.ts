@@ -38,6 +38,9 @@ const default_options: Options = {
         mode: 'lossly',
       },
     },
+    svg: {
+      optimization: true,
+    },
   },
 };
 
