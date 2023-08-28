@@ -37,7 +37,7 @@ const isDevLog = currentPageMatch.startsWith('devlog/');
 					<ul>
 						{children.map((child) => {
 							let url = child.link.startsWith('https://') ? child.link : Astro.site?.pathname + child.link;
-							if (url !== '/') url += '/';
+							if (!url.endsWith('/')) url += '/';
 							return (
 								<li class="nav-link">
 									<a href={url} aria-current={currentPageMatch === child.link ? 'page' : false}>
