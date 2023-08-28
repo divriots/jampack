@@ -14,7 +14,7 @@ export function fast() {
 export async function loadConfig() {
   const proload = await load('jampack', { mustExist: false });
   if (proload) {
-    console.log('Overriding default config with:');
+    console.log('Merging default config with:');
     console.log(JSON.stringify(proload.value, null, 2));
     Object.assign(options, deepmerge(options, proload.value));
   }

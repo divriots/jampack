@@ -47,8 +47,6 @@ export async function compressImage(
   // Load modifiable toFormat
   let toFormat = options.toFormat || 'unchanged';
 
-  if (!config.image.compress) return undefined;
-
   let sharpFile = await sharp(data, { animated: true });
   const meta = await sharpFile.metadata();
 

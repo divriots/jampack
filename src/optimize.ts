@@ -308,10 +308,12 @@ async function processImage(
         : 'webp';
   }
 
-  newImage = await compressImage(await originalImage.getData(), {
-    toFormat: srcToFormat,
-    resize: { width: config.image.srcset_max_width },
-  });
+  if (config.image.compress) {
+    newImage = await compressImage(await originalImage.getData(), {
+      toFormat: srcToFormat,
+      resize: { width: config.image.srcset_max_width },
+    });
+  }
 
   if (
     newImage?.data &&
