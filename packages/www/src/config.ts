@@ -55,6 +55,7 @@ export const featuresDirs = [
   'optimize-images-external',
   'optimize-above-the-fold',
   'embed-small-images',
+  'images-max-width',
   'iframe',
   'compress-all',
   'autofixes',

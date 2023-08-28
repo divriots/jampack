@@ -15,8 +15,10 @@ export type Options = {
     add_css_reset_as: 'inline' | 'off';
   };
   image: {
-    embed_size: number;
-    srcset_min_width: number;
+    embed_size: number; // Embed above the fold images if size < embed_size
+    srcset_min_width: number; // Minimum width of generate image in srcset
+    srcset_max_width: number; // Maximum width of generate image in srcset
+    max_width: number; // Maximum width of original images - if bigger => resized output
     external: {
       process:
         | 'off' // Default

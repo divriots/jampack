@@ -310,6 +310,7 @@ async function processImage(
 
   newImage = await compressImage(await originalImage.getData(), {
     toFormat: srcToFormat,
+    resize: { width: config.image.srcset_max_width },
   });
 
   if (
@@ -570,9 +571,8 @@ async function generateSrcSet(
 
   // Start reduction
   const step = 300; //px
-  const ratio = imageWidth / imageHeight;
   let valueW = !startSrc ? imageWidth : imageWidth - step;
-  let valueH = Math.trunc(valueW / ratio);
+  valueW = Math.min(valueW, config.image.srcset_max_width);
   let previousImageSize = startSrcLength || Number.MAX_VALUE;
 
   while (valueW >= config.image.srcset_min_width) {
@@ -590,7 +590,7 @@ async function generateSrcSet(
     if (!$state.compressedFiles.has(absoluteFilename)) {
       const compressedImage = await compressImage(
         await originalImage.getData(),
-        { ...options, resize: { width: valueW, height: valueH } }
+        { ...options, resize: { width: valueW } }
       );
 
       if (
@@ -620,7 +620,6 @@ async function generateSrcSet(
 
     // reduce size
     valueW -= step;
-    valueH = Math.trunc(valueW / ratio);
   }
 
   if (new_srcset) {

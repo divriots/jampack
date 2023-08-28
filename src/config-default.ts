@@ -7,6 +7,8 @@ const default_options: Options = {
   image: {
     embed_size: 1500,
     srcset_min_width: 640,
+    srcset_max_width: 1920 * 2,
+    max_width: 99999,
     external: {
       process: 'off',
       src_include: /^.*$/,

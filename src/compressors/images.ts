@@ -153,10 +153,10 @@ export async function compressImage(
   if (!outputFormat) return undefined;
 
   // If resize is requested
-  if (options.resize?.width && options.resize?.height) {
+  if (options.resize?.width || options.resize?.height) {
+    const resize = options.resize;
     sharpFile = sharpFile.resize({
-      ...options.resize,
-      fit: 'fill',
+      ...resize,
       withoutEnlargement: true,
     });
   }
