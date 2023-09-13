@@ -1,0 +1,48 @@
+h1 {
+  color: blue;
+}
+
+h2.unused {
+  color: red;
+}
+
+p {
+  color: purple;
+}
+
+p.unused {
+  color: orange;
+}
+
+header {
+  padding: 0 50px;
+}
+
+.banner {
+  font-family: sans-serif;
+}
+
+.contents {
+  padding: 50px;
+  text-align: center;
+}
+
+.input-field {
+  padding: 10px;
+}
+
+footer {
+  margin-top: 10px;
+}
+
+.container {
+  border: 1px solid;
+}
+
+div:is(:hover, .active) {
+  color: #000;
+}
+
+div:is(.selected, :hover) {
+  color: #fff;
+}

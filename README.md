@@ -116,7 +116,7 @@ In a 2nd PASS, `jampack` compresses all untouched assets and keep the same name 
 | --------------- | --------------------- | 
 | `.html`,`.htm`  | [`html-minifier-terser`](https://github.com/terser/html-minifier-terser) |   
 | `.css`          | [`lightningCSS`](https://lightningcss.dev)  |
-| `.js`           | [`swc`](https://swc.rs/)                   |   
+| `.js`           | [`esbuild`](https://esbuild.github.io/) or [`swc`](https://swc.rs/)                   |   
 | `.svg`          | [`svgo`](https://github.com/svg/svgo)                  |  
 | `.jpg`,`.jpeg`  | [`sharp`](https://sharp.pixelplumbing.com/)                 |  
 | `.png`          | [`sharp`](https://sharp.pixelplumbing.com/)                |    

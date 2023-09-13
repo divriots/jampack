@@ -3,7 +3,7 @@ import { Options } from './config-types.js';
 const fast_options_override: any = {
   image: {
     embed_size: 0,
-    srcset_min_width: 16000,
+    srcset_min_width: 99999,
     compress: false,
     jpeg: {
       options: {
@@ -26,6 +26,9 @@ const fast_options_override: any = {
     svg: {
       optimization: false,
     },
+  },
+  misc: {
+    prefetch_links: 'none',
   },
 };
 

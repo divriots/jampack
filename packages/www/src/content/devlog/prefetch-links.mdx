@@ -1,0 +1,26 @@
+---
+date: 2023-09-04
+author: ['georges-gomes']
+title: Prefetch links
+---
+
+[jampack](/) has a new option to prefetch links on pages.
+
+This makes navigation to subsequent pages load faster.
+
+```js
+{
+  misc: {
+    prefetch_links: 'in-viewport' | 'none';
+  }
+}
+```
+
+- `none`: No prefetch of links.
+- `in-viewport`: Links are prefetched when entering viewport.
+
+See [Prefetch links](/features/prefetch-links/) for more details.
+
+## Released
+
+- `jampack 0.20.0+`

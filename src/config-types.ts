@@ -14,6 +14,12 @@ export type Options = {
     */
     add_css_reset_as: 'inline' | 'off';
   };
+  js: {
+    compressor: 'esbuild' | 'swc'; // swc have smaller result but can break code (seen with SvelteKit code)
+  };
+  css: {
+    inline_critical_css: boolean; // Only works for relative stylesheets for the moment
+  };
   image: {
     embed_size: number; // Embed above the fold images if size < embed_size
     srcset_min_width: number; // Minimum width of generate image in srcset
@@ -45,5 +51,8 @@ export type Options = {
     svg: {
       optimization: boolean;
     };
+  };
+  misc: {
+    prefetch_links: 'in-viewport' | 'none';
   };
 };

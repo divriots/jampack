@@ -1,0 +1,24 @@
+---
+date: 2023-09-04
+author: ['georges-gomes']
+title: Inline critical CSS
+---
+
+[jampack](/) has a new option to inline critical CSS.
+
+- Avoids a [FOUC](https://en.wikipedia.org/wiki/Flash_of_unstyled_content) while the stylesheet is remotely downloaded after the html content.
+- Improves [CLS](https://web.dev/cls/) score of [Core Web Vitals](https://web.dev/vitals/).
+
+```js
+{
+  css: {
+    inline_critical_css: true,
+  }
+}
+```
+
+See [Inline critical CSS](/features/inline-critical-css/) for more details.
+
+## Released
+
+- `jampack 0.20.0+`

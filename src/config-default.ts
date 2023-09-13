@@ -4,10 +4,16 @@ const default_options: Options = {
   html: {
     add_css_reset_as: 'inline',
   },
+  css: {
+    inline_critical_css: false, // Doesn't work yet
+  },
+  js: {
+    compressor: 'esbuild',
+  },
   image: {
     embed_size: 1500,
-    srcset_min_width: 640,
-    srcset_max_width: 1920 * 2,
+    srcset_min_width: 390 * 2, // HiDPI phone
+    srcset_max_width: 1920 * 2, // 4K
     max_width: 99999,
     external: {
       process: 'off',
@@ -41,6 +47,9 @@ const default_options: Options = {
     svg: {
       optimization: true,
     },
+  },
+  misc: {
+    prefetch_links: 'none',
   },
 };
 

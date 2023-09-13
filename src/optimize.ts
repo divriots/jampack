@@ -16,6 +16,8 @@ import kleur from 'kleur';
 import ora from 'ora';
 import { isLocal, Resource, translateSrc } from './utils/resource.js';
 import { downloadExternalImage } from './optimizers/img-external.js';
+import { inlineCriticalCss } from './optimizers/inline-critical-css.js';
+import { prefetch_links_in_viewport } from './optimizers/prefetch-links.js';
 
 async function analyse(file: string): Promise<void> {
   console.log('▶ ' + file);
@@ -107,23 +109,65 @@ async function analyse(file: string): Promise<void> {
   spinnerIframe.succeed();
 
   // Remove the fold
+  //
   if (theFold) {
     $('the-fold').remove();
   }
 
-  // Add CSS to head
+  // Add to <head>
+  //
+  let prependToHead = '';
+  let appendToHead = '';
+
   if (config.html.add_css_reset_as === 'inline') {
-    const CSS = `<style>:where(img){height:auto;}</style>`;
-    const heads = $('head');
-    if (heads.length > 0) {
-      heads.prepend(CSS);
-    } else {
-      $('html')?.prepend(`<head>${CSS}</head>`);
+    prependToHead += `<style>:where(img){height:auto;}</style>`;
+  }
+
+  if (prependToHead || appendToHead) {
+    let heads = $('head');
+    if (heads.length === 0) {
+      // head tag doesn't exist
+      $('html')?.prepend(`<head></head>`);
+    }
+    heads = $('head');
+
+    // head tag exist
+    if (prependToHead) heads.prepend(prependToHead);
+    if (appendToHead) heads.append(appendToHead);
+  }
+
+  // Add to <body>
+  //
+  let appendToBody = '';
+
+  if (config.misc.prefetch_links === 'in-viewport') {
+    appendToBody += await prefetch_links_in_viewport();
+  }
+
+  if (appendToBody) {
+    const body = $('body');
+    if (body.length > 0) {
+      body.append(appendToBody);
+    }
+  }
+
+  // Render HTML
+  //
+  let htmlResult = $.html();
+
+  // Inline critical css
+  //
+  if (config.css.inline_critical_css) {
+    try {
+      const location = path.resolve(path.dirname(path.join($state.dir, file)));
+      htmlResult = await inlineCriticalCss(location, htmlResult);
+    } catch (e) {
+      console.warn('Fail to inline critical CSS', e);
     }
   }
 
   if (!$state.args.nowrite) {
-    await fs.writeFile(path.join($state.dir, file), $.html());
+    await fs.writeFile(path.join($state.dir, file), htmlResult);
   }
 }
 
