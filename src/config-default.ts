@@ -49,7 +49,7 @@ const default_options: Options = {
     },
   },
   misc: {
-    prefetch_links: 'none',
+    prefetch_links: 'off',
   },
 };
 

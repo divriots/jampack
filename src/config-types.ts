@@ -53,6 +53,6 @@ export type Options = {
     };
   };
   misc: {
-    prefetch_links: 'in-viewport' | 'none';
+    prefetch_links: 'in-viewport' | 'off';
   };
 };
