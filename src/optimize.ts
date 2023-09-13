@@ -141,7 +141,7 @@ async function analyse(file: string): Promise<void> {
   let appendToBody = '';
 
   if (config.misc.prefetch_links === 'in-viewport') {
-    appendToBody += await prefetch_links_in_viewport();
+    appendToBody += await prefetch_links_in_viewport(file);
   }
 
   if (appendToBody) {
