@@ -106,7 +106,14 @@ Lazy-load assets below-the-fold ⬇️.
 
 - Images and Iframes are lazy loaded.
 
-See [details](https://jampack.divriots.com/features/optimize-above-the-fold/).
+See [Above-the-fold optimisations](https://jampack.divriots.com/features/optimize-above-the-fold/) for details.
+
+## Prefetch links
+
+Speedup the future page navigations by prefetching the links on the page.
+Thanks to [quicklink](https://github.com/GoogleChromeLabs/quicklink), this can be done dynamically as links enter the viewport.
+
+See [Prefetch links](https://jampack.divriots.com/features/prefetch-links/) for details.
 
 ### All assets are compressed
 
