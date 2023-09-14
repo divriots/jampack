@@ -3,8 +3,6 @@ title: Inline critical CSS
 jampack: "--onlyoptim"
 ---
 
-> THIS IS EXPERIMENTAL AND ONLY WORKS FOR RELATIVE CSS STYLESHEETS RIGHT NOW. NOT ENABLED BY DEFAULT.
-
 `jampack` uses [`critters`](https://github.com/GoogleChromeLabs/critters) to inline critical CSS and lazy-loads the rest.
 
 - Avoids a [FOUC](https://en.wikipedia.org/wiki/Flash_of_unstyled_content) while the stylesheet is remotely downloaded after the html content.

@@ -159,8 +159,7 @@ async function analyse(file: string): Promise<void> {
   //
   if (config.css.inline_critical_css) {
     try {
-      const location = path.resolve(path.dirname(path.join($state.dir, file)));
-      htmlResult = await inlineCriticalCss(location, htmlResult);
+      htmlResult = await inlineCriticalCss($state.dir, htmlResult);
     } catch (e) {
       console.warn('Fail to inline critical CSS', e);
     }
