@@ -18,7 +18,7 @@ export type Options = {
     compressor: 'esbuild' | 'swc'; // swc have smaller result but can break code (seen with SvelteKit code)
   };
   css: {
-    inline_critical_css: boolean; // Only works for relative stylesheets for the moment
+    inline_critical_css: boolean;
   };
   image: {
     embed_size: number; // Embed above the fold images if size < embed_size

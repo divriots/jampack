@@ -5,7 +5,7 @@ const default_options: Options = {
     add_css_reset_as: 'inline',
   },
   css: {
-    inline_critical_css: false, // Doesn't work yet
+    inline_critical_css: false,
   },
   js: {
     compressor: 'esbuild',
