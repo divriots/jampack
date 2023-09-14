@@ -108,6 +108,13 @@ Lazy-load assets below-the-fold ⬇️.
 
 See [Above-the-fold optimisations](https://jampack.divriots.com/features/optimize-above-the-fold/) for details.
 
+## Inline critical CSS
+
+Avoid [FOUC](https://en.wikipedia.org/wiki/Flash_of_unstyled_content) while stylesheets are downloaded and parsed.
+`jampack` will inline critical CSS and lazy-load the rest of CSS.
+
+See [Inline critical CSS](https://jampack.divriots.com/features/inline-critical-css/) for details.
+
 ## Prefetch links
 
 Speedup the future page navigations by prefetching the links on the page.
