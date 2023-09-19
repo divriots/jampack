@@ -102,10 +102,10 @@ will become
 </picture>
 ```
 
-If the original image is lossless (`PNG`) then:
-- The `AVIF` image set will be compressed with very high quality settings.
+If the original image is lossless (`PNG` or `WebP lossless`) then:
 - The `WebP` image set will be compressed with [near_lossless option](https://sharp.pixelplumbing.com/api-output#webp).
+- No `AVIF` image set will be created because AVIF lossless is not very good [(1)](https://www.reddit.com/r/jpegxl/comments/l9ta2u/how_does_lossless_jpegxl_compared_to_png/) [2](https://twitter.com/jonsneyers/status/1346389917816008704?s=19).
 
-If the original image is lossly (`JPEG`) then:
+If the original image is lossly (`JPEG` or `WebP lossly`) then:
 - The `AVIF` image set will be compressed with normal quality settings.
 - The `WebP` image set will be lossly compressed.
