@@ -3,7 +3,6 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import { fileTypeFromBuffer, FileExtension, MimeType } from 'file-type';
 import sharp from 'sharp';
-import { WebPInfo } from 'webpinfo';
 import { AllImageFormat, ImageFormat } from '../compressors/images.js';
 
 type ImageMeta = {
@@ -51,8 +50,9 @@ export class Resource {
         case 'webp':
           if (!isLossless) {
             try {
-              const info = await WebPInfo.from(await this.getData());
-              isLossless = info.summary.isLossless;
+              // TODO check if webp is lossless
+              // const info = await WebPInfo.from(await this.getData());
+              // isLossless = info.summary.isLossless;
             } catch (e) {
               console.warn('Failed to get WebP info');
             }
