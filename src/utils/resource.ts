@@ -3,13 +3,15 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import { fileTypeFromBuffer, FileExtension, MimeType } from 'file-type';
 import sharp from 'sharp';
+import { WebPInfo } from 'webpinfo';
 import { AllImageFormat, ImageFormat } from '../compressors/images.js';
 
 type ImageMeta = {
   width: number | undefined;
   height: number | undefined;
   isProgressive: boolean;
-  hasAlpha: boolean;
+  isOpaque: boolean;
+  isLossless: boolean;
 };
 
 /**
@@ -39,21 +41,36 @@ export class Resource {
   public async getImageMeta() {
     if (this.image_meta === undefined) {
       const ext = await this.getExt();
+      let isLossless = false;
       switch (ext) {
         case 'svg':
         case 'gif':
-        case 'jpg':
         case 'png':
-        case 'webp':
         case 'tif':
+          isLossless = true;
+        case 'webp':
+          if (!isLossless) {
+            try {
+              const info = await WebPInfo.from(await this.getData());
+              isLossless = info.summary.isLossless;
+            } catch (e) {
+              console.warn('Failed to get WebP info');
+            }
+          }
         case 'avif':
+        // TODO
+        // Check for lossless avif
+        case 'jpg':
           let sharpFile = await sharp(await this.getData(), { animated: true });
           const meta = await sharpFile.metadata();
+          const stats = await sharpFile.stats();
+
           this.image_meta = {
             width: meta.width,
             height: meta.height,
             isProgressive: meta.isProgressive || false,
-            hasAlpha: meta.hasAlpha || false,
+            isOpaque: stats.isOpaque,
+            isLossless,
           };
           break;
       }

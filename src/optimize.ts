@@ -328,17 +328,15 @@ async function processImage(
     'unchanged';
   if (isAboveTheFold) {
     // Above the fold, nothing beats progressive JPEG for LCP
-    // but it's not transparent
-    if ((await originalImage.getImageMeta())?.hasAlpha) {
-      // TODO some images have Alpha metadata but have 0 alpha pixels
-      // We should be able to detect these to take advantage of Progressive JPEG
+    // But jpeg doesn't support transparency
+    if ((await originalImage.getImageMeta())?.isOpaque) {
+      srcToFormat = 'jpeg+progressive';
+    } else {
       srcToFormat =
         (await originalImage.getMime()) === 'image/avif' ||
         (await originalImage.getMime()) === 'image/webp'
           ? 'unchanged'
           : 'webp';
-    } else {
-      srcToFormat = 'jpeg+progressive';
     }
   } else if (isInPicture) {
     // srcToFormat should not change if in picture
@@ -525,18 +523,30 @@ async function processImage(
       // Only try to generate better images
       // TODO generate more compatible formats (avif => webp/jpeg/png)
       //
-      switch (await originalImage.getMime()) {
-        case 'image/jpeg':
+      const mime = await originalImage.getMime();
+      switch (mime) {
         case 'image/png':
+        case 'image/jpeg':
           sourcesToGenerate.push({
             mime: 'image/webp',
             format: 'webp',
           });
         case 'image/webp':
-          sourcesToGenerate.push({
-            mime: 'image/avif',
-            format: 'avif',
-          });
+          // Only add AVIF source for lossy images
+          // AVIF don't perform well on lossless images
+          // PNG and WebP will perform better
+          // https://www.reddit.com/r/jpegxl/comments/l9ta2u/how_does_lossless_jpegxl_compared_to_png/
+          // https://twitter.com/jonsneyers/status/1346389917816008704?s=19
+          const isLossless =
+            mime === 'image/png' ||
+            (mime === 'image/webp' &&
+              (await originalImage.getImageMeta())?.isLossless);
+          if (!isLossless) {
+            sourcesToGenerate.push({
+              mime: 'image/avif',
+              format: 'avif',
+            });
+          }
         case 'image/avif':
           // Nothing better
           break;
