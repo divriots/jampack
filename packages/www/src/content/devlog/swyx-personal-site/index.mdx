@@ -34,7 +34,7 @@ If you don't follow him yet, you should 👍
 https://swyx.io
 
 <picture>
-  <img src={original_www} alt="Screenshot of swyx website in light mode" />
+  <img src={original_www.src} alt="Screenshot of swyx website in light mode" />
 </picture>
 
 The 2022 version of the website was a rewrite in [SvelteKit](https://kit.svelte.dev/) and [TailwindCSS](https://tailwindcss.com/).
@@ -78,7 +78,10 @@ Looks close enough.
 **Request waterfall**
 
 <picture>
-  <img src={original_waterfall} alt="Requests waterfall from WebPageTest.org" />
+  <img
+    src={original_waterfall.src}
+    alt="Requests waterfall from WebPageTest.org"
+  />
 </picture>
 
 ### Observations
@@ -112,7 +115,7 @@ with [`@sveltejs/adapter-static`](https://kit.svelte.dev/docs/adapter-static) an
 on the output.
 
 <picture>
-  <img src={later} alt="20 minutes later" />
+  <img src={later.src} alt="20 minutes later" />
 </picture>
 
 Not an easy task - some things are specifically dynamic routes.
@@ -132,7 +135,7 @@ Download: 2.575MB
 
 <picture>
   <img
-    src={jampack_waterfall_s1_static}
+    src={jampack_waterfall_s1_static.src}
     alt="Request Waterfall after turning prerendering"
   />
 </picture>
@@ -217,7 +220,7 @@ Download: 2.592MB
 
 <picture>
   <img
-    src={jampack_waterfall_s2_jp091}
+    src={jampack_waterfall_s2_jp091.src}
     alt="Request Waterfall after turning prerendering"
   />
 </picture>
@@ -240,7 +243,7 @@ loading them eagerly. Let's free some resources by loading them lazy.
 
 <picture>
   <img
-    src={jampack_waterfall_s2_jp091}
+    src={jampack_waterfall_s2_jp091.src}
     alt="Request Waterfall after iframe lazy"
   />
 </picture>
@@ -273,7 +276,7 @@ Download: 1.250MB
 
 <picture>
   <img
-    src={jampack_waterfall_s4_jp093}
+    src={jampack_waterfall_s4_jp093.src}
     alt="Request Waterfall after no hydration"
   />
 </picture>

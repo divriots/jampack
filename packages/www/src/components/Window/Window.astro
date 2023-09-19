@@ -17,7 +17,7 @@ const { title, open_url } = Astro.props as Props;
 		<div class="zoom"></div>
 	  </div>
 	  <span>{ title }</span>
-	  { open_url ? <a href={open_url} target="_blank"><img src={externalSvg} alt="Open in new tab" title="Open in new tab"/></a> : <div></div> }
+	  { open_url ? <a href={open_url} target="_blank"><img src={externalSvg.src} alt="Open in new tab" title="Open in new tab"/></a> : <div></div> }
 	</div>
   <div class="slot">
     <slot></slot>

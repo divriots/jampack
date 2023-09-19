@@ -21,7 +21,7 @@ loaded when scrolling with `loading="lazy"`. So, embedding images after the fold
 I'm gonna use one of our websites to test it out: [https://webcomponents.dev](https://webcomponents.dev)
 
 <picture>
-  <img src={wcd} alt="Landing screenshot of WebComponents.dev" />
+  <img src={wcd.src} alt="Landing screenshot of WebComponents.dev" />
 </picture>
 
 In this landing, `jampack` embedded the WebComponents.dev logo but not much.
@@ -33,7 +33,10 @@ Good performance already 😋.
 | .191S      | .300S        | .339S | .382S       | .341S | 0   | 0S  | 65KB        |
 
 <picture>
-  <img src={requestsBefore} alt="Browser request view from WebPageTest.org" />
+  <img
+    src={requestsBefore.src}
+    alt="Browser request view from WebPageTest.org"
+  />
 </picture>
 
 A lot of waiting presumably because a lot of requests.
@@ -68,7 +71,7 @@ Let's add image dimension to embedded images too!
 
 <picture>
   <img
-    src={requestsAfter}
+    src={requestsAfter.src}
     alt="Browser request view from WebPageTest.org after new version"
   />
 </picture>
