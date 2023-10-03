@@ -1,6 +1,7 @@
 export type Args = {
   nowrite?: boolean;
   nocache?: boolean;
+  cache_folder?: string;
 };
 
 export type ReportItem = {

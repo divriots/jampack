@@ -15,3 +15,4 @@ layout: ../layouts/MainLayout.astro
 | `--exclude`   | Files to exclude from processing. Expect glob format like `--exclude 'blog/**'` |
 | `--cleancache`| Clean cache before running |
 | `--nocache`   | Don't use the cache (no read or write to cache) |
+| `--cache_folder`   | followed by the cache folder location. By default '.jampack/cache' |

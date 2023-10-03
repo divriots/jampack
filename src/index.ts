@@ -44,12 +44,15 @@ program
   .option('--fail', 'Exits with a non-zero return code if issues.')
   .option('--onlyoptim', 'Only optimize (PASS 1).')
   .option('--onlycomp', 'Only compress (PASS 2).')
+  .option('--cache_folder <cache_folder>', 'Default: .jampack/cache')
   .option('--cleancache', 'Clean cache before running')
   .option('--nocache', 'Run with no use of cache')
   .action(async (dir, options) => {
+    // Arguments
     $state.dir = dir;
     $state.args = options;
 
+    // Print options
     if (options) {
       console.log('Options:');
       console.log(options);

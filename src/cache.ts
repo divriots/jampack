@@ -5,9 +5,10 @@ import $state from './state.js';
 import { CACHE_VERSIONS } from './packagejson.js';
 
 const listOfCategories = ['img', 'img-ext'] as const;
-export type Category = (typeof listOfCategories)[number];
 
-const CACHE_FOLDER = '.jampack/cache';
+const CACHE_FOLDER = $state.args.cache_folder || '.jampack/cache';
+
+export type Category = (typeof listOfCategories)[number];
 
 export type CacheData = { buffer: Buffer; meta: any };
 
