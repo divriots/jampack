@@ -6,13 +6,17 @@ import { CACHE_VERSIONS } from './packagejson.js';
 
 const listOfCategories = ['img', 'img-ext'] as const;
 
-const CACHE_FOLDER = $state.args.cache_folder || '.jampack/cache';
-
 export type Category = (typeof listOfCategories)[number];
 
 export type CacheData = { buffer: Buffer; meta: any };
 
+function getCacheFolder(): string {
+  return $state.args.cache_folder || '.jampack/cache';
+}
+
 async function cleanCache(full: boolean) {
+  const CACHE_FOLDER = getCacheFolder();
+
   if (full) {
     try {
       await fs.rm(CACHE_FOLDER, { recursive: true });
@@ -72,6 +76,8 @@ function getVersionOfCategory(category: Category): string {
 }
 
 function getLocation(hash: string, category: Category): string {
+  const CACHE_FOLDER = getCacheFolder();
+
   return path.join(
     CACHE_FOLDER,
     category,
