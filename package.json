@@ -27,7 +27,7 @@
     "commander": "^10.0.1",
     "critters": "^0.0.20",
     "deepmerge": "^4.3.1",
-    "esbuild": "^0.19.3",
+    "esbuild": "^0.19.5",
     "file-type": "^18.5.0",
     "globby": "^13.2.2",
     "hasha": "^5.2.2",
