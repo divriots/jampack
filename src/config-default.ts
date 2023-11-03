@@ -20,6 +20,9 @@ const default_options: Options = {
       src_include: /^.*$/,
       src_exclude: null,
     },
+    cdn: {
+      process: 'off',
+    },
     compress: true,
     jpeg: {
       options: {
