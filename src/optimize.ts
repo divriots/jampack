@@ -338,7 +338,7 @@ async function processImage(
         if (img.attr('srcset') && !img.attr('sizes')) {
           img.attr('sizes', '100vw');
         }
-        break;
+        return;
     }
     switch (config.image.external.process) {
       case 'off': // Don't process external images
