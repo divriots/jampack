@@ -22,6 +22,8 @@ const default_options: Options = {
     },
     cdn: {
       process: 'off',
+      src_include: /^.*$/,
+      src_exclude: null,
     },
     compress: true,
     jpeg: {

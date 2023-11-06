@@ -21,6 +21,7 @@ import { inlineCriticalCss } from './optimizers/inline-critical-css.js';
 import { prefetch_links_in_viewport } from './optimizers/prefetch-links.js';
 
 const UNPIC_DEFAULT_HOST_REGEX = /^https:\/\/n\//g;
+const ABOVE_FOLD_DATA_ATTR = 'data-abovethefold';
 
 function getIntAttr(
   img: cheerio.Cheerio<cheerio.Element>,
@@ -57,7 +58,8 @@ async function analyse(file: string): Promise<void> {
     );
 
     const img = $(imgElement);
-    const isAboveTheFold = imgElement.startIndex! < theFold;
+    const isAboveTheFold = isImgAboveTheFold(img, imgElement, theFold);
+    img.removeAttr(ABOVE_FOLD_DATA_ATTR);
 
     try {
       await processImage(file, img, isAboveTheFold);
@@ -185,6 +187,20 @@ async function analyse(file: string): Promise<void> {
   }
 }
 
+function isImgAboveTheFold(
+  img: cheerio.Cheerio<cheerio.Element>,
+  imgElement: cheerio.Element,
+  theFold: number
+) {
+  const aboveTheFoldAttr: string | number | undefined =
+    img.attr(ABOVE_FOLD_DATA_ATTR);
+  if (aboveTheFoldAttr) {
+    const parsed = parseInt(aboveTheFoldAttr);
+    if (!Number.isNaN(parsed)) return !!parsed;
+  }
+  return imgElement.startIndex! < theFold;
+}
+
 function getTheFold($: cheerio.CheerioAPI): number {
   const theFolds = $('the-fold');
 
@@ -292,13 +308,7 @@ async function processImage(
   /*
    * Check for external images
    */
-  if (
-    !isLocal(attrib_src) &&
-    !!config.image.external.src_include &&
-    attrib_src.match(config.image.external.src_include) &&
-    (!config.image.external.src_exclude ||
-      !attrib_src.match(config.image.external.src_exclude))
-  ) {
+  if (!isLocal(attrib_src)) {
     switch (config.image.cdn.process) {
       case 'off':
         break;
@@ -307,6 +317,14 @@ async function processImage(
         if (!canonical) break;
         const cdnTransformer = getTransformer(canonical.cdn);
         if (!cdnTransformer) break;
+        if (
+          !isIncluded(
+            attrib_src,
+            config.image.cdn.src_include,
+            config.image.cdn.src_exclude
+          )
+        )
+          break;
         let attrib_width = getIntAttr(img, 'width');
         if (!attrib_width) {
           $state.reportIssue(htmlfile, {
@@ -344,6 +362,14 @@ async function processImage(
       case 'off': // Don't process external images
         return;
       case 'download': // Download external image for local processing
+        if (
+          !isIncluded(
+            attrib_src,
+            config.image.external.src_include,
+            config.image.external.src_exclude
+          )
+        )
+          break;
         try {
           attrib_src = await downloadExternalImage(htmlfile, attrib_src);
           img.attr('src', attrib_src);
@@ -655,6 +681,12 @@ async function processImage(
     }
   }
 }
+
+const isIncluded = (
+  src: string,
+  includeConf: RegExp,
+  excludeConf: RegExp | null
+) => !!src.match(includeConf) && (!excludeConf || !src.match(excludeConf));
 
 async function _generateSrcSet(
   startSrc: string | undefined,

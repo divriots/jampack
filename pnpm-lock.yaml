@@ -68,6 +68,9 @@ dependencies:
   undici:
     specifier: ^5.24.0
     version: 5.24.0
+  unpic:
+    specifier: ^3.11.0
+    version: 3.12.0
 
 devDependencies:
   '@types/html-minifier-terser':
@@ -1954,6 +1957,10 @@ packages:
     engines: {node: '>=14.0'}
     dependencies:
       busboy: 1.6.0
+    dev: false
+
+  /unpic@3.12.0:
+    resolution: {integrity: sha512-dmp0XRBeE6i+wWlWAkF7ordJYi5y7neEGSNvlM+92HUp1VnLUb37NVUZI6AZgb2Rf/vZynSadZkdGbPGXc/ZIA==}
     dev: false
 
   /uri-js@4.4.1:
