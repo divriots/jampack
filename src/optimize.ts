@@ -1,6 +1,7 @@
 import { globby } from 'globby';
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import { UrlTransformer, getCanonicalCdnForUrl, getTransformer } from 'unpic';
 import * as cheerio from '@divriots/cheerio';
 import { isNumeric } from './utils.js';
 import config from './config.js';
@@ -18,6 +19,20 @@ import { isLocal, Resource, translateSrc } from './utils/resource.js';
 import { downloadExternalImage } from './optimizers/img-external.js';
 import { inlineCriticalCss } from './optimizers/inline-critical-css.js';
 import { prefetch_links_in_viewport } from './optimizers/prefetch-links.js';
+
+const UNPIC_DEFAULT_HOST_REGEX = /^https:\/\/n\//g;
+const ABOVE_FOLD_DATA_ATTR = 'data-abovethefold';
+
+function getIntAttr(
+  img: cheerio.Cheerio<cheerio.Element>,
+  attr: string
+): number | undefined {
+  const stringValue = img.attr(attr);
+  if (!stringValue) return;
+  const parsed = parseInt(stringValue);
+  if (isNaN(parsed)) return;
+  return parsed;
+}
 
 async function analyse(file: string): Promise<void> {
   console.log('▶ ' + file);
@@ -42,10 +57,12 @@ async function analyse(file: string): Promise<void> {
       `<img> [${i + 1}/${imgsArray.length}] ${$(imgElement).attr('src')}`
     );
 
-    const isAboveTheFold = imgElement.startIndex! < theFold;
+    const img = $(imgElement);
+    const isAboveTheFold = isImgAboveTheFold(img, imgElement, theFold);
+    img.removeAttr(ABOVE_FOLD_DATA_ATTR);
 
     try {
-      await processImage(file, $, imgElement, isAboveTheFold);
+      await processImage(file, img, isAboveTheFold);
     } catch (e) {
       $state.reportIssue(file, {
         type: 'erro',
@@ -170,6 +187,20 @@ async function analyse(file: string): Promise<void> {
   }
 }
 
+function isImgAboveTheFold(
+  img: cheerio.Cheerio<cheerio.Element>,
+  imgElement: cheerio.Element,
+  theFold: number
+) {
+  const aboveTheFoldAttr: string | number | undefined =
+    img.attr(ABOVE_FOLD_DATA_ATTR);
+  if (aboveTheFoldAttr) {
+    const parsed = parseInt(aboveTheFoldAttr);
+    if (!Number.isNaN(parsed)) return !!parsed;
+  }
+  return imgElement.startIndex! < theFold;
+}
+
 function getTheFold($: cheerio.CheerioAPI): number {
   const theFolds = $('the-fold');
 
@@ -201,12 +232,9 @@ function getTheFold($: cheerio.CheerioAPI): number {
 
 async function processImage(
   htmlfile: string,
-  $: cheerio.CheerioAPI,
-  imgElement: cheerio.Element,
+  img: cheerio.Cheerio<cheerio.Element>,
   isAboveTheFold: boolean
 ): Promise<void> {
-  const img = $(imgElement);
-
   /*
    * Attribute 'src'
    */
@@ -281,10 +309,67 @@ async function processImage(
    * Check for external images
    */
   if (!isLocal(attrib_src)) {
+    switch (config.image.cdn.process) {
+      case 'off':
+        break;
+      case 'optimize':
+        const canonical = getCanonicalCdnForUrl(attrib_src);
+        if (!canonical) break;
+        const cdnTransformer = getTransformer(canonical.cdn);
+        if (!cdnTransformer) break;
+        if (
+          !isIncluded(
+            attrib_src,
+            config.image.cdn.src_include,
+            config.image.cdn.src_exclude
+          )
+        )
+          break;
+        let attrib_width = getIntAttr(img, 'width');
+        if (!attrib_width) {
+          $state.reportIssue(htmlfile, {
+            type: 'warn',
+            msg: `Missing or malformed'width' attribute for image ${attrib_src}, unable to perform CDN transform`,
+          });
+          return;
+        }
+        let attrib_height = getIntAttr(img, 'height');
+        if (!attrib_height) {
+          $state.reportIssue(htmlfile, {
+            type: 'warn',
+            msg: `Missing or malformed 'height' attribute for image ${attrib_src}, unable to perform CDN transform`,
+          });
+          return;
+        }
+        const new_srcset = await generateSrcSetForCdn(
+          attrib_src,
+          cdnTransformer,
+          attrib_width,
+          attrib_height
+        );
+
+        if (new_srcset !== null) {
+          img.attr('srcset', new_srcset);
+        }
+
+        // Add sizes attribute if not specified
+        if (img.attr('srcset') && !img.attr('sizes')) {
+          img.attr('sizes', '100vw');
+        }
+        return;
+    }
     switch (config.image.external.process) {
       case 'off': // Don't process external images
         return;
       case 'download': // Download external image for local processing
+        if (
+          !isIncluded(
+            attrib_src,
+            config.image.external.src_include,
+            config.image.external.src_exclude
+          )
+        )
+          break;
         try {
           attrib_src = await downloadExternalImage(htmlfile, attrib_src);
           img.attr('src', attrib_src);
@@ -597,6 +682,51 @@ async function processImage(
   }
 }
 
+const isIncluded = (
+  src: string,
+  includeConf: RegExp,
+  excludeConf: RegExp | null
+) => !!src.match(includeConf) && (!excludeConf || !src.match(excludeConf));
+
+async function _generateSrcSet(
+  startSrc: string | undefined,
+  imageWidth: number | undefined,
+  imageHeight: number | undefined,
+  transformSrc: (
+    valueW: number
+  ) => string | Promise<string | undefined> | undefined
+): Promise<string | null> {
+  // Start from original image
+  let new_srcset = '';
+
+  if (!imageWidth || !imageHeight) {
+    // Forget about srcset
+    return null;
+  }
+
+  // Start reduction
+  const step = 300; //px
+  let valueW = !startSrc ? imageWidth : imageWidth - step;
+  valueW = Math.min(valueW, config.image.srcset_max_width);
+
+  while (valueW >= config.image.srcset_min_width) {
+    let src = await transformSrc(valueW);
+    if (src) {
+      new_srcset += `, ${src} ${valueW}w`;
+    }
+    // reduce size
+    valueW -= step;
+  }
+
+  if (new_srcset) {
+    return startSrc
+      ? `${startSrc} ${imageWidth}w` + new_srcset
+      : new_srcset.slice(2);
+  }
+
+  return null;
+}
+
 async function generateSrcSet(
   htmlfile: string,
   originalImage: Resource,
@@ -613,24 +743,13 @@ async function generateSrcSet(
         : `.${options.toFormat?.split('+')[0]}`
     }`;
 
-  // Start from original image
-  let new_srcset = '';
-
   const meta = await originalImage.getImageMeta();
   const imageWidth = meta?.width || 0;
   const imageHeight = meta?.height || 0;
-  if (!imageWidth || !imageHeight) {
-    // Forget about srcset
-    return null;
-  }
 
-  // Start reduction
-  const step = 300; //px
-  let valueW = !startSrc ? imageWidth : imageWidth - step;
-  valueW = Math.min(valueW, config.image.srcset_max_width);
   let previousImageSize = startSrcLength || Number.MAX_VALUE;
 
-  while (valueW >= config.image.srcset_min_width) {
+  return _generateSrcSet(startSrc, imageWidth, imageHeight, async (valueW) => {
     const src = imageSrc(`@${valueW}w`);
 
     const absoluteFilename = translateSrc(
@@ -638,8 +757,6 @@ async function generateSrcSet(
       path.dirname(htmlfile),
       src
     );
-
-    let doAddToSrcSet = true;
 
     // Don't generate srcset file twice
     if (!$state.compressedFiles.has(absoluteFilename)) {
@@ -654,7 +771,7 @@ async function generateSrcSet(
       ) {
         // New image is not compressed or bigger than previous image in srcset
         // Don't add to srcset
-        doAddToSrcSet = false;
+        return;
       } else {
         // Write file
         if (!$state.args.nowrite) {
@@ -668,22 +785,25 @@ async function generateSrcSet(
         $state.compressedFiles.add(absoluteFilename);
       }
     }
+    return src;
+  });
+}
 
-    if (doAddToSrcSet) {
-      new_srcset += `, ${src} ${valueW}w`;
-    }
-
-    // reduce size
-    valueW -= step;
-  }
-
-  if (new_srcset) {
-    return startSrc
-      ? `${startSrc} ${imageWidth}w` + new_srcset
-      : new_srcset.slice(2);
-  }
-
-  return null;
+async function generateSrcSetForCdn(
+  startSrc: string,
+  cdnTransformer: UrlTransformer,
+  imageWidth: number | undefined,
+  imageHeight: number | undefined
+): Promise<string | null> {
+  return _generateSrcSet('', imageWidth, imageHeight, (valueW: number) =>
+    cdnTransformer({
+      url: startSrc,
+      width: valueW,
+    })
+      ?.toString()
+      // unpic adds a default host to absolute paths, remove it
+      ?.replace(UNPIC_DEFAULT_HOST_REGEX, '/')
+  );
 }
 
 async function setImageSize(

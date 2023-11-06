@@ -32,6 +32,13 @@ export type Options = {
       src_include: RegExp;
       src_exclude: RegExp | null;
     };
+    cdn: {
+      process:
+        | 'off' //default
+        | 'optimize';
+      src_include: RegExp;
+      src_exclude: RegExp | null;
+    };
     compress: boolean;
     jpeg: {
       options: {
