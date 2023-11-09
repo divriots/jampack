@@ -1,6 +1,6 @@
 {
   "name": "@divriots/jampack",
-  "version": "0.22.0",
+  "version": "0.22.1",
   "cache-version": {
     "img": "v1",
     "img-ext": "v1"
@@ -19,6 +19,12 @@
     "/bin",
     "/dist"
   ],
+  "exports": {
+    "./optimize": "./dist/optimize.js",
+    "./compress": "./dist/compress.js",
+    "./config": "./dist/config.js",
+    "./state": "./dist/state.js"
+  },
   "dependencies": {
     "@divriots/cheerio": "1.0.0-rc.12",
     "@proload/core": "^0.3.3",
