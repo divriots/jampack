@@ -46,12 +46,13 @@ export const ALGOLIA = {
 };
 
 export type Sidebar = Record<
-  typeof KNOWN_LANGUAGE_CODES[number],
+  (typeof KNOWN_LANGUAGE_CODES)[number],
   Record<string, { text: string; link: string }[]>
 >;
 
 export const featuresDirs = [
   'optimize-images',
+  'optimize-images-cdn',
   'optimize-images-external',
   'optimize-above-the-fold',
   'embed-small-images',

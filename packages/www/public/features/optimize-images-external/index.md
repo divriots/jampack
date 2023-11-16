@@ -7,7 +7,7 @@ jampack: '--onlyoptim'
 
 `jampack` can optionally optimizes external images for faster download on any device and better [Core Web Vitals](https://web.dev/learn-core-web-vitals/) scores.
 
-This is controled by configuration:
+## Configuration
 
 ```js
 image: {
@@ -21,6 +21,8 @@ image: {
 |-----------|-------------|
 | `'off'` | It will ignore external images and only [optimize local images](/features/optimize-images/). |
 | `'download'` | It will download external images [optimize them like local images](/features/optimize-images/). |
+
+## Example
 
 `<img>` and `<picture>` elements with external images like:
 

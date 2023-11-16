@@ -94,6 +94,74 @@ becomes responsive with multiple formats including AVIF:
 </picture>
 ```
 
+[Read more](/features/optimize-images)
+
+### CDN images become responsive
+
+```html
+<img
+      src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      alt="Clouds in the sky by Taylor Van Riper"
+      width="2848"
+      height="4272"
+    />
+```
+
+becomes
+
+```html
+<img
+      src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      alt="Clouds in the sky by Taylor Van Riper"
+      width="2848"
+      height="4272"
+      loading="lazy"
+      decoding="async"
+      srcset="
+        https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;w=2848&amp;fit=min&amp;auto=format 2848w,
+        https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;w=2548&amp;fit=min&amp;auto=format 2548w,
+        https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;w=2248&amp;fit=min&amp;auto=format 2248w,
+        https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;w=1948&amp;fit=min&amp;auto=format 1948w,
+        https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;w=1648&amp;fit=min&amp;auto=format 1648w,
+        https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;w=1348&amp;fit=min&amp;auto=format 1348w,
+        https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;w=1048&amp;fit=min&amp;auto=format 1048w
+      "
+      sizes="100vw"
+    />
+```
+
+[Read more](/features/optimize-images-cdn)
+
+### External images can be downloaded and optimized
+
+```html
+<img
+     src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=jpg&fit=crop&w=1287&q=80"
+     alt="Clouds in the sky by Taylor Van Riper"
+/>
+```
+
+becomes
+
+```html
+<img
+     src="_jampack/ab99b9d280ce4cf7cfc810b59f3a7739.jpg.webp"
+     alt="Clouds in the sky by Taylor Van Riper"
+     loading="lazy"
+     decoding="async"
+     width="1287"
+     height="1931"
+     srcset="
+        _jampack/ab99b9d280ce4cf7cfc810b59f3a7739.jpg.webp  1287w,
+        _jampack/ab99b9d280ce4cf7cfc810b59f3a7739@987w.webp  987w,
+        _jampack/ab99b9d280ce4cf7cfc810b59f3a7739@687w.webp  687w
+     "
+     sizes="100vw"
+    />
+```
+
+[Read more](/features/optimize-images-external)
+
 ### Above & below-the-fold
 
 `jampack` optimizes assets above-the-fold ⬆️.
@@ -106,21 +174,21 @@ Lazy-load assets below-the-fold ⬇️.
 
 - Images and Iframes are lazy loaded.
 
-See [Above-the-fold optimisations](https://jampack.divriots.com/features/optimize-above-the-fold/) for details.
+[Read more](https://jampack.divriots.com/features/optimize-above-the-fold/)
 
 ## Inline critical CSS
 
 Avoid [FOUC](https://en.wikipedia.org/wiki/Flash_of_unstyled_content) while stylesheets are downloaded and parsed.
 `jampack` will inline critical CSS and lazy-load the rest of CSS.
 
-See [Inline critical CSS](https://jampack.divriots.com/features/inline-critical-css/) for details.
+[Read more](https://jampack.divriots.com/features/inline-critical-css/)
 
 ## Prefetch links
 
 Speedup the future page navigations by prefetching the links on the page.
 Thanks to [quicklink](https://github.com/GoogleChromeLabs/quicklink), this can be done dynamically as links enter the viewport.
 
-See [Prefetch links](https://jampack.divriots.com/features/prefetch-links/) for details.
+[Read more](https://jampack.divriots.com/features/prefetch-links/)
 
 ### All assets are compressed
 
@@ -137,9 +205,8 @@ In a 2nd PASS, `jampack` compresses all untouched assets and keep the same name 
 | `.webp`         | [`sharp`](https://sharp.pixelplumbing.com/)                 |  
 | `.avif`         | [`sharp`](https://sharp.pixelplumbing.com/)                 |  
 
-### And more!
+### [And a lot more!](https://jampack.divriots.com/)
 
-See [Documentation](https://jampack.divriots.com/) for all feature list and examples.
 
 ## Quick use
 
