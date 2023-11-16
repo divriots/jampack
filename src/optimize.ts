@@ -135,22 +135,26 @@ async function analyse(file: string): Promise<void> {
   //
   let prependToHead = '';
   let appendToHead = '';
+  let heads = $('head'); // always exists because doc loaded with isDocument=true (default)
 
   if (config.html.add_css_reset_as === 'inline') {
     prependToHead += `<style>:where(img){height:auto;}</style>`;
   }
-
   if (prependToHead || appendToHead) {
-    let heads = $('head');
-    if (heads.length === 0) {
-      // head tag doesn't exist
-      $('html')?.prepend(`<head></head>`);
-    }
-    heads = $('head');
-
-    // head tag exist
     if (prependToHead) heads.prepend(prependToHead);
     if (appendToHead) heads.append(appendToHead);
+  }
+
+  const charsetElements$ = heads.find('meta[charset]');
+  switch (charsetElements$.length) {
+    case 0: // utf-8 is the default in html5, could check DOCTYPE is set?
+      break;
+    case 1:
+      if (charsetElements$.prev().length) heads.prepend(charsetElements$);
+      break;
+    default:
+      charsetElements$.remove();
+      heads.prepend(charsetElements$.first());
   }
 
   // Add to <body>
