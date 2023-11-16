@@ -150,9 +150,19 @@ async function analyse(file: string): Promise<void> {
     case 0: // utf-8 is the default in html5, could check DOCTYPE is set?
       break;
     case 1:
-      if (charsetElements$.prev().length) heads.prepend(charsetElements$);
+      if (charsetElements$.prev().length) {
+        $state.reportIssue(file, {
+          type: 'fix',
+          msg: 'Moving <meta charset> to the top of the <head>',
+        });
+        heads.prepend(charsetElements$);
+      }
       break;
     default:
+      $state.reportIssue(file, {
+        type: 'fix',
+        msg: 'Multiple <meta charset> found in the <head>: taking only the first one and deleting the others',
+      });
       charsetElements$.remove();
       heads.prepend(charsetElements$.first());
   }
