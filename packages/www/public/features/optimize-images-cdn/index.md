@@ -42,7 +42,7 @@ image: {
 
 | process: | Description |
 |-----------|-------------|
-| `'off'` | It will ignore cdn images threat them as [external images](/features/features/optimize-images-external). |
+| `'off'` | It will ignore cdn images and treat them as [external images](/features/features/optimize-images-external). |
 | `'optimize'` | It will detect external images as coming from CDN and generate srcsets images url on the CDN. |
 
 ## Example

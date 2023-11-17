@@ -147,7 +147,12 @@ async function analyse(file: string): Promise<void> {
 
   const charsetElements$ = heads.find('meta[charset]');
   switch (charsetElements$.length) {
-    case 0: // utf-8 is the default in html5, could check DOCTYPE is set?
+    case 0:
+      $state.reportIssue(file, {
+        type: 'fix',
+        msg: 'Adding missing <meta charset="utf-8"> to the top of the <head>',
+      });
+      heads.prepend('<meta charset="utf-8">');
       break;
     case 1:
       if (charsetElements$.prev().length) {
