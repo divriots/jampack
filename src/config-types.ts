@@ -13,6 +13,7 @@ export type Options = {
       ":where(img){height:auto}"
     */
     add_css_reset_as: 'inline' | 'off';
+    sort_attributes: boolean;
   };
   js: {
     compressor: 'esbuild' | 'swc'; // swc have smaller result but can break code (seen with SvelteKit code)

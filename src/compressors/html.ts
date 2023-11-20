@@ -1,6 +1,7 @@
 import { minify } from 'html-minifier-terser';
 import { compressCSS } from './css.js';
 import { compressJS } from './js.js';
+import config from '../config.js';
 
 async function minifyJSinHTML(originalCode: string): Promise<string> {
   const newCode = await compressJS(originalCode);
@@ -27,7 +28,7 @@ export async function compressHTML(originalCode: Buffer): Promise<Buffer> {
     minifyCSS: minifyCSSinHTML,
     minifyJS: minifyJSinHTML,
     sortClassName: true,
-    sortAttributes: true,
+    sortAttributes: config.html.sort_attributes,
   });
 
   if (newhtmlData) return Buffer.from(newhtmlData, 'utf-8');
