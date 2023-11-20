@@ -135,22 +135,41 @@ async function analyse(file: string): Promise<void> {
   //
   let prependToHead = '';
   let appendToHead = '';
+  let heads = $('head'); // always exists because doc loaded with isDocument=true (default)
 
   if (config.html.add_css_reset_as === 'inline') {
     prependToHead += `<style>:where(img){height:auto;}</style>`;
   }
-
   if (prependToHead || appendToHead) {
-    let heads = $('head');
-    if (heads.length === 0) {
-      // head tag doesn't exist
-      $('html')?.prepend(`<head></head>`);
-    }
-    heads = $('head');
-
-    // head tag exist
     if (prependToHead) heads.prepend(prependToHead);
     if (appendToHead) heads.append(appendToHead);
+  }
+
+  const charsetElements$ = heads.find('meta[charset]');
+  switch (charsetElements$.length) {
+    case 0:
+      $state.reportIssue(file, {
+        type: 'fix',
+        msg: 'Adding missing <meta charset="utf-8"> to the top of the <head>',
+      });
+      heads.prepend('<meta charset="utf-8">');
+      break;
+    case 1:
+      if (charsetElements$.prev().length) {
+        $state.reportIssue(file, {
+          type: 'fix',
+          msg: 'Moving <meta charset> to the top of the <head>',
+        });
+        heads.prepend(charsetElements$);
+      }
+      break;
+    default:
+      $state.reportIssue(file, {
+        type: 'fix',
+        msg: 'Multiple <meta charset> found in the <head>: taking only the first one and deleting the others',
+      });
+      charsetElements$.remove();
+      heads.prepend(charsetElements$.first());
   }
 
   // Add to <body>
