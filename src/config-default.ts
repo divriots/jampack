@@ -3,6 +3,7 @@ import { Options } from './config-types.js';
 const default_options: Options = {
   html: {
     add_css_reset_as: 'inline',
+    sort_attributes: false,
   },
   css: {
     inline_critical_css: false,
