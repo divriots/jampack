@@ -38,6 +38,7 @@ async function analyse(file: string): Promise<void> {
   console.log('▶ ' + file);
 
   const html = (await fs.readFile(path.join($state.dir, file))).toString();
+  if (!html.includes('<html')) return;
   const $ = cheerio.load(html, { sourceCodeLocationInfo: true });
 
   const theFold = getTheFold($);
@@ -135,7 +136,9 @@ async function analyse(file: string): Promise<void> {
   //
   let prependToHead = '';
   let appendToHead = '';
-  let heads = $('head'); // always exists because doc loaded with isDocument=true (default)
+  const heads = $('head'); // always exists because doc loaded with isDocument=true (default)
+  const charsetElements$ = heads.find('meta[charset]');
+  const wasCharsetFirst = !charsetElements$.prev().length;
 
   if (config.html.add_css_reset_as === 'inline') {
     prependToHead += `<style>:where(img){height:auto;}</style>`;
@@ -145,7 +148,6 @@ async function analyse(file: string): Promise<void> {
     if (appendToHead) heads.append(appendToHead);
   }
 
-  const charsetElements$ = heads.find('meta[charset]');
   switch (charsetElements$.length) {
     case 0:
       $state.reportIssue(file, {
@@ -155,13 +157,13 @@ async function analyse(file: string): Promise<void> {
       heads.prepend('<meta charset="utf-8">');
       break;
     case 1:
-      if (charsetElements$.prev().length) {
+      if (!wasCharsetFirst) {
         $state.reportIssue(file, {
-          type: 'fix',
+          type: 'perf',
           msg: 'Moving <meta charset> to the top of the <head>',
         });
-        heads.prepend(charsetElements$);
       }
+      if (!wasCharsetFirst || prependToHead) heads.prepend(charsetElements$);
       break;
     default:
       $state.reportIssue(file, {
