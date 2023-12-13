@@ -19,13 +19,13 @@ export async function compressCSS(
       code: originalCode,
       minify: true,
       sourceMap: false,
+      targets,
     };
     if (type === 'inline') {
       lightCSSData = lightcssStyleAttribute(options).code;
     } else {
       lightCSSData = lightcss({
         filename: 'style.css',
-        targets,
         ...options,
       }).code;
     }
