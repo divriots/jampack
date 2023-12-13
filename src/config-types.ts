@@ -5,6 +5,9 @@ export type WebpOptions = {
 };
 
 export type Options = {
+  general: {
+    browserslist: string; // browserslist query string
+  };
   html: {
     /*
       jampack adds a little bit of css to make
@@ -20,6 +23,7 @@ export type Options = {
   };
   css: {
     inline_critical_css: boolean;
+    browserslist?: string; // If present, overrides general.browserslist just for CSS
   };
   image: {
     embed_size: number; // Embed above the fold images if size < embed_size

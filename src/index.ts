@@ -6,7 +6,7 @@ import { optimize } from './optimize.js';
 import $state from './state.js';
 import { table, TableUserConfig } from 'table';
 import { formatBytes } from './utils.js';
-import { fast, loadConfig } from './config.js';
+import config, { fast, loadConfig } from './config.js';
 import { printTitle } from './logger.js';
 import { exit } from 'process';
 import kleur from 'kleur';
@@ -14,6 +14,7 @@ import { cleanCache } from './cache.js';
 import { VERSION } from './packagejson.js';
 import { mkdirSync } from 'fs';
 import { join } from 'path';
+import { loadConfig as loadConfigCSS } from './compressors/css.js';
 
 const logo = `     __                                    __    
     |__|____    _____ ___________    ____ |  | __
@@ -77,6 +78,9 @@ program
       console.error('Failed to create `_jampack` folder.');
       exit(1);
     }
+
+    // Inject config into modules
+    loadConfigCSS(config);
 
     if (!options.onlycomp) {
       printTitle('PASS 1 - Optimizing');

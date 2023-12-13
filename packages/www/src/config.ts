@@ -60,6 +60,7 @@ export const featuresDirs = [
   'inline-critical-css',
   'iframe',
   'prefetch-links',
+  'browser-compatibility',
   'compress-all',
   'autofixes',
   'warnings',

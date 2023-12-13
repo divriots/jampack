@@ -1,7 +1,12 @@
+import browserslist from 'browserslist';
 import {
+  browserslistToTargets,
   transform as lightcss,
   transformStyleAttribute as lightcssStyleAttribute,
 } from 'lightningcss';
+import { Options } from '../config-types.js';
+
+let targets = browserslistToTargets(browserslist('defaults'));
 
 export async function compressCSS(
   originalCode: Buffer,
@@ -18,7 +23,11 @@ export async function compressCSS(
     if (type === 'inline') {
       lightCSSData = lightcssStyleAttribute(options).code;
     } else {
-      lightCSSData = lightcss({ filename: 'style.css', ...options }).code;
+      lightCSSData = lightcss({
+        filename: 'style.css',
+        targets,
+        ...options,
+      }).code;
     }
   } catch (e) {
     // Error while processing with lightningcss
@@ -32,4 +41,10 @@ export async function compressCSS(
   }
 
   return resultBuffer || originalCode;
+}
+
+export function loadConfig(config: Options): void {
+  targets = browserslistToTargets(
+    browserslist(config.css.browserslist || config.general.browserslist)
+  );
 }

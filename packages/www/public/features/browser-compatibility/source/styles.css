@@ -1,0 +1,26 @@
+.container {
+  background-size: cover;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+.box {
+  border-radius: 5px;
+  font-family: sans-serif;
+  text-align: center;
+  max-width: 50%;
+  max-height: 50%;
+  padding: 20px 40px;
+}
+
+.box {
+  background-color: rgb(255 255 255 / 0.3);
+  backdrop-filter: blur(10px);
+}
+
+body {
+  background-image: url('anemones.jpg');
+}
