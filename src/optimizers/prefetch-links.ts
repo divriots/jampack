@@ -8,12 +8,13 @@ const require = createRequire(import.meta.url);
 const src_filename = 'quicklink.mjs';
 const folder = `/_jampack/quicklink-2.3.0`;
 const url_loader = `${folder}/loader.js`;
-let payloadStored = false;
 
 export async function prefetch_links_in_viewport(
   html_file: string
 ): Promise<string> {
   const path_html = path.dirname('/' + html_file);
+  const quickLinkDestination = path.join($state.dir, folder, src_filename);
+  const payloadStored = await fs.access(quickLinkDestination).catch(() => false)
 
   if (!payloadStored) {
     const path_loader = path.join($state.dir, url_loader);
@@ -27,10 +28,7 @@ export async function prefetch_links_in_viewport(
 
     // Write quicklink code
     const source = require.resolve(`quicklink/dist/${src_filename}`);
-    await fs.copyFile(source, path.join($state.dir, folder, src_filename));
-
-    // We don't need to store them anymore
-    payloadStored = true;
+    await fs.copyFile(source, quickLinkDestination);
   }
 
   return `<script type="module" src="${path.relative(
