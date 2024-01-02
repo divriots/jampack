@@ -1,12 +1,13 @@
 import $state from '../state.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as url from 'url';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
 
 const src_filename = 'quicklink.mjs';
 const folder = `/_jampack/quicklink-2.3.0`;
 const url_loader = `${folder}/loader.js`;
-const url_quicklink = `${folder}/${src_filename}`;
 let payloadStored = false;
 
 export async function prefetch_links_in_viewport(
@@ -20,15 +21,12 @@ export async function prefetch_links_in_viewport(
     await fs.mkdir(path.join($state.dir, folder), { recursive: true });
 
     // Write loader
-    const code_loader = `import { listen } from "./quicklink.mjs";
+    const code_loader = `import { listen } from "./${src_filename}";
     listen();`;
     await fs.writeFile(path_loader, code_loader);
 
     // Write quicklink code
-    const source = path.join(
-      path.dirname(url.fileURLToPath(import.meta.url)),
-      `../../node_modules/quicklink/dist/${src_filename}`
-    );
+    const source = require.resolve(`quicklink/dist/${src_filename}`);
     await fs.copyFile(source, path.join($state.dir, folder, src_filename));
 
     // We don't need to store them anymore
