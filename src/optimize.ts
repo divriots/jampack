@@ -334,9 +334,12 @@ async function processImage(
       case 'off':
         break;
       case 'optimize':
-        const canonical = getCanonicalCdnForUrl(attrib_src);
-        if (!canonical) break;
-        const cdnTransformer = getTransformer(canonical.cdn);
+        let cdnTransformer = config.image.cdn.transformer;
+        if (!cdnTransformer) {
+          const canonical = getCanonicalCdnForUrl(attrib_src);
+          if (!canonical) break;
+          cdnTransformer = getTransformer(canonical.cdn);
+        }
         if (!cdnTransformer) break;
         if (
           !isIncluded(

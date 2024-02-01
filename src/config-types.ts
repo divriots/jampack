@@ -1,3 +1,5 @@
+import type { UrlTransformer } from 'unpic';
+
 export type WebpOptions = {
   effort: number;
   mode: 'lossless' | 'lossly';
@@ -43,6 +45,7 @@ export type Options = {
         | 'optimize';
       src_include: RegExp;
       src_exclude: RegExp | null;
+      transformer?: UrlTransformer;
     };
     compress: boolean;
     jpeg: {
