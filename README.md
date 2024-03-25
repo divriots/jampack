@@ -225,7 +225,8 @@ For more options see [CLI options](https://jampack.divriots.com/cli-options/).
 - [qwind.pages.dev](https://qwind.pages.dev/)
 - [Bloycey's Blog](https://bloycey.blog/)
 - [gxanshu.in](https://gxanshu.in/)
-- [cloudcannon.com](https://cloudcannon.com)  
+- [cloudcannon.com](https://cloudcannon.com)
+- [groupsync.app](https://groupsync.app)
 > Add yours here
 
 ## Why is it called `jampack`?
