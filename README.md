@@ -219,13 +219,7 @@ For more options see [CLI options](https://jampack.divriots.com/cli-options/).
 
 ## `jampack` used in the wild
 
-- [divRIOTS.com](https://divRIOTS.com)
-- [Backlight.dev](https://backlight.dev)
-- [story.to.design](https://story.to.design)
-- [html.to.design](https://html.to.design/docs)
-- [WebComponents.dev](https://WebComponents.dev)
-- [LWC.studio](https://lwc.studio)
-- [Components.studio](https://components.studio)
+- Powering all [‹div›RIOTS](https://divRIOTS.com)' websites
 - [keycloak.ch](https://keycloak.ch)
 - [bayjs.org](https://bayjs.org/)
 - [qwind.pages.dev](https://qwind.pages.dev/)
