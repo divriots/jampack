@@ -839,6 +839,11 @@ async function setImageSize(
   let height = img.attr('height');
   let width_new: number | undefined = undefined;
   let height_new: number | undefined = undefined;
+  const img_fmt = await image.getExt();
+
+  if (img_fmt === 'svg' && !config.image.svg.add_width_and_height) {
+    return [];
+  }
 
   // Check valid values
   if (width !== undefined) {
@@ -893,7 +898,7 @@ async function setImageSize(
   } else {
     // No width or height provided - set both to image size
 
-    if ((await image.getExt()) === 'svg') {
+    if (img_fmt === 'svg') {
       // svg with no height and width has special sizing by browsers
       // They size it inside 300x150 unless they have width and height
       // attributes

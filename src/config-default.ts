@@ -55,6 +55,7 @@ const default_options: Options = {
     },
     svg: {
       optimization: true,
+      add_width_and_height: false,
     },
   },
   misc: {
