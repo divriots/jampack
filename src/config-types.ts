@@ -65,6 +65,7 @@ export type Options = {
     };
     svg: {
       optimization: boolean;
+      add_width_and_height: boolean;
     };
   };
   misc: {
