@@ -470,8 +470,18 @@ async function processImage(
     (newImage.data.length < (await originalImage.getLen()) ||
       srcToFormat === 'jpeg+progressive') // Progressive override all even if worse
   ) {
-    const additionalExtension = `.${newImage.format}`;
-    const newFilename = originalImage.filePathAbsolute + additionalExtension;
+    const newFilename = path.join(
+      path.dirname(originalImage.filePathAbsolute),
+      path.basename(
+        originalImage.filePathAbsolute,
+        path.extname(originalImage.filePathAbsolute)
+      ) + `.${newImage.format}`
+    );
+    const newSrc = path.join(
+      path.dirname(attrib_src),
+      path.basename(attrib_src, path.extname(attrib_src)) +
+        `.${newImage.format}`
+    );
 
     if (!$state.compressedFiles.has(newFilename) && !$state.args.nowrite) {
       fs.writeFile(newFilename, newImage.data);
@@ -490,7 +500,7 @@ async function processImage(
       compressedSize: newImage.data.length,
     });
 
-    img.attr('src', attrib_src + additionalExtension);
+    img.attr('src', newSrc);
   } else {
     // Drop new Image
     newImage = undefined;
