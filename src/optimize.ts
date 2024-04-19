@@ -628,9 +628,11 @@ async function processImage(
     const picture = img.parent();
 
     if (isAboveTheFold && srcToFormat === 'jpeg+progressive') {
-      // We don't need anything else than jpeg progressive above the fold
-      const nodes = picture.children(`source`);
-      nodes.remove();
+      // We were previously removing <source> elements here
+      // but they may be used to express art direction
+      // + WebP or AVIF may be a lot smaller than JPEG progressive...
+      // So for the moment we do nothing else
+      // just add the JPEG progressive
     } else {
       // List of possible sources to generate
       //
