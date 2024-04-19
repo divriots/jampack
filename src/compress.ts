@@ -2,6 +2,7 @@ import { Stats } from 'fs';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { formatBytes } from './utils.js';
+import config from './config.js';
 import $state, { ReportItem } from './state.js';
 import { globby } from 'globby';
 import ora from 'ora';
@@ -23,10 +24,12 @@ const processFile = async (file: string, stats: Stats): Promise<void> => {
       case '.svg':
       case '.webp':
       case '.avif':
-        const imgData = await fs.readFile(file);
-        const newImage = await compressImage(imgData, {});
-        if (newImage?.data && newImage.data.length < stats.size) {
-          writeData = newImage.data;
+        if (config.image.compress) {
+          const imgData = await fs.readFile(file);
+          const newImage = await compressImage(imgData, {});
+          if (newImage?.data && newImage.data.length < stats.size) {
+            writeData = newImage.data;
+          }
         }
         break;
       case '.html':
