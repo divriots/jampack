@@ -167,7 +167,6 @@ becomes
 `jampack` optimizes assets above-the-fold ⬆️.
 
 - Images are loaded with higher priority.
-- Images are compress as Progressive JPEG.
 - Small images are embedded in HTML.
 
 Lazy-load assets below-the-fold ⬇️.
