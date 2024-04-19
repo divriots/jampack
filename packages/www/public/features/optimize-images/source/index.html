@@ -9,6 +9,9 @@
     </style>
   </head>
   <body>
+    
+    <the-fold></the-fold>
+
     <h1>Responsive images generation</h1>
     <p>
       The right image size will be used by the browser based on the device of
@@ -37,6 +40,13 @@
 
     <picture>
       <img src="./picture_screenshot.png" alt="Girl listening to music" />
+    </picture>
+
+    <h3>Picture tag with media sources</h3>
+
+    <picture>
+      <source srcset="./long-cat.jpg" media="(width > 800px)">
+      <img src="./tall-cat.jpg" alt="Image">
     </picture>
 
     <h2>IMG tag</h2>

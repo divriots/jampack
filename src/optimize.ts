@@ -673,7 +673,7 @@ async function processImage(
 
       const sizes = img.attr('sizes');
 
-      for (const s of sourcesToGenerate) {
+      for (const s of sourcesToGenerate.reverse()) {
         const sourceWithThisMimeType = picture.children(
           `source[type="${s.mime}"]`
         );
@@ -701,17 +701,8 @@ async function processImage(
         const source = `<source ${
           sizes ? `sizes="${sizes}"` : ''
         } srcset="${srcset}" type="${s.mime}">`;
-        picture.prepend(source);
+        img.before(source); // Append before this way existing sources are always top priority
       }
-
-      // Reorder sources to priority order 1)avif 2)webp
-      //
-      function popupSource(type: ImageMimeType): void {
-        const nodes = picture.children(`source[type="${type}"]`);
-        picture.prepend(nodes);
-      }
-      popupSource('image/webp');
-      popupSource('image/avif');
     }
   }
 }
