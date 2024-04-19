@@ -14,25 +14,25 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@algolia/client-search": "^4.20.0",
-    "@astrojs/mdx": "1.1.0",
-    "@astrojs/preact": "^3.0.0",
-    "@astrojs/react": "^3.0.2",
-    "@docsearch/css": "^3.5.2",
-    "@docsearch/react": "^3.5.2",
-    "@types/node": "^18.17.17",
-    "@types/react": "^17.0.65",
-    "@types/react-dom": "^18.2.7",
+    "@algolia/client-search": "^4.23.3",
+    "@astrojs/mdx": "2.3.1",
+    "@astrojs/preact": "^3.2.0",
+    "@astrojs/react": "^3.3.0",
+    "@docsearch/css": "^3.6.0",
+    "@docsearch/react": "^3.6.0",
+    "@types/node": "^20.12.7",
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "^18.2.25",
     "ansi-to-html": "^0.7.2",
-    "astro": "^3.1.1",
+    "astro": "^4.6.3",
     "dir-compare": "^4.2.0",
     "front-matter": "^4.0.2",
-    "preact": "^10.17.1",
+    "preact": "^10.20.2",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
-    "sass": "^1.67.0"
+    "sass": "^1.75.0"
   },
   "devDependencies": {
-    "ultrahtml": "^1.5.2"
+    "ultrahtml": "^1.5.3"
   }
 }

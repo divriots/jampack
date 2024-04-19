@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import $state from '../state.js';
-import hasha from 'hasha';
+import { hashSync as hasha } from 'hasha';
 import { fileTypeFromBuffer } from 'file-type';
 import { addToCache, getFromCache } from '../cache.js';
 import { parse } from '../utils/cache-control-parser.js';

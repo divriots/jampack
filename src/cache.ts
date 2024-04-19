@@ -1,4 +1,4 @@
-import hasha from 'hasha';
+import { hashSync as hasha } from 'hasha';
 import path from 'path';
 import * as fs from 'fs/promises';
 import $state from './state.js';
