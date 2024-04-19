@@ -17,13 +17,7 @@ export type Image = {
 
 export type ImageOutputOptions = {
   resize?: sharp.ResizeOptions;
-  toFormat?:
-    | 'webp'
-    | 'avif'
-    | 'png'
-    | 'jpeg'
-    | 'jpeg+progressive'
-    | 'unchanged';
+  toFormat?: 'webp' | 'avif' | 'png' | 'jpeg' | 'unchanged';
 };
 
 function createWebpOptions(opt: WebpOptions | undefined): sharp.WebpOptions {
@@ -117,12 +111,6 @@ export async function compressImage(
     switch (toFormat) {
       case 'jpeg':
         sharpFile = sharpFile.jpeg({ ...config.image.jpeg.options } || {});
-        outputFormat = 'jpg';
-        break;
-      case 'jpeg+progressive':
-        sharpFile = sharpFile.jpeg(
-          { ...config.image.jpeg.options, progressive: true } || {}
-        );
         outputFormat = 'jpg';
         break;
       case 'png':

@@ -433,21 +433,9 @@ async function processImage(
 
   const isInPicture: boolean = img.parent()?.is('picture');
 
-  let srcToFormat: 'webp' | 'avif' | 'jpeg' | 'jpeg+progressive' | 'unchanged' =
-    'unchanged';
-  if (isAboveTheFold) {
-    // Above the fold, nothing beats progressive JPEG for LCP
-    // But jpeg doesn't support transparency
-    if ((await originalImage.getImageMeta())?.isOpaque) {
-      srcToFormat = 'jpeg+progressive';
-    } else {
-      srcToFormat =
-        (await originalImage.getMime()) === 'image/avif' ||
-        (await originalImage.getMime()) === 'image/webp'
-          ? 'unchanged'
-          : 'webp';
-    }
-  } else if (isInPicture) {
+  let srcToFormat: 'webp' | 'avif' | 'jpeg' | 'unchanged' = 'unchanged';
+
+  if (isInPicture) {
     // srcToFormat should not change if in picture
   } else {
     // Let's go to avif -> avif , webp -> webp, else * -> webp
@@ -465,11 +453,7 @@ async function processImage(
     });
   }
 
-  if (
-    newImage?.data &&
-    (newImage.data.length < (await originalImage.getLen()) ||
-      srcToFormat === 'jpeg+progressive') // Progressive override all even if worse
-  ) {
+  if (newImage?.data && newImage.data.length < (await originalImage.getLen())) {
     const newFilename = path.join(
       path.dirname(originalImage.filePathAbsolute),
       path.basename(
@@ -627,84 +611,76 @@ async function processImage(
   if (isInPicture) {
     const picture = img.parent();
 
-    if (isAboveTheFold && srcToFormat === 'jpeg+progressive') {
-      // We were previously removing <source> elements here
-      // but they may be used to express art direction
-      // + WebP or AVIF may be a lot smaller than JPEG progressive...
-      // So for the moment we do nothing else
-      // just add the JPEG progressive
-    } else {
-      // List of possible sources to generate
-      //
-      const sourcesToGenerate: {
-        mime: ImageMimeType;
-        format: 'avif' | 'webp';
-      }[] = [];
+    // List of possible sources to generate
+    //
+    const sourcesToGenerate: {
+      mime: ImageMimeType;
+      format: 'avif' | 'webp';
+    }[] = [];
 
-      // Only try to generate better images
-      // TODO generate more compatible formats (avif => webp/jpeg/png)
-      //
-      const mime = await originalImage.getMime();
-      switch (mime) {
-        case 'image/png':
-        case 'image/jpeg':
+    // Only try to generate better images
+    // TODO generate more compatible formats (avif => webp/jpeg/png)
+    //
+    const mime = await originalImage.getMime();
+    switch (mime) {
+      case 'image/png':
+      case 'image/jpeg':
+        sourcesToGenerate.push({
+          mime: 'image/webp',
+          format: 'webp',
+        });
+      case 'image/webp':
+        // Only add AVIF source for lossy images
+        // AVIF don't perform well on lossless images
+        // PNG and WebP will perform better
+        // https://www.reddit.com/r/jpegxl/comments/l9ta2u/how_does_lossless_jpegxl_compared_to_png/
+        // https://twitter.com/jonsneyers/status/1346389917816008704?s=19
+        const isLossless =
+          mime === 'image/png' ||
+          (mime === 'image/webp' &&
+            (await originalImage.getImageMeta())?.isLossless);
+        if (!isLossless) {
           sourcesToGenerate.push({
-            mime: 'image/webp',
-            format: 'webp',
+            mime: 'image/avif',
+            format: 'avif',
           });
-        case 'image/webp':
-          // Only add AVIF source for lossy images
-          // AVIF don't perform well on lossless images
-          // PNG and WebP will perform better
-          // https://www.reddit.com/r/jpegxl/comments/l9ta2u/how_does_lossless_jpegxl_compared_to_png/
-          // https://twitter.com/jonsneyers/status/1346389917816008704?s=19
-          const isLossless =
-            mime === 'image/png' ||
-            (mime === 'image/webp' &&
-              (await originalImage.getImageMeta())?.isLossless);
-          if (!isLossless) {
-            sourcesToGenerate.push({
-              mime: 'image/avif',
-              format: 'avif',
-            });
-          }
-        case 'image/avif':
-          // Nothing better
-          break;
+        }
+      case 'image/avif':
+        // Nothing better
+        break;
+    }
+
+    const sizes = img.attr('sizes');
+
+    for (const s of sourcesToGenerate.reverse()) {
+      const sourceWithThisMimeType = picture.children(
+        `source[type="${s.mime}"]`
+      );
+      if (sourceWithThisMimeType.length > 0) {
+        // Ignore the creation of sources that already exist
+        continue;
       }
 
-      const sizes = img.attr('sizes');
-
-      for (const s of sourcesToGenerate.reverse()) {
-        const sourceWithThisMimeType = picture.children(
-          `source[type="${s.mime}"]`
-        );
-        if (sourceWithThisMimeType.length > 0) {
-          // Ignore the creation of sources that already exist
-          continue;
+      const srcset = await generateSrcSet(
+        htmlfile,
+        originalImage,
+        undefined,
+        undefined,
+        {
+          toFormat: s.format,
         }
+      );
 
-        const srcset = await generateSrcSet(
-          htmlfile,
-          originalImage,
-          undefined,
-          undefined,
-          {
-            toFormat: s.format,
-          }
-        );
-
-        if (!srcset) {
-          // No sourceset generated
-          // Image is too small or can't be compressed better
-          continue;
-        }
-
-        const source = `<source ${
-          sizes ? `sizes="${sizes}"` : ''
-        } srcset="${srcset}" type="${s.mime}">`;
-        img.before(source); // Append before this way existing sources are always top priority
+      if (!srcset) {
+        // No sourceset generated
+        // Image is too small or can't be compressed better
+        continue;
       }
+
+      const source = `<source ${
+        sizes ? `sizes="${sizes}"` : ''
+      } srcset="${srcset}" type="${s.mime}">`;
+      img.before(source); // Append before this way existing sources are always top priority
     }
   }
 }
