@@ -61,7 +61,9 @@ export class Resource {
         // TODO
         // Check for lossless avif
         case 'jpg':
-          let sharpFile = await sharp(await this.getData(), { animated: true });
+          let sharpFile = sharp(await this.getData(), {
+            animated: true,
+          });
           const meta = await sharpFile.metadata();
           const stats = await sharpFile.stats();
 

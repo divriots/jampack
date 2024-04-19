@@ -47,7 +47,8 @@ export async function compressImage(
   // Load modifiable toFormat
   let toFormat = options.toFormat || 'unchanged';
 
-  let sharpFile = await sharp(data, { animated: true });
+  let sharpFile = sharp(data, { animated: true });
+  sharpFile = sharpFile.rotate(); // Rotate image based on EXIF data (because EXIF data is removed)
   const meta = await sharpFile.metadata();
 
   if (meta.pages && meta.pages > 1) {
