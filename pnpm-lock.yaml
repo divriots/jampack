@@ -69,8 +69,8 @@ dependencies:
     specifier: ^6.8.2
     version: 6.8.2
   undici:
-    specifier: ^6.13.0
-    version: 6.13.0
+    specifier: ^6.15.0
+    version: 6.15.0
   unpic:
     specifier: ^3.18.0
     version: 3.18.0
@@ -2021,9 +2021,9 @@ packages:
       '@fastify/busboy': 2.1.1
     dev: false
 
-  /undici@6.13.0:
-    resolution: {integrity: sha512-Q2rtqmZWrbP8nePMq7mOJIN98M0fYvSgV89vwl/BQRT4mDOeY2GXZngfGpcBBhtky3woM7G24wZV3Q304Bv6cw==}
-    engines: {node: '>=18.0'}
+  /undici@6.15.0:
+    resolution: {integrity: sha512-VviMt2tlMg1BvQ0FKXxrz1eJuyrcISrL2sPfBf7ZskX/FCEc/7LeThQaoygsMJpNqrATWQIsRVx+1Dpe4jaYuQ==}
+    engines: {node: '>=18.17'}
     dev: false
 
   /unicorn-magic@0.1.0:
