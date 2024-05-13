@@ -155,6 +155,7 @@ export class Resource {
 }
 
 export function isLocal(src: string) {
+  if (src.startsWith('/')) return false;
   const u = url.parse(src);
   return !u.host;
 }
