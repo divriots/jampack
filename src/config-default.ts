@@ -26,7 +26,7 @@ const default_options: Options = {
     },
     cdn: {
       process: 'off',
-      src_include: /^.*$/,
+      src_include: null,
       src_exclude: null,
     },
     compress: true,
