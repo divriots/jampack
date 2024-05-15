@@ -329,59 +329,65 @@ async function processImage(
   /*
    * Check for external images
    */
-  if (!isLocal(attrib_src)) {
-    switch (config.image.cdn.process) {
-      case 'off':
-        break;
-      case 'optimize':
-        let cdnTransformer = config.image.cdn.transformer;
-        if (!cdnTransformer) {
-          const canonical = getCanonicalCdnForUrl(attrib_src);
-          if (!canonical) break;
-          cdnTransformer = getTransformer(canonical.cdn);
-        }
-        if (!cdnTransformer) break;
-        if (
-          !isIncluded(
-            attrib_src,
-            config.image.cdn.src_include,
-            config.image.cdn.src_exclude
-          )
-        )
-          break;
-        let attrib_width = getIntAttr(img, 'width');
-        if (!attrib_width) {
-          $state.reportIssue(htmlfile, {
-            type: 'warn',
-            msg: `Missing or malformed'width' attribute for image ${attrib_src}, unable to perform CDN transform`,
-          });
-          return;
-        }
-        let attrib_height = getIntAttr(img, 'height');
-        if (!attrib_height) {
-          $state.reportIssue(htmlfile, {
-            type: 'warn',
-            msg: `Missing or malformed 'height' attribute for image ${attrib_src}, unable to perform CDN transform`,
-          });
-          return;
-        }
-        const new_srcset = await generateSrcSetForCdn(
-          attrib_src,
-          cdnTransformer,
-          attrib_width,
-          attrib_height
+  switch (config.image.cdn.process) {
+    case 'off':
+      break;
+    case 'optimize':
+      let cdnTransformer = config.image.cdn.transformer;
+      if (cdnTransformer && !config.image.cdn.src_include) {
+        throw new Error(
+          'config.image.cdn.src_include is required when specifying a config.image.cdn.transformer'
         );
+      }
 
-        if (new_srcset !== null) {
-          img.attr('srcset', new_srcset);
-        }
-
-        // Add sizes attribute if not specified
-        if (img.attr('srcset') && !img.attr('sizes')) {
-          img.attr('sizes', '100vw');
-        }
+      if (!cdnTransformer) {
+        const canonical = getCanonicalCdnForUrl(attrib_src);
+        if (!canonical) break;
+        cdnTransformer = getTransformer(canonical.cdn);
+      }
+      if (!cdnTransformer) break;
+      if (
+        !isIncluded(
+          attrib_src,
+          config.image.cdn.src_include || /.*/,
+          config.image.cdn.src_exclude
+        )
+      )
+        break;
+      let attrib_width = getIntAttr(img, 'width');
+      if (!attrib_width) {
+        $state.reportIssue(htmlfile, {
+          type: 'warn',
+          msg: `Missing or malformed'width' attribute for image ${attrib_src}, unable to perform CDN transform`,
+        });
         return;
-    }
+      }
+      let attrib_height = getIntAttr(img, 'height');
+      if (!attrib_height) {
+        $state.reportIssue(htmlfile, {
+          type: 'warn',
+          msg: `Missing or malformed 'height' attribute for image ${attrib_src}, unable to perform CDN transform`,
+        });
+        return;
+      }
+      const new_srcset = await generateSrcSetForCdn(
+        attrib_src,
+        cdnTransformer,
+        attrib_width,
+        attrib_height
+      );
+
+      if (new_srcset !== null) {
+        img.attr('srcset', new_srcset);
+      }
+
+      // Add sizes attribute if not specified
+      if (img.attr('srcset') && !img.attr('sizes')) {
+        img.attr('sizes', '100vw');
+      }
+      return;
+  }
+  if (!isLocal(attrib_src)) {
     switch (config.image.external.process) {
       case 'off': // Don't process external images
         return;

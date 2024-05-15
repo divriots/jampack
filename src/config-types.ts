@@ -43,7 +43,7 @@ export type Options = {
       process:
         | 'off' //default
         | 'optimize';
-      src_include: RegExp;
+      src_include: RegExp | null;
       src_exclude: RegExp | null;
       transformer?: UrlTransformer; // Custom 'unpic' cdn url transformer, if not present it will be determined by 'unpic' based on original url
     };
