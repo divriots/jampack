@@ -260,6 +260,7 @@ async function processImage(
    * Attribute 'src'
    */
   let attrib_src = img.attr('src');
+
   if (!attrib_src) {
     const attrib_data_src = img.attr('data-src');
     if (attrib_data_src) {
@@ -273,6 +274,13 @@ async function processImage(
       type: 'warn',
       msg: `Missing [src] on img - processing skipped.`,
     });
+    return;
+  }
+
+  if (
+    !isIncluded(attrib_src, config.image.src_include, config.image.src_exclude)
+  ) {
+    // Setup to ignore
     return;
   }
 

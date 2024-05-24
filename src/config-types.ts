@@ -32,6 +32,8 @@ export type Options = {
     srcset_min_width: number; // Minimum width of generate image in srcset
     srcset_max_width: number; // Maximum width of generate image in srcset
     max_width: number; // Maximum width of original images - if bigger => resized output
+    src_include: RegExp;
+    src_exclude: RegExp | null;
     external: {
       process:
         | 'off' // Default

@@ -75,7 +75,9 @@ program
     try {
       mkdirSync(join(dir, '_jampack'));
     } catch (e) {
-      console.error('Failed to create `_jampack` folder.');
+      console.error(
+        'Folder `_jampack` is present in target folder. This means that jampack has already processed this folder. You should always run jampack on clean build of the static website.'
+      );
       exit(1);
     }
 
