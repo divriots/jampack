@@ -2,8 +2,8 @@ import sharp from 'sharp';
 import { optimize as svgo } from 'svgo';
 import { getFromCache, addToCache, computeCacheHash } from '../cache.js';
 import { WebpOptions } from '../config-types.js';
-import config from '../config.js';
 import { MimeType } from 'file-type';
+import { GlobalState } from '../state.js';
 
 export type ImageMimeType = MimeType | 'image/svg+xml';
 
@@ -29,11 +29,12 @@ function createWebpOptions(opt: WebpOptions | undefined): sharp.WebpOptions {
 }
 
 export async function compressImage(
+  state: GlobalState,
   data: Buffer,
   options: ImageOutputOptions
 ): Promise<Image | undefined> {
-  const cacheHash = computeCacheHash(data, options);
-  const imageFromCache = await getFromCache('img', cacheHash);
+  const cacheHash = computeCacheHash(state, data, options);
+  const imageFromCache = await getFromCache(state, 'img', cacheHash);
   if (imageFromCache) {
     return { data: imageFromCache.buffer, format: imageFromCache.meta };
   }
@@ -51,10 +52,10 @@ export async function compressImage(
   }
 
   let outputFormat: ImageFormat;
-
+  const imageOptions = state.options.image;
   // Special case for svg
   if (meta.format === 'svg') {
-    if (!config.image.svg.optimization) return undefined;
+    if (!imageOptions.svg.optimization) return undefined;
 
     try {
       const output = svgo(data.toString(), {
@@ -86,17 +87,17 @@ export async function compressImage(
   if (toFormat === 'unchanged') {
     switch (meta.format) {
       case 'png':
-        sharpFile = sharpFile.png(config.image.png.options || {});
+        sharpFile = sharpFile.png(imageOptions.png.options || {});
         outputFormat = 'png';
         break;
       case 'jpeg':
       case 'jpg':
-        sharpFile = sharpFile.jpeg(config.image.jpeg.options || {});
+        sharpFile = sharpFile.jpeg(imageOptions.jpeg.options || {});
         outputFormat = 'jpg';
         break;
       case 'webp':
         sharpFile = sharpFile.webp(
-          createWebpOptions(config.image.webp.options_lossly) || {}
+          createWebpOptions(imageOptions.webp.options_lossly) || {}
         );
         outputFormat = 'webp';
         break;
@@ -110,19 +111,19 @@ export async function compressImage(
     // To format
     switch (toFormat) {
       case 'jpeg':
-        sharpFile = sharpFile.jpeg({ ...config.image.jpeg.options } || {});
+        sharpFile = sharpFile.jpeg({ ...imageOptions.jpeg.options } || {});
         outputFormat = 'jpg';
         break;
       case 'png':
-        sharpFile = sharpFile.png({ ...config.image.png.options } || {});
+        sharpFile = sharpFile.png({ ...imageOptions.png.options } || {});
         outputFormat = 'png';
         break;
       case 'webp':
         sharpFile = sharpFile.webp(
           createWebpOptions(
             meta.format === 'png'
-              ? config.image.webp.options_lossless
-              : config.image.webp.options_lossly
+              ? imageOptions.webp.options_lossless
+              : imageOptions.webp.options_lossly
           )
         );
         outputFormat = 'webp';
@@ -160,7 +161,7 @@ export async function compressImage(
     data: await sharpFile.toBuffer(),
   };
 
-  await addToCache('img', cacheHash, {
+  await addToCache(state, 'img', cacheHash, {
     buffer: outputImage.data,
     meta: outputImage.format,
   });

@@ -1,7 +1,7 @@
-import $state from '../state.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { createRequire } from 'node:module';
+import { GlobalState } from '../state.js';
 
 const require = createRequire(import.meta.url);
 
@@ -10,16 +10,19 @@ const folder = `/_jampack/quicklink-2.3.0`;
 const url_loader = `${folder}/loader.js`;
 
 export async function prefetch_links_in_viewport(
+  state: GlobalState,
   html_file: string
 ): Promise<string> {
   const path_html = path.dirname('/' + html_file);
-  const quickLinkDestination = path.join($state.dir, folder, src_filename);
-  const payloadStored = await fs.access(quickLinkDestination).catch(() => false)
+  const quickLinkDestination = path.join(state.dir, folder, src_filename);
+  const payloadStored = await fs
+    .access(quickLinkDestination)
+    .catch(() => false);
 
   if (!payloadStored) {
-    const path_loader = path.join($state.dir, url_loader);
+    const path_loader = path.join(state.dir, url_loader);
 
-    await fs.mkdir(path.join($state.dir, folder), { recursive: true });
+    await fs.mkdir(path.join(state.dir, folder), { recursive: true });
 
     // Write loader
     const code_loader = `import { listen } from "./${src_filename}";

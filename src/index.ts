@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import { Command } from 'commander';
+import { Command } from '@commander-js/extra-typings';
 import { compressFolder } from './compress.js';
 import { optimize } from './optimize.js';
-import $state from './state.js';
+import { GlobalState } from './state.js';
 import { table, TableUserConfig } from 'table';
 import { formatBytes } from './utils.js';
-import config, { fast, loadConfig } from './config.js';
+import { fast, loadConfig } from './config.js';
 import { printTitle } from './logger.js';
 import { exit } from 'process';
 import kleur from 'kleur';
@@ -14,7 +14,6 @@ import { cleanCache } from './cache.js';
 import { VERSION } from './packagejson.js';
 import { mkdirSync } from 'fs';
 import { join } from 'path';
-import { loadConfig as loadConfigCSS } from './compressors/css.js';
 
 const logo = `     __                                    __    
     |__|____    _____ ___________    ____ |  | __
@@ -49,9 +48,11 @@ program
   .option('--cleancache', 'Clean cache before running')
   .option('--nocache', 'Run with no use of cache')
   .action(async (dir, options) => {
+    const state = new GlobalState();
+
     // Arguments
-    $state.dir = dir;
-    $state.args = options;
+    state.dir = dir;
+    state.args = options;
 
     // Print options
     if (options) {
@@ -61,15 +62,15 @@ program
     }
 
     // Override default config with config file
-    await loadConfig();
+    await loadConfig(state);
 
     // Override config with fast options if set
     if (options.fast) {
-      fast();
+      fast(state);
     }
 
     // Clean cache
-    await cleanCache(options.cleancache);
+    await cleanCache(state, options.cleancache);
 
     // Make _jampack folder
     try {
@@ -81,35 +82,32 @@ program
       exit(1);
     }
 
-    // Inject config into modules
-    loadConfigCSS(config);
-
     if (!options.onlycomp) {
       printTitle('PASS 1 - Optimizing');
       console.time('Done');
-      await optimize(options.include, options.exclude);
+      await optimize(state, options.include, options.exclude);
       console.timeEnd('Done');
     }
 
     if (!options.onlyoptim && !options.fast) {
       printTitle('PASS 2 - Compressing the rest');
       console.time('Done');
-      await compressFolder(options.exclude);
+      await compressFolder(state, options.exclude);
       console.timeEnd('Done');
     }
 
-    printSummary();
+    printSummary(state);
 
-    printIssues();
+    printIssues(state);
 
-    if (options.fail && $state.issues.size > 0) {
+    if (options.fail && state.issues.size > 0) {
       exit(1);
     }
   });
 
 program.parse();
 
-function printSummary() {
+function printSummary($state: GlobalState) {
   if ($state.summary.nbFiles > 0) {
     printTitle('Summary');
 
@@ -174,15 +172,15 @@ function printSummary() {
   }
 }
 
-function printIssues() {
+function printIssues(state: GlobalState) {
   let issueCount = 0;
 
-  if ($state.issues.size === 0) {
+  if (state.issues.size === 0) {
     printTitle('✔ No issues');
   } else {
     printTitle('Issues', kleur.bgRed);
     console.log('');
-    for (let [file, list] of $state.issues) {
+    for (let [file, list] of state.issues) {
       console.log('▶ ' + file + '\n');
       list.forEach((issue) => {
         issueCount++;
@@ -190,7 +188,7 @@ function printIssues() {
       });
     }
     printTitle(
-      `${issueCount} issue(s) over ${$state.issues.size} files`,
+      `${issueCount} issue(s) over ${state.issues.size} files`,
       kleur.bgYellow
     );
     console.log('');

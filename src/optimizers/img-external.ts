@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import $state from '../state.js';
+import { GlobalState } from '../state.js';
 import { hashSync as hasha } from 'hasha';
 import { fileTypeFromBuffer } from 'file-type';
 import { addToCache, getFromCache } from '../cache.js';
@@ -8,6 +8,7 @@ import { parse } from '../utils/cache-control-parser.js';
 import '../utils/polyfill-fetch.js';
 
 export async function downloadExternalImage(
+  state: GlobalState,
   htmlfile: string,
   href: string
 ): Promise<string> {
@@ -20,7 +21,7 @@ export async function downloadExternalImage(
   let ext: string | undefined;
 
   // Image is in cache?
-  const dataFromCache = await getFromCache('img-ext', hash);
+  const dataFromCache = await getFromCache(state, 'img-ext', hash);
   const cacheControl = dataFromCache?.meta?.CacheControl;
 
   if (dataFromCache && cacheControl) {
@@ -75,7 +76,7 @@ export async function downloadExternalImage(
           // No cache requested
         } else {
           // Add downloaded image to cache
-          await addToCache('img-ext', hash, {
+          await addToCache(state, 'img-ext', hash, {
             buffer,
             meta: {
               Date: resp.headers.get('Date'),
@@ -110,11 +111,11 @@ export async function downloadExternalImage(
   if (!ext) throw new Error('Unknown image format');
   const htmlFolder = path.dirname(htmlfile);
   const filename = path.relative(
-    path.join($state.dir, htmlFolder),
-    path.join($state.dir, `_jampack/${contentHash}.${ext}`)
+    path.join(state.dir, htmlFolder),
+    path.join(state.dir, `_jampack/${contentHash}.${ext}`)
   );
 
-  await fs.writeFile(path.join($state.dir, htmlFolder, filename), buffer);
+  await fs.writeFile(path.join(state.dir, htmlFolder, filename), buffer);
 
   return filename;
 }

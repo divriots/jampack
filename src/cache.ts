@@ -1,7 +1,7 @@
 import { hashSync as hasha } from 'hasha';
 import path from 'path';
 import * as fs from 'fs/promises';
-import $state from './state.js';
+import { GlobalState } from './state.js';
 import { CACHE_VERSIONS } from './packagejson.js';
 
 const listOfCategories = ['img', 'img-ext'] as const;
@@ -10,12 +10,12 @@ export type Category = (typeof listOfCategories)[number];
 
 export type CacheData = { buffer: Buffer; meta: any };
 
-function getCacheFolder(): string {
-  return $state.args.cache_folder || '.jampack/cache';
+function getCacheFolder(state: GlobalState): string {
+  return state.args.cache_folder || '.jampack/cache';
 }
 
-async function cleanCache(full: boolean) {
-  const CACHE_FOLDER = getCacheFolder();
+async function cleanCache(state: GlobalState, full?: boolean) {
+  const CACHE_FOLDER = getCacheFolder(state);
 
   if (full) {
     try {
@@ -59,8 +59,8 @@ async function cleanCache(full: boolean) {
   }
 }
 
-function computeCacheHash(buffer: Buffer, options?: any) {
-  if ($state.args.nocache) {
+function computeCacheHash(state: GlobalState, buffer: Buffer, options?: any) {
+  if (state.args.nocache) {
     return '';
   }
 
@@ -75,8 +75,12 @@ function getVersionOfCategory(category: Category): string {
   return CACHE_VERSIONS[category];
 }
 
-function getLocation(hash: string, category: Category): string {
-  const CACHE_FOLDER = getCacheFolder();
+function getLocation(
+  state: GlobalState,
+  hash: string,
+  category: Category
+): string {
+  const CACHE_FOLDER = getCacheFolder(state);
 
   return path.join(
     CACHE_FOLDER,
@@ -87,14 +91,15 @@ function getLocation(hash: string, category: Category): string {
 }
 
 async function getFromCache(
+  state: GlobalState,
   category: Category,
   hash: string
 ): Promise<CacheData | undefined> {
-  if ($state.args.nocache) {
+  if (state.args.nocache) {
     return undefined;
   }
 
-  const location = getLocation(hash, category);
+  const location = getLocation(state, hash, category);
 
   try {
     const buffer = await fs.readFile(path.join(location, 'data'));
@@ -111,15 +116,16 @@ async function getFromCache(
 }
 
 async function addToCache(
+  state: GlobalState,
   category: Category,
   hash: string,
   data: CacheData
 ): Promise<void> {
-  if ($state.args.nocache) {
+  if (state.args.nocache) {
     return;
   }
 
-  const location = getLocation(hash, category);
+  const location = getLocation(state, hash, category);
   await fs.mkdir(location, { recursive: true });
   await fs.writeFile(path.join(location, 'data'), data.buffer);
   await fs.writeFile(path.join(location, 'meta'), JSON.stringify(data.meta));
