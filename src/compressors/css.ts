@@ -4,16 +4,18 @@ import {
   transform as lightcss,
   transformStyleAttribute as lightcssStyleAttribute,
 } from 'lightningcss';
-import { Options } from '../config-types.js';
+import { GlobalState } from '../state.js';
 
-let targets = browserslistToTargets(browserslist('defaults'));
+export const defaultTargets = () =>
+  browserslistToTargets(browserslist('defaults'));
 
 export async function compressCSS(
+  { targets }: GlobalState,
   originalCode: Buffer,
   type?: 'inline' | undefined
 ): Promise<Buffer> {
   // Compress with lightningcss
-  let lightCSSData: Buffer | undefined = undefined;
+  let lightCSSData: Uint8Array | undefined = undefined;
   try {
     const options = {
       code: originalCode,
@@ -37,14 +39,12 @@ export async function compressCSS(
 
   let resultBuffer: Buffer | undefined = undefined;
   if (lightCSSData && lightCSSData.length < originalCode.length) {
-    resultBuffer = lightCSSData;
+    resultBuffer = Buffer.from(lightCSSData);
   }
 
   return resultBuffer || originalCode;
 }
 
-export function loadConfig(config: Options): void {
-  targets = browserslistToTargets(
-    browserslist(config.css.browserslist || config.general.browserslist)
-  );
+export function loadConfigCSS(state: GlobalState): void {
+  const { options } = state;
 }

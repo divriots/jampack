@@ -1,3 +1,6 @@
+import { defaultTargets } from './compressors/css.js';
+import default_options from './config-default.js';
+
 export type Args = {
   nowrite?: boolean;
   nocache?: boolean;
@@ -25,6 +28,8 @@ type Issue = {
 export class GlobalState {
   dir: string = 'dist';
   args: Args = {};
+  options = default_options;
+  targets = defaultTargets();
 
   compressedFiles: Set<string> = new Set();
 
@@ -51,9 +56,9 @@ export class GlobalState {
     const isCompressed = r.compressedSize < r.originalSize ? 1 : 0;
 
     this.summary.nbFiles++;
-    state.summary.nbFilesCompressed += isCompressed;
-    state.summary.dataLenUncompressed += r.originalSize;
-    state.summary.dataLenCompressed += r.compressedSize;
+    this.summary.nbFilesCompressed += isCompressed;
+    this.summary.dataLenUncompressed += r.originalSize;
+    this.summary.dataLenCompressed += r.compressedSize;
 
     if (r.action) {
       let summary = this.summaryByExtension[r.action];
@@ -73,7 +78,3 @@ export class GlobalState {
     }
   }
 }
-
-const state = new GlobalState();
-
-export default state;

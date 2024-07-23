@@ -1,11 +1,14 @@
 import swc from '@swc/core';
 import * as esbuild from 'esbuild';
-import config from '../config.js';
+import { GlobalState } from '../state.js';
 
-export async function compressJS(originalCode: string): Promise<string> {
+export async function compressJS(
+  { options }: GlobalState,
+  originalCode: string
+): Promise<string> {
   let resultCode = originalCode;
 
-  switch (config.js.compressor) {
+  switch (options.js.compressor) {
     case 'esbuild':
       resultCode = (
         await esbuild.transform(originalCode, {

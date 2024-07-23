@@ -4,7 +4,6 @@ import * as fs from 'fs/promises';
 import { UrlTransformer, getCanonicalCdnForUrl, getTransformer } from 'unpic';
 import * as cheerio from '@divriots/cheerio';
 import { isNumeric } from './utils.js';
-import config from './config.js';
 import {
   Image,
   compressImage,
@@ -12,13 +11,13 @@ import {
   ImageOutputOptions,
 } from './compressors/images.js';
 import svgToMiniDataURI from 'mini-svg-data-uri';
-import $state from './state.js';
 import kleur from 'kleur';
 import ora from 'ora';
 import { isLocal, Resource, translateSrc } from './utils/resource.js';
 import { downloadExternalImage } from './optimizers/img-external.js';
 import { inlineCriticalCss } from './optimizers/inline-critical-css.js';
 import { prefetch_links_in_viewport } from './optimizers/prefetch-links.js';
+import { GlobalState } from './state.js';
 
 const UNPIC_DEFAULT_HOST_REGEX = /^https:\/\/n\//g;
 const ABOVE_FOLD_DATA_ATTR = 'data-abovethefold';
@@ -34,10 +33,10 @@ function getIntAttr(
   return parsed;
 }
 
-async function analyse(file: string): Promise<void> {
+async function analyse(state: GlobalState, file: string): Promise<void> {
   console.log('▶ ' + file);
 
-  const html = (await fs.readFile(path.join($state.dir, file))).toString();
+  const html = (await fs.readFile(path.join(state.dir, file))).toString();
   if (!html.includes('<html')) return;
   const $ = cheerio.load(html, { sourceCodeLocationInfo: true });
 
@@ -63,9 +62,9 @@ async function analyse(file: string): Promise<void> {
     img.removeAttr(ABOVE_FOLD_DATA_ATTR);
 
     try {
-      await processImage(file, img, isAboveTheFold);
+      await processImage(state, file, img, isAboveTheFold);
     } catch (e) {
-      $state.reportIssue(file, {
+      state.reportIssue(file, {
         type: 'erro',
         msg:
           (e as Error).message ||
@@ -80,7 +79,7 @@ async function analyse(file: string): Promise<void> {
   );
 
   // Notify issues
-  const issues = $state.issues.get(file);
+  const issues = state.issues.get(file);
   if (issues) {
     spinnerImg.fail();
     console.log(
@@ -110,7 +109,7 @@ async function analyse(file: string): Promise<void> {
     try {
       await processIframe(file, $, ifElement, isAboveTheFold);
     } catch (e) {
-      $state.reportIssue(file, {
+      state.reportIssue(file, {
         type: 'erro',
         msg:
           (e as Error).message ||
@@ -140,7 +139,8 @@ async function analyse(file: string): Promise<void> {
   const charsetElements$ = heads.find('meta[charset]');
   const wasCharsetFirst = !charsetElements$.prev().length;
 
-  if (config.html.add_css_reset_as === 'inline') {
+  const { options } = state;
+  if (options.html.add_css_reset_as === 'inline') {
     prependToHead += `<style>:where(img){height:auto;}</style>`;
   }
   if (prependToHead || appendToHead) {
@@ -150,7 +150,7 @@ async function analyse(file: string): Promise<void> {
 
   switch (charsetElements$.length) {
     case 0:
-      $state.reportIssue(file, {
+      state.reportIssue(file, {
         type: 'fix',
         msg: 'Adding missing <meta charset="utf-8"> to the top of the <head>',
       });
@@ -158,7 +158,7 @@ async function analyse(file: string): Promise<void> {
       break;
     case 1:
       if (!wasCharsetFirst) {
-        $state.reportIssue(file, {
+        state.reportIssue(file, {
           type: 'perf',
           msg: 'Moving <meta charset> to the top of the <head>',
         });
@@ -166,7 +166,7 @@ async function analyse(file: string): Promise<void> {
       if (!wasCharsetFirst || prependToHead) heads.prepend(charsetElements$);
       break;
     default:
-      $state.reportIssue(file, {
+      state.reportIssue(file, {
         type: 'fix',
         msg: 'Multiple <meta charset> found in the <head>: taking only the first one and deleting the others',
       });
@@ -178,8 +178,8 @@ async function analyse(file: string): Promise<void> {
   //
   let appendToBody = '';
 
-  if (config.misc.prefetch_links === 'in-viewport') {
-    appendToBody += await prefetch_links_in_viewport(file);
+  if (options.misc.prefetch_links === 'in-viewport') {
+    appendToBody += await prefetch_links_in_viewport(state, file);
   }
 
   if (appendToBody) {
@@ -195,16 +195,16 @@ async function analyse(file: string): Promise<void> {
 
   // Inline critical css
   //
-  if (config.css.inline_critical_css) {
+  if (options.css.inline_critical_css) {
     try {
-      htmlResult = await inlineCriticalCss($state.dir, htmlResult);
+      htmlResult = await inlineCriticalCss(state.dir, htmlResult);
     } catch (e) {
       console.warn('Fail to inline critical CSS', e);
     }
   }
 
-  if (!$state.args.nowrite) {
-    await fs.writeFile(path.join($state.dir, file), htmlResult);
+  if (!state.args.nowrite) {
+    await fs.writeFile(path.join(state.dir, file), htmlResult);
   }
 }
 
@@ -252,6 +252,7 @@ function getTheFold($: cheerio.CheerioAPI): number {
 }
 
 async function processImage(
+  state: GlobalState,
   htmlfile: string,
   img: cheerio.Cheerio<cheerio.Element>,
   isAboveTheFold: boolean
@@ -270,12 +271,14 @@ async function processImage(
       return; // No warnings
     }
 
-    $state.reportIssue(htmlfile, {
+    state.reportIssue(htmlfile, {
       type: 'warn',
       msg: `Missing [src] on img - processing skipped.`,
     });
     return;
   }
+
+  const config = state.options;
 
   if (
     !isIncluded(attrib_src, config.image.src_include, config.image.src_exclude)
@@ -289,7 +292,7 @@ async function processImage(
    */
   const attrib_alt = img.attr('alt');
   if (attrib_alt === undefined) {
-    $state.reportIssue(htmlfile, {
+    state.reportIssue(htmlfile, {
       type: 'a11y',
       msg: `Missing [alt] on img src="${attrib_src}" - Adding alt="" meanwhile.`,
     });
@@ -322,7 +325,7 @@ async function processImage(
         // Don't touch it
         break;
       default:
-        $state.reportIssue(htmlfile, {
+        state.reportIssue(htmlfile, {
           type: 'invalid',
           msg: `Invalid [loading]="${attr_loading}" on img src="${attrib_src}"`,
         });
@@ -364,7 +367,7 @@ async function processImage(
         break;
       let attrib_width = getIntAttr(img, 'width');
       if (!attrib_width) {
-        $state.reportIssue(htmlfile, {
+        state.reportIssue(htmlfile, {
           type: 'warn',
           msg: `Missing or malformed'width' attribute for image ${attrib_src}, unable to perform CDN transform`,
         });
@@ -372,13 +375,14 @@ async function processImage(
       }
       let attrib_height = getIntAttr(img, 'height');
       if (!attrib_height) {
-        $state.reportIssue(htmlfile, {
+        state.reportIssue(htmlfile, {
           type: 'warn',
           msg: `Missing or malformed 'height' attribute for image ${attrib_src}, unable to perform CDN transform`,
         });
         return;
       }
       const new_srcset = await generateSrcSetForCdn(
+        state,
         attrib_src,
         cdnTransformer,
         attrib_width,
@@ -409,10 +413,10 @@ async function processImage(
         )
           break;
         try {
-          attrib_src = await downloadExternalImage(htmlfile, attrib_src);
+          attrib_src = await downloadExternalImage(state, htmlfile, attrib_src);
           img.attr('src', attrib_src);
         } catch (e: any) {
-          $state.reportIssue(htmlfile, {
+          state.reportIssue(htmlfile, {
             type: 'warn',
             msg: `Failed to download image: ${attrib_src} - ${e.message}`,
           });
@@ -426,14 +430,14 @@ async function processImage(
    * Loading image
    */
   const originalImage = await Resource.loadResource(
-    $state.dir,
+    state.dir,
     htmlfile,
     attrib_src
   );
 
   // No file -> give up
   if (!originalImage) {
-    $state.reportIssue(htmlfile, {
+    state.reportIssue(htmlfile, {
       type: 'erro',
       msg: `Can't find img on disk src="${attrib_src}"`,
     });
@@ -461,7 +465,7 @@ async function processImage(
   }
 
   if (config.image.compress) {
-    newImage = await compressImage(await originalImage.getData(), {
+    newImage = await compressImage(state, await originalImage.getData(), {
       toFormat: srcToFormat,
       resize: { width: config.image.srcset_max_width },
     });
@@ -481,15 +485,15 @@ async function processImage(
         `.${newImage.format}`
     );
 
-    if (!$state.compressedFiles.has(newFilename) && !$state.args.nowrite) {
+    if (!state.compressedFiles.has(newFilename) && !state.args.nowrite) {
       fs.writeFile(newFilename, newImage.data);
     }
 
     // Mark new file as compressed
-    $state.compressedFiles.add(newFilename);
+    state.compressedFiles.add(newFilename);
 
     // Report compression result
-    $state.reportSummary({
+    state.reportSummary({
       action:
         newFilename !== originalImage.filePathAbsolute
           ? `${await originalImage.getExt()}->${newImage.format}`
@@ -504,7 +508,7 @@ async function processImage(
     newImage = undefined;
 
     // Report non-compression
-    $state.reportSummary({
+    state.reportSummary({
       action: path.extname(originalImage.filePathAbsolute),
       originalSize: await originalImage.getLen(),
       compressedSize: await originalImage.getLen(),
@@ -553,7 +557,7 @@ async function processImage(
         img.removeAttr('loading');
         img.removeAttr('decoding');
 
-        $state.reportSummary({
+        state.reportSummary({
           action: `${imageToEmbed.format}->embed`,
           originalSize: await originalImage.getLen(),
           compressedSize: imageToEmbed.data.length,
@@ -572,7 +576,7 @@ async function processImage(
   /*
    * Attribute 'width' & 'height'
    */
-  const [w, h] = await setImageSize(htmlfile, img, originalImage);
+  const [w, h] = await setImageSize(state, htmlfile, img, originalImage);
 
   if (isEmbed) {
     // Image is embed, no need for more processing
@@ -602,6 +606,7 @@ async function processImage(
     // of the srcset
   } else {
     const new_srcset = await generateSrcSet(
+      state,
       htmlfile,
       originalImage,
       img.attr('src'),
@@ -676,6 +681,7 @@ async function processImage(
       }
 
       const srcset = await generateSrcSet(
+        state,
         htmlfile,
         originalImage,
         undefined,
@@ -706,6 +712,7 @@ const isIncluded = (
 ) => !!src.match(includeConf) && (!excludeConf || !src.match(excludeConf));
 
 async function _generateSrcSet(
+  { options }: GlobalState,
   startSrc: string | undefined,
   imageWidth: number | undefined,
   imageHeight: number | undefined,
@@ -724,9 +731,9 @@ async function _generateSrcSet(
   // Start reduction
   const step = 300; //px
   let valueW = !startSrc ? imageWidth : imageWidth - step;
-  valueW = Math.min(valueW, config.image.srcset_max_width);
+  valueW = Math.min(valueW, options.image.srcset_max_width);
 
-  while (valueW >= config.image.srcset_min_width) {
+  while (valueW >= options.image.srcset_min_width) {
     let src = await transformSrc(valueW);
     if (src) {
       new_srcset += `, ${src} ${valueW}w`;
@@ -745,6 +752,7 @@ async function _generateSrcSet(
 }
 
 async function generateSrcSet(
+  state: GlobalState,
   htmlfile: string,
   originalImage: Resource,
   startSrc: string | undefined,
@@ -766,53 +774,61 @@ async function generateSrcSet(
 
   let previousImageSize = startSrcLength || Number.MAX_VALUE;
 
-  return _generateSrcSet(startSrc, imageWidth, imageHeight, async (valueW) => {
-    const src = imageSrc(`@${valueW}w`);
+  return _generateSrcSet(
+    state,
+    startSrc,
+    imageWidth,
+    imageHeight,
+    async (valueW) => {
+      const src = imageSrc(`@${valueW}w`);
 
-    const absoluteFilename = translateSrc(
-      $state.dir,
-      path.dirname(htmlfile),
-      src
-    );
-
-    // Don't generate srcset file twice
-    if (!$state.compressedFiles.has(absoluteFilename)) {
-      const compressedImage = await compressImage(
-        await originalImage.getData(),
-        { ...options, resize: { width: valueW } }
+      const absoluteFilename = translateSrc(
+        state.dir,
+        path.dirname(htmlfile),
+        src
       );
 
-      if (
-        !compressedImage?.data ||
-        compressedImage.data.length >= previousImageSize
-      ) {
-        // New image is not compressed or bigger than previous image in srcset
-        // Don't add to srcset
-        return;
-      } else {
-        // Write file
-        if (!$state.args.nowrite) {
-          fs.writeFile(absoluteFilename, compressedImage.data);
+      // Don't generate srcset file twice
+      if (!state.compressedFiles.has(absoluteFilename)) {
+        const compressedImage = await compressImage(
+          state,
+          await originalImage.getData(),
+          { ...options, resize: { width: valueW } }
+        );
+
+        if (
+          !compressedImage?.data ||
+          compressedImage.data.length >= previousImageSize
+        ) {
+          // New image is not compressed or bigger than previous image in srcset
+          // Don't add to srcset
+          return;
+        } else {
+          // Write file
+          if (!state.args.nowrite) {
+            fs.writeFile(absoluteFilename, compressedImage.data);
+          }
+
+          // Set new previous size to beat
+          previousImageSize = compressedImage.data.length;
+
+          // Add file to list avoid recompression
+          state.compressedFiles.add(absoluteFilename);
         }
-
-        // Set new previous size to beat
-        previousImageSize = compressedImage.data.length;
-
-        // Add file to list avoid recompression
-        $state.compressedFiles.add(absoluteFilename);
       }
+      return src;
     }
-    return src;
-  });
+  );
 }
 
 async function generateSrcSetForCdn(
+  state: GlobalState,
   startSrc: string,
   cdnTransformer: UrlTransformer,
   imageWidth: number | undefined,
   imageHeight: number | undefined
 ): Promise<string | null> {
-  return _generateSrcSet('', imageWidth, imageHeight, (valueW: number) =>
+  return _generateSrcSet(state, '', imageWidth, imageHeight, (valueW: number) =>
     cdnTransformer({
       url: startSrc,
       width: valueW,
@@ -824,6 +840,7 @@ async function generateSrcSetForCdn(
 }
 
 async function setImageSize(
+  state: GlobalState,
   htmlfile: string,
   img: cheerio.Cheerio<cheerio.Element>,
   image: Resource
@@ -834,14 +851,14 @@ async function setImageSize(
   let height_new: number | undefined = undefined;
   const img_fmt = await image.getExt();
 
-  if (img_fmt === 'svg' && !config.image.svg.add_width_and_height) {
+  if (img_fmt === 'svg' && !state.options.image.svg.add_width_and_height) {
     return [];
   }
 
   // Check valid values
   if (width !== undefined) {
     if (!isNumeric(width)) {
-      $state.reportIssue(htmlfile, {
+      state.reportIssue(htmlfile, {
         type: 'fix',
         msg: `Invalid width attribute format: "${width}" - overriding for ${image.src}`,
       });
@@ -850,7 +867,7 @@ async function setImageSize(
   }
   if (height !== undefined) {
     if (!isNumeric(height)) {
-      $state.reportIssue(htmlfile, {
+      state.reportIssue(htmlfile, {
         type: 'fix',
         msg: `Invalid height attribute format: "${height}" - overriding for ${image.src}`,
       });
@@ -979,16 +996,17 @@ async function processIframe(
 }
 
 export async function optimize(
+  state: GlobalState,
   include?: string,
   exclude?: string
 ): Promise<void> {
   const glob = include ? [include] : ['**/*.{htm,html}'];
   if (exclude) glob.push('!' + exclude);
 
-  const paths = await globby(glob, { cwd: $state.dir });
+  const paths = await globby(glob, { cwd: state.dir });
 
   // Sequential async
   for (const file of paths) {
-    await analyse(file);
+    await analyse(state, file);
   }
 }
