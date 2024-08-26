@@ -278,6 +278,10 @@ async function processImage(
     return;
   }
 
+  const fullSizeRaw = img.attr('data-fullsize');
+  if (typeof fullSizeRaw !== undefined) img.removeAttr('data-fullsize');
+  const fullSize = !!fullSizeRaw && parseInt(fullSizeRaw) > 0;
+
   const config = state.options;
 
   if (
@@ -365,6 +369,7 @@ async function processImage(
         )
       )
         break;
+      if (fullSize) return;
       let attrib_width = getIntAttr(img, 'width');
       if (!attrib_width) {
         state.reportIssue(htmlfile, {
@@ -604,7 +609,7 @@ async function processImage(
     // If srcset are set, don't touch it.
     // The compress pass will compress the images
     // of the srcset
-  } else {
+  } else if (!fullSize) {
     const new_srcset = await generateSrcSet(
       state,
       htmlfile,
