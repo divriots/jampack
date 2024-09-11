@@ -737,7 +737,7 @@ async function _generateSrcSet(
   }
 
   // Start reduction
-  const step = 300; //px
+  const step = options.image.srcset_step; //px
   let valueW = !startSrc ? imageWidth : imageWidth - step;
   valueW = Math.min(valueW, options.image.srcset_max_width);
 

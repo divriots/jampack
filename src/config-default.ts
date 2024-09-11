@@ -18,6 +18,7 @@ const default_options: Options = {
     embed_size: 1500,
     srcset_min_width: 390 * 2, // HiDPI phone
     srcset_max_width: 1920 * 2, // 4K
+    srcset_step: 300,
     max_width: 99999,
     src_include: /^.*$/,
     src_exclude: /^\/vercel\/image\?/, // Ignore /vervel/image? URLs because not local and most likely already optimized,

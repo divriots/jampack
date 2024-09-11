@@ -31,6 +31,7 @@ export type Options = {
     embed_size: number; // Embed above the fold images if size < embed_size
     srcset_min_width: number; // Minimum width of generate image in srcset
     srcset_max_width: number; // Maximum width of generate image in srcset
+    srcset_step: number; // Number of pixels between sizes in srcset
     max_width: number; // Maximum width of original images - if bigger => resized output
     src_include: RegExp;
     src_exclude: RegExp | null;
