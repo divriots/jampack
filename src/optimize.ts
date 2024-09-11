@@ -344,6 +344,35 @@ async function processImage(
   /*
    * Check for external images
    */
+
+  if (
+    !isLocal(attrib_src) &&
+    isIncluded(
+      attrib_src,
+      config.image.external.src_include,
+      config.image.external.src_exclude
+    )
+  ) {
+    // Don't process external images
+    if (config.image.external.process === 'off') return;
+    try {
+      if (config.image.external.process === 'download') {
+        // Download external image for local processing
+        attrib_src = await downloadExternalImage(state, htmlfile, attrib_src);
+      } else if (typeof config.image.external.process === 'function') {
+        // Custom processing for external image
+        attrib_src = await config.image.external.process(attrib_src);
+      }
+      img.attr('src', attrib_src);
+    } catch (e: any) {
+      state.reportIssue(htmlfile, {
+        type: 'warn',
+        msg: `Failed to process external image: ${attrib_src} - ${e.message}`,
+      });
+      return; // No more processing
+    }
+  }
+
   switch (config.image.cdn.process) {
     case 'off':
       break;
@@ -403,32 +432,6 @@ async function processImage(
         img.attr('sizes', '100vw');
       }
       return;
-  }
-  if (!isLocal(attrib_src)) {
-    switch (config.image.external.process) {
-      case 'off': // Don't process external images
-        return;
-      case 'download': // Download external image for local processing
-        if (
-          !isIncluded(
-            attrib_src,
-            config.image.external.src_include,
-            config.image.external.src_exclude
-          )
-        )
-          break;
-        try {
-          attrib_src = await downloadExternalImage(state, htmlfile, attrib_src);
-          img.attr('src', attrib_src);
-        } catch (e: any) {
-          state.reportIssue(htmlfile, {
-            type: 'warn',
-            msg: `Failed to download image: ${attrib_src} - ${e.message}`,
-          });
-          return; // No more processing
-        }
-        break;
-    }
   }
 
   /*

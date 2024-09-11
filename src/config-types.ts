@@ -37,7 +37,8 @@ export type Options = {
     external: {
       process:
         | 'off' // Default
-        | 'download'; // Experimental
+        | 'download' // Experimental
+        | ((attrib_src: string) => Promise<string>); // Experimental
       src_include: RegExp;
       src_exclude: RegExp | null;
     };
