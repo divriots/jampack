@@ -5,6 +5,7 @@ export type Args = {
   nowrite?: boolean;
   nocache?: boolean;
   cache_folder?: string;
+  sequential_compress?: boolean;
 };
 
 export type ReportItem = {

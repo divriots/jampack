@@ -74,6 +74,5 @@ export type Options = {
   };
   misc: {
     prefetch_links: 'in-viewport' | 'off';
-    sequential_compress: boolean;
   };
 };
