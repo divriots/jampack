@@ -63,6 +63,7 @@ const default_options: Options = {
   },
   misc: {
     prefetch_links: 'off',
+    sequential_compress: false,
   },
 };
 

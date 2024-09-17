@@ -91,15 +91,19 @@ export async function compressFolder(
   if (exclude) globs.push('!' + exclude);
   const paths = await globby(globs, { cwd: state.dir, absolute: true });
 
-  // "Parallel" processing
-  await Promise.all(
-    paths.map(async (file) => {
-      if (!state.compressedFiles.has(file)) {
-        await processFile(state, file, await fs.stat(file));
-        spinner.text = getProgressText(state);
-      }
-    })
-  );
+  async function compressFile(file: string) {
+    if (!state.compressedFiles.has(file)) {
+      await processFile(state, file, await fs.stat(file));
+      spinner.text = getProgressText(state);
+    }
+  }
+
+  if (!state.options.misc.sequential_compress) {
+    // "Parallel" processing
+    await Promise.all(paths.map(compressFile));
+  } else {
+    for (const file of paths) await compressFile(file);
+  }
 
   spinner.text = getProgressText(state);
   spinner.succeed();
