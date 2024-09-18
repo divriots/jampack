@@ -98,7 +98,7 @@ export async function compressFolder(
     }
   }
 
-  if (!state.options.misc.sequential_compress) {
+  if (!state.args.sequential_compress) {
     // "Parallel" processing
     await Promise.all(paths.map(compressFile));
   } else {

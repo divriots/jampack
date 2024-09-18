@@ -45,6 +45,10 @@ program
   .option('--onlyoptim', 'Only optimize (PASS 1).')
   .option('--onlycomp', 'Only compress (PASS 2).')
   .option('--cache_folder <cache_folder>', 'Default: .jampack/cache')
+  .option(
+    '--sequential_compress',
+    'Whether to perform folder compression sequentially. Reduces memoru footprint on compress. Default: false'
+  )
   .option('--cleancache', 'Clean cache before running')
   .option('--nocache', 'Run with no use of cache')
   .action(async (dir, options) => {
