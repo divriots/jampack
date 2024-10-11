@@ -11,13 +11,7 @@ export type Options = {
     browserslist: string; // browserslist query string
   };
   html: {
-    /*
-      jampack adds a little bit of css to make
-      image keep correct aspect ratio after adding
-      image dimensions.
-      ":where(img){height:auto}"
-    */
-    add_css_reset_as: 'inline' | 'off';
+    add_css_reset_as: 'inline' | 'off'; // 'inline': adds "<style>:where(img){height:auto}</style>" on top of the <head>
     sort_attributes: boolean;
   };
   js: {

@@ -548,6 +548,10 @@ async function processImage(
       const ifmt = imageToEmbed.format;
       switch (ifmt) {
         case 'svg':
+          // When embedded, if the SVG file has width and height attributes (or viewBox without corresponding width/height),
+          // the browser respects those attributes over the external <img> tag attributes.
+          // TODO update the SVG - meanwhile don't embed it if there are attributes
+          if (img.attr('width') || img.attr('height')) break;
           datauri = svgToMiniDataURI(imageToEmbed.data.toString());
           break;
         case 'webp':
