@@ -37,7 +37,7 @@
     "deepmerge": "^4.3.1",
     "esbuild": "^0.20.2",
     "file-type": "^19.0.0",
-    "globby": "^14.0.1",
+    "globby": "^14.0.2",
     "hasha": "^6.0.0",
     "html-minifier-terser": "^7.2.0",
     "kleur": "^4.1.5",
