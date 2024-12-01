@@ -107,6 +107,7 @@ program
     if (options.fail && state.issues.size > 0) {
       exit(1);
     }
+    exit(0);
   });
 
 program.parse();
