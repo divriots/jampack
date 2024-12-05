@@ -58,7 +58,7 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
     );
 
     const img = $(imgElement);
-    const isAboveTheFold = isImgAboveTheFold(img, imgElement, theFold);
+    const isAboveTheFold = isElementAboveTheFold(img, imgElement, theFold);
     img.removeAttr(ABOVE_FOLD_DATA_ATTR);
 
     try {
@@ -104,7 +104,8 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
       `<iframe> [${i + 1}/${iframesArray.length}] ${$(ifElement).attr('src')}`
     );
 
-    const isAboveTheFold = ifElement.startIndex! < theFold;
+    const ifr = $(ifElement);
+    const isAboveTheFold = isElementAboveTheFold(ifr, ifElement, theFold);
 
     try {
       await processIframe(file, $, ifElement, isAboveTheFold);
@@ -208,18 +209,18 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
   }
 }
 
-function isImgAboveTheFold(
-  img: cheerio.Cheerio<cheerio.Element>,
-  imgElement: cheerio.Element,
+function isElementAboveTheFold(
+  cheerio: cheerio.Cheerio<cheerio.Element>,
+  element: cheerio.Element,
   theFold: number
 ) {
   const aboveTheFoldAttr: string | number | undefined =
-    img.attr(ABOVE_FOLD_DATA_ATTR);
+    cheerio.attr(ABOVE_FOLD_DATA_ATTR);
   if (aboveTheFoldAttr) {
     const parsed = parseInt(aboveTheFoldAttr);
     if (!Number.isNaN(parsed)) return !!parsed;
   }
-  return imgElement.startIndex! < theFold;
+  return element.startIndex! < theFold;
 }
 
 function getTheFold($: cheerio.CheerioAPI): number {
