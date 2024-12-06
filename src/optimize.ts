@@ -106,6 +106,7 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
 
     const ifr = $(ifElement);
     const isAboveTheFold = isElementAboveTheFold(ifr, ifElement, theFold);
+    ifr.removeAttr(ABOVE_FOLD_DATA_ATTR);
 
     try {
       await processIframe(file, $, ifElement, isAboveTheFold);
