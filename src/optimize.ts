@@ -122,7 +122,7 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
 
   // Reset spinner
   spinnerIframe.text = kleur.dim(
-    `<iframe> [${imgsArray.length}/${imgsArray.length}]`
+    `<iframe> [${iframesArray.length}/${iframesArray.length}]`
   );
 
   spinnerIframe.succeed();
