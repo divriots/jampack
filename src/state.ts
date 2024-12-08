@@ -36,6 +36,8 @@ export class GlobalState {
 
   issues: Map<string, Issue[]> = new Map();
 
+  installed_dependencies: Set<string> = new Set();
+
   summary: Summary = {
     nbFiles: 0,
     nbFilesCompressed: 0,

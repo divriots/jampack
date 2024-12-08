@@ -61,6 +61,12 @@ const default_options: Options = {
       add_width_and_height: false,
     },
   },
+  iframe: {
+    lazyload: {
+      when: 'below-the-fold',
+      how: 'native',
+    },
+  },
   misc: {
     prefetch_links: 'off',
   },

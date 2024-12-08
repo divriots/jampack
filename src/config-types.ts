@@ -66,6 +66,17 @@ export type Options = {
       add_width_and_height: boolean;
     };
   };
+  iframe: {
+    lazyload: {
+      when: // Default: 'below-the-fold'
+      | 'never' // All iframes are loaded eagerly
+        | 'below-the-fold' // Iframe are lazy loaded only if they are below the fold
+        | 'always'; // Not recommended, but if you want to lazy load all iframes
+      how: // Default: 'native'
+      | 'native' // Using `loading="lazy" attribue on iframe tag
+        | 'js'; // Using IntersectionObserver. Requires ~1Ko of JS but is more precise than native lazyload
+    };
+  };
   misc: {
     prefetch_links: 'in-viewport' | 'off';
   };

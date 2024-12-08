@@ -1,6 +1,3 @@
-import * as path from 'path';
-import * as fs from 'fs/promises';
-
 export function formatBytes(bytes: number, decimals = 2) {
   if (!+bytes) return '0 Bytes';
 

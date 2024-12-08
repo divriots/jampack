@@ -53,6 +53,9 @@ dependencies:
   lightningcss:
     specifier: ^1.25.1
     version: 1.25.1
+  lozad:
+    specifier: ^1.16.0
+    version: 1.16.0
   mini-svg-data-uri:
     specifier: ^1.4.4
     version: 1.4.4
@@ -1479,6 +1482,10 @@ packages:
     resolution: {integrity: sha512-7fm3l3NAF9WfN6W3JOmf5drwpVqX78JtoGJ3A6W0a6ZnldM41w2fV5D490psKFTpMds8TJse/eHLFFsNHHjHgg==}
     dependencies:
       tslib: 2.6.2
+    dev: false
+
+  /lozad@1.16.0:
+    resolution: {integrity: sha512-JBr9WjvEFeKoyim3svo/gsQPTkgG/mOHJmDctZ/+U9H3ymUuvEkqpn8bdQMFsvTMcyRJrdJkLv0bXqGm0sP72w==}
     dev: false
 
   /lru-cache@6.0.0:

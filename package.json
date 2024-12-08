@@ -42,6 +42,7 @@
     "html-minifier-terser": "^7.2.0",
     "kleur": "^4.1.5",
     "lightningcss": "^1.25.1",
+    "lozad": "^1.16.0",
     "mini-svg-data-uri": "^1.4.4",
     "ora": "^8.0.1",
     "quicklink": "^2.3.0",

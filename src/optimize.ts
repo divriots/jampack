@@ -18,6 +18,7 @@ import { downloadExternalImage } from './optimizers/img-external.js';
 import { inlineCriticalCss } from './optimizers/inline-critical-css.js';
 import { prefetch_links_in_viewport } from './optimizers/prefetch-links.js';
 import { GlobalState } from './state.js';
+import { processIframe } from './optimizers/process-iframe.js';
 
 const UNPIC_DEFAULT_HOST_REGEX = /^https:\/\/n\//g;
 const ABOVE_FOLD_DATA_ATTR = 'data-abovethefold';
@@ -35,6 +36,9 @@ function getIntAttr(
 
 async function analyse(state: GlobalState, file: string): Promise<void> {
   console.log('▶ ' + file);
+
+  // For processes to add into
+  const appendToBody: Record<string, string> = {};
 
   const html = (await fs.readFile(path.join(state.dir, file))).toString();
   if (!html.includes('<html')) return;
@@ -109,7 +113,14 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
     ifr.removeAttr(ABOVE_FOLD_DATA_ATTR);
 
     try {
-      await processIframe(file, $, ifElement, isAboveTheFold);
+      await processIframe(
+        state,
+        file,
+        $,
+        ifElement,
+        isAboveTheFold,
+        appendToBody
+      );
     } catch (e) {
       state.reportIssue(file, {
         type: 'erro',
@@ -178,16 +189,18 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
 
   // Add to <body>
   //
-  let appendToBody = '';
 
   if (options.misc.prefetch_links === 'in-viewport') {
-    appendToBody += await prefetch_links_in_viewport(state, file);
+    await prefetch_links_in_viewport(state, file, appendToBody);
   }
 
-  if (appendToBody) {
+  // Custom code
+  console.log('Custom code', appendToBody);
+  const keys_to_install = Object.keys(appendToBody);
+  if (keys_to_install.length > 0) {
     const body = $('body');
     if (body.length > 0) {
-      body.append(appendToBody);
+      keys_to_install.forEach((key) => body.append(appendToBody[key]));
     }
   }
 
@@ -994,19 +1007,6 @@ async function setImageSize(
 
   // Something when wrong
   throw new Error(`Unexpected issue when resolving image size "${image.src}"`);
-}
-
-async function processIframe(
-  htmlfile: string,
-  $: cheerio.CheerioAPI,
-  imgElement: cheerio.Element,
-  isAboveTheFold: boolean
-): Promise<void> {
-  const iframe = $(imgElement);
-
-  if (!isAboveTheFold) {
-    iframe.attr('loading', 'lazy');
-  }
 }
 
 export async function optimize(
