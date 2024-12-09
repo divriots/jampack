@@ -28,8 +28,8 @@
     "dir-compare": "^4.2.0",
     "front-matter": "^4.0.2",
     "preact": "^10.20.2",
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "sass": "^1.75.0"
   },
   "devDependencies": {

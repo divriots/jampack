@@ -1,5 +1,5 @@
 // @ts-ignore
-import load from '@proload/core';
+import load from './proload/esm/index.mjs';
 import deepmerge from 'deepmerge';
 
 import default_options from './config-default.js';

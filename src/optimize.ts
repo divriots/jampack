@@ -195,7 +195,6 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
   }
 
   // Custom code
-  console.log('Custom code', appendToBody);
   const keys_to_install = Object.keys(appendToBody);
   if (keys_to_install.length > 0) {
     const body = $('body');
