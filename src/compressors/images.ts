@@ -111,11 +111,11 @@ export async function compressImage(
     // To format
     switch (toFormat) {
       case 'jpeg':
-        sharpFile = sharpFile.jpeg({ ...imageOptions.jpeg.options } || {});
+        sharpFile = sharpFile.jpeg({ ...imageOptions.jpeg.options });
         outputFormat = 'jpg';
         break;
       case 'png':
-        sharpFile = sharpFile.png({ ...imageOptions.png.options } || {});
+        sharpFile = sharpFile.png({ ...imageOptions.png.options });
         outputFormat = 'png';
         break;
       case 'webp':
