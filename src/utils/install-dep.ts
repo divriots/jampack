@@ -57,3 +57,28 @@ export async function install_dependency(
     )}"></script>`;
   }
 }
+
+export async function install_lozad(
+  state: GlobalState,
+  html_file: string,
+  appendToBody: Record<string, string>
+): Promise<void> {
+  return install_dependency(
+    state,
+    html_file,
+    {
+      source: {
+        npm_package_name: 'lozad',
+        absolute_path_to_file: '/dist',
+        filename: 'lozad.es.js',
+      },
+      destination: {
+        folder_name: 'lozad-1.16',
+        code_loader: `import lozad from "./lozad.es.js";
+      const observer = lozad('.jampack-lozad', { rootMargin: '100px 0px', threshold: [0.1] });
+      observer.observe();`,
+      },
+    },
+    appendToBody
+  );
+}

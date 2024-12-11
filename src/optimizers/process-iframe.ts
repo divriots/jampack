@@ -1,17 +1,14 @@
 import * as cheerio from '@divriots/cheerio';
 import type { GlobalState } from '../state.js';
-import { install_dependency } from '../utils/install-dep.js';
+import { install_dependency, install_lozad } from '../utils/install-dep.js';
 
 export async function processIframe(
   state: GlobalState,
   htmlfile: string,
-  $: cheerio.CheerioAPI,
-  imgElement: cheerio.Element,
+  iframe: cheerio.Cheerio<cheerio.Element>,
   isAboveTheFold: boolean,
   appendToBody: Record<string, string>
 ): Promise<void> {
-  const iframe = $(imgElement);
-
   // Reset loading attribute
   iframe.removeAttr('loading');
 
@@ -32,24 +29,7 @@ export async function processIframe(
         iframe.attr('class', 'jampack-lozad');
         iframe.attr('data-src', src);
         iframe.removeAttr('src');
-        await install_dependency(
-          state,
-          htmlfile,
-          {
-            source: {
-              npm_package_name: 'lozad',
-              absolute_path_to_file: '/dist',
-              filename: 'lozad.es.js',
-            },
-            destination: {
-              folder_name: 'lozad-1.16',
-              code_loader: `import lozad from "./lozad.es.js";
-            const observer = lozad('.jampack-lozad', { rootMargin: '100px 0px', threshold: [0.1] });
-            observer.observe();`,
-            },
-          },
-          appendToBody
-        );
+        await install_lozad(state, htmlfile, appendToBody);
       }
     }
   }

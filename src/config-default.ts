@@ -67,6 +67,12 @@ const default_options: Options = {
       how: 'native',
     },
   },
+  video: {
+    autoplay_lazyload: {
+      when: 'below-the-fold',
+      how: 'js',
+    },
+  },
   misc: {
     prefetch_links: 'off',
   },

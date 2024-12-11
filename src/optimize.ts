@@ -19,6 +19,7 @@ import { inlineCriticalCss } from './optimizers/inline-critical-css.js';
 import { prefetch_links_in_viewport } from './optimizers/prefetch-links.js';
 import { GlobalState } from './state.js';
 import { processIframe } from './optimizers/process-iframe.js';
+import { processVideo } from './optimizers/process-video.js';
 
 const UNPIC_DEFAULT_HOST_REGEX = /^https:\/\/n\//g;
 const ABOVE_FOLD_DATA_ATTR = 'data-abovethefold';
@@ -46,97 +47,36 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
 
   const theFold = getTheFold($);
 
-  const imgs = $('img');
-  const imgsArray: cheerio.Element[] = [];
-  imgs.each((index, imgElement) => {
-    imgsArray.push(imgElement);
-  });
-
-  // Process images sequentially
-  const spinnerImg = ora({ prefixText: ' ' }).start();
-  for (let i = 0; i < imgsArray.length; i++) {
-    const imgElement = imgsArray[i];
-
-    spinnerImg.text = kleur.dim(
-      `<img> [${i + 1}/${imgsArray.length}] ${$(imgElement).attr('src')}`
-    );
-
-    const img = $(imgElement);
-    const isAboveTheFold = isElementAboveTheFold(img, imgElement, theFold);
-    img.removeAttr(ABOVE_FOLD_DATA_ATTR);
-
-    try {
-      await processImage(state, file, img, isAboveTheFold);
-    } catch (e) {
-      state.reportIssue(file, {
-        type: 'erro',
-        msg:
-          (e as Error).message ||
-          `Unexpected error while processing image: ${JSON.stringify(e)}`,
-      });
-    }
-  }
-
-  // Reset spinner
-  spinnerImg.text = kleur.dim(
-    `<img> [${imgsArray.length}/${imgsArray.length}]`
+  await processTag(
+    state,
+    file,
+    $,
+    'img',
+    'src',
+    processImage,
+    theFold,
+    appendToBody
   );
-
-  // Notify issues
-  const issues = state.issues.get(file);
-  if (issues) {
-    spinnerImg.fail();
-    console.log(
-      kleur.red(`  ${issues.length} issue${issues.length > 1 ? 's' : ''}`)
-    );
-  } else {
-    spinnerImg.succeed();
-  }
-
-  const iframes = $('iframe');
-  const iframesArray: cheerio.Element[] = [];
-  iframes.each((index, ifElement) => {
-    iframesArray.push(ifElement);
-  });
-
-  // Process iframes sequentially
-  const spinnerIframe = ora({ prefixText: ' ' }).start();
-  for (let i = 0; i < iframesArray.length; i++) {
-    const ifElement = iframesArray[i];
-
-    spinnerIframe.text = kleur.dim(
-      `<iframe> [${i + 1}/${iframesArray.length}] ${$(ifElement).attr('src')}`
-    );
-
-    const ifr = $(ifElement);
-    const isAboveTheFold = isElementAboveTheFold(ifr, ifElement, theFold);
-    ifr.removeAttr(ABOVE_FOLD_DATA_ATTR);
-
-    try {
-      await processIframe(
-        state,
-        file,
-        $,
-        ifElement,
-        isAboveTheFold,
-        appendToBody
-      );
-    } catch (e) {
-      state.reportIssue(file, {
-        type: 'erro',
-        msg:
-          (e as Error).message ||
-          `Unexpected error while processing image: ${JSON.stringify(e)}`,
-      });
-    }
-  }
-
-  // Reset spinner
-  spinnerIframe.text = kleur.dim(
-    `<iframe> [${iframesArray.length}/${iframesArray.length}]`
+  await processTag(
+    state,
+    file,
+    $,
+    'iframe',
+    'src',
+    processIframe,
+    theFold,
+    appendToBody
   );
-
-  spinnerIframe.succeed();
+  await processTag(
+    state,
+    file,
+    $,
+    'video',
+    'src',
+    processVideo,
+    theFold,
+    appendToBody
+  );
 
   // Remove the fold
   //
@@ -1021,5 +961,71 @@ export async function optimize(
   // Sequential async
   for (const file of paths) {
     await analyse(state, file);
+  }
+}
+
+async function processTag(
+  state: GlobalState,
+  file: string,
+  $: cheerio.CheerioAPI,
+  tag: 'img' | 'iframe' | 'video',
+  attribute_to_log: string,
+  processor: (
+    state: GlobalState,
+    file: string,
+    tag: cheerio.Cheerio<cheerio.Element>,
+    isAboveTheFold: boolean,
+    appendToBody: Record<string, string>
+  ) => Promise<void>,
+  theFold: number,
+  appendToBody: Record<string, string>
+) {
+  const previous_issues = state.issues.get(file);
+
+  const tags: cheerio.Cheerio<cheerio.Element> = $(tag);
+  const tagsArray: cheerio.Element[] = [];
+  tags.each((index, tagElement) => {
+    tagsArray.push(tagElement);
+  });
+
+  // Process tags sequentially
+  const spinnerImg = ora({ prefixText: ' ' }).start();
+  for (let i = 0; i < tagsArray.length; i++) {
+    const tagElement = tagsArray[i];
+
+    spinnerImg.text = kleur.dim(
+      `<${tag}> [${i + 1}/${tagsArray.length}] ${$(tagElement).attr(
+        attribute_to_log
+      )}`
+    );
+
+    const el = $(tagElement);
+    const isAboveTheFold = isElementAboveTheFold(el, tagElement, theFold);
+    el.removeAttr(ABOVE_FOLD_DATA_ATTR);
+
+    try {
+      await processor(state, file, el, isAboveTheFold, appendToBody);
+    } catch (e) {
+      state.reportIssue(file, {
+        type: 'erro',
+        msg:
+          (e as Error).message ||
+          `Unexpected error while processing ${tag}: ${JSON.stringify(e)}`,
+      });
+    }
+  }
+
+  // Reset spinner
+  spinnerImg.text = kleur.dim(
+    `<${tag}> [${tagsArray.length}/${tagsArray.length}]`
+  );
+
+  // Notify issues
+  const issues = state.issues.get(file);
+  const newIssues = (issues?.length || 0) - (previous_issues?.length || 0);
+  if (newIssues > 0) {
+    spinnerImg.fail();
+  } else {
+    spinnerImg.succeed();
   }
 }

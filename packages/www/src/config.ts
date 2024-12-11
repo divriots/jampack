@@ -58,6 +58,7 @@ export const featuresDirs = [
   'embed-small-images',
   'images-max-width',
   'inline-critical-css',
+  'video',
   'iframe',
   'prefetch-links',
   'browser-compatibility',

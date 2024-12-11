@@ -77,6 +77,16 @@ export type Options = {
         | 'js'; // Using IntersectionObserver. Requires ~1Ko of JS but is more precise than native lazyload
     };
   };
+  video: {
+    autoplay_lazyload: {
+      // Only for videos with autoplay
+      when: // Default: 'below-the-fold'
+      | 'never' // All video are loaded eagerly
+        | 'below-the-fold' // videos are lazy loaded only if they are below the fold
+        | 'always'; // Not recommended
+      how: 'js'; // Using IntersectionObserver. Requires ~1Ko of JS
+    };
+  };
   misc: {
     prefetch_links: 'in-viewport' | 'off';
   };
