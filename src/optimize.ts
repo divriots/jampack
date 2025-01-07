@@ -1,6 +1,6 @@
 import { globby } from 'globby';
 import * as path from 'path';
-import * as fs from 'fs/promises';
+import * as fsp from 'fs/promises';
 import { UrlTransformer, getCanonicalCdnForUrl, getTransformer } from 'unpic';
 import * as cheerio from '@divriots/cheerio';
 import { isNumeric } from './utils.js';
@@ -41,6 +41,7 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
   // For processes to add into
   const appendToBody: Record<string, string> = {};
 
+  const fs = state.vfs ?? fsp;
   const html = (await fs.readFile(path.join(state.dir, file))).toString();
   if (!html.includes('<html')) return;
   const $ = cheerio.load(html, { sourceCodeLocationInfo: true });
@@ -392,7 +393,7 @@ async function processImage(
    * Loading image
    */
   const originalImage = await Resource.loadResource(
-    state.dir,
+    state,
     htmlfile,
     attrib_src
   );
@@ -448,7 +449,7 @@ async function processImage(
     );
 
     if (!state.compressedFiles.has(newFilename) && !state.args.nowrite) {
-      fs.writeFile(newFilename, newImage.data);
+      await (state.vfs??fsp).writeFile(newFilename, newImage.data);
     }
 
     // Mark new file as compressed
@@ -772,7 +773,7 @@ async function generateSrcSet(
         } else {
           // Write file
           if (!state.args.nowrite) {
-            fs.writeFile(absoluteFilename, compressedImage.data);
+            await (state.vfs??fsp).writeFile(absoluteFilename, compressedImage.data);
           }
 
           // Set new previous size to beat
@@ -961,6 +962,7 @@ export async function optimize(
   // Sequential async
   for (const file of paths) {
     await analyse(state, file);
+    state.onAnalysedFile?.(file);
   }
 }
 

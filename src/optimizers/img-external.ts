@@ -1,5 +1,5 @@
 import * as path from 'path';
-import * as fs from 'fs/promises';
+import * as fsp from 'fs/promises';
 import { GlobalState } from '../state.js';
 import { hashSync as hasha } from 'hasha';
 import { fileTypeFromBuffer } from 'file-type';
@@ -115,7 +115,7 @@ export async function downloadExternalImage(
     path.join(state.dir, `_jampack/${contentHash}.${ext}`)
   );
 
-  await fs.writeFile(path.join(state.dir, htmlFolder, filename), buffer);
+  await (state.vfs??fsp).writeFile(path.join(state.dir, htmlFolder, filename), buffer);
 
   return filename;
 }
