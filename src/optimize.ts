@@ -78,6 +78,16 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
     theFold,
     appendToBody
   );
+  await processTag(
+    state,
+    file,
+    $,
+    'meta[property$=":image"], meta[name$=":image"]' as 'meta',
+    'content',
+    processMetaImage,
+    theFold,
+    appendToBody
+  );
 
   // Remove the fold
   //
@@ -300,32 +310,14 @@ async function processImage(
    * Check for external images
    */
 
-  if (
-    !isLocal(attrib_src) &&
-    isIncluded(
-      attrib_src,
-      config.image.external.src_include,
-      config.image.external.src_exclude
-    )
-  ) {
-    // Don't process external images
-    if (config.image.external.process === 'off') return;
-    try {
-      if (config.image.external.process === 'download') {
-        // Download external image for local processing
-        attrib_src = await downloadExternalImage(state, htmlfile, attrib_src);
-      } else if (typeof config.image.external.process === 'function') {
-        // Custom processing for external image
-        attrib_src = await config.image.external.process(attrib_src);
-      }
-      img.attr('src', attrib_src);
-    } catch (e: any) {
-      state.reportIssue(htmlfile, {
-        type: 'warn',
-        msg: `Failed to process external image: ${attrib_src} - ${e.message}`,
-      });
-      return; // No more processing
-    }
+  try {
+    const external_src = await externalImage(attrib_src, state, htmlfile);
+    if (external_src) img.attr('src', (attrib_src = external_src));
+  } catch (e: any) {
+    return state.reportIssue(htmlfile, {
+      type: 'warn',
+      msg: `Failed to process external image: ${attrib_src} - ${e.message}`,
+    }); // No more processing
   }
 
   switch (config.image.cdn.process) {
@@ -449,7 +441,7 @@ async function processImage(
     );
 
     if (!state.compressedFiles.has(newFilename) && !state.args.nowrite) {
-      await (state.vfs??fsp).writeFile(newFilename, newImage.data);
+      await (state.vfs ?? fsp).writeFile(newFilename, newImage.data);
     }
 
     // Mark new file as compressed
@@ -498,7 +490,7 @@ async function processImage(
     // Only embed small images
     // matching the embed size
     if (imageToEmbed.data.length <= config.image.embed_size) {
-      let datauri = undefined;
+      let datauri: string | undefined = undefined;
 
       const ifmt = imageToEmbed.format;
       switch (ifmt) {
@@ -672,6 +664,128 @@ async function processImage(
   }
 }
 
+async function processMetaImage(
+  state: GlobalState,
+  htmlfile: string,
+  meta: cheerio.Cheerio<cheerio.Element>
+): Promise<void> {
+  const attribute = 'content';
+  let content = meta.attr(attribute);
+  if (!content)
+    return state.reportIssue(htmlfile, {
+      type: 'warn',
+      msg: `Missing [content] on meta - processing skipped.`,
+    });
+
+  // Setup to ignore
+  const { src_exclude, src_include, cdn } = state.options.image;
+  if (!isIncluded(content, src_include, src_exclude)) return;
+
+  /*
+   * Check for external images
+   */
+
+  try {
+    const external_content = await externalImage(content, state, htmlfile);
+    if (external_content) meta.attr(attribute, (content = external_content));
+  } catch (e: any) {
+    return state.reportIssue(htmlfile, {
+      type: 'warn',
+      msg: `Failed to process external image: ${attribute} - ${e.message}`,
+    }); // No more processing
+  }
+
+  const propName = meta.attr('property') ? 'property' : 'name';
+  const width = meta.closest(`meta[${propName}:width]`).attr(attribute);
+
+  switch (cdn.process) {
+    case 'off':
+      break;
+    case 'optimize':
+      let cdnTransformer = cdn.transformer;
+      if (cdnTransformer && !cdn.src_include) {
+        throw new Error(
+          'config.image.cdn.src_include is required when specifying a config.image.cdn.transformer'
+        );
+      }
+      if (!cdnTransformer) {
+        const canonical = getCanonicalCdnForUrl(content);
+        if (!canonical) break;
+        cdnTransformer = getTransformer(canonical.cdn);
+      }
+      if (!cdnTransformer) break;
+      if (!isIncluded(content, cdn.src_include || /.*/, cdn.src_exclude)) break;
+      if (!width)
+        return state.reportIssue(htmlfile, {
+          type: 'warn',
+          msg: `Missing or malformed'width' attribute for image ${content}, unable to perform CDN transform`,
+        });
+      meta.attr(
+        attribute,
+        cdnTransformer({ url: content, width: +width })
+          ?.toString()
+          // unpic adds a default host to absolute paths, remove it
+          ?.replace(UNPIC_DEFAULT_HOST_REGEX, '/')
+      );
+      return;
+  }
+
+  /*
+   * Loading image
+   */
+  const originalImage = await Resource.loadResource(state, htmlfile, content);
+  if (!originalImage)
+    return state.reportIssue(htmlfile, {
+      type: 'erro',
+      msg: `Can't find img on disk ${attribute}="${content}"`,
+    });
+
+  /*
+   * Compress image
+   */
+  const newImage = await compressImage(state, await originalImage.getData(), {
+    resize: width ? { width: +width } : undefined,
+    toFormat:
+      meta.closest(`meta[${propName}:type]`).attr(attribute) === 'image/png'
+        ? 'png'
+        : 'jpeg',
+  });
+
+  if (newImage?.data && newImage.data.length < (await originalImage.getLen())) {
+    meta.attr(
+      attribute,
+      path.join(
+        path.dirname(content),
+        path.basename(content, path.extname(content)) + `.${newImage.format}`
+      )
+    );
+
+    const newFilename = path.join(
+      path.dirname(originalImage.filePathAbsolute),
+      path.basename(
+        originalImage.filePathAbsolute,
+        path.extname(originalImage.filePathAbsolute)
+      ) + `.${newImage.format}`
+    );
+
+    if (!state.compressedFiles.has(newFilename)) {
+      if (!state.args.nowrite)
+        await (state.vfs ?? fsp).writeFile(newFilename, newImage.data);
+      // Mark new file as compressed
+      state.compressedFiles.add(newFilename);
+      // Report compression result
+      state.reportSummary({
+        action:
+          newFilename !== originalImage.filePathAbsolute
+            ? `${await originalImage.getExt()}->${newImage.format}`
+            : path.extname(originalImage.filePathAbsolute),
+        originalSize: await originalImage.getLen(),
+        compressedSize: newImage.data.length,
+      });
+    }
+  }
+}
+
 const isIncluded = (
   src: string,
   includeConf: RegExp,
@@ -773,7 +887,10 @@ async function generateSrcSet(
         } else {
           // Write file
           if (!state.args.nowrite) {
-            await (state.vfs??fsp).writeFile(absoluteFilename, compressedImage.data);
+            await (state.vfs ?? fsp).writeFile(
+              absoluteFilename,
+              compressedImage.data
+            );
           }
 
           // Set new previous size to beat
@@ -970,7 +1087,7 @@ async function processTag(
   state: GlobalState,
   file: string,
   $: cheerio.CheerioAPI,
-  tag: 'img' | 'iframe' | 'video',
+  tag: 'img' | 'iframe' | 'video' | 'meta',
   attribute_to_log: string,
   processor: (
     state: GlobalState,
@@ -1029,5 +1146,24 @@ async function processTag(
     spinnerImg.fail();
   } else {
     spinnerImg.succeed();
+  }
+}
+
+async function externalImage(
+  content: string,
+  state: GlobalState,
+  htmlfile: string
+): Promise<string | undefined> {
+  const { src_exclude, src_include, process } = state.options.image.external;
+  if (!isLocal(content) && isIncluded(content, src_include, src_exclude)) {
+    if (process === 'off')
+      // Don't process external images
+      return;
+    if (process === 'download')
+      // Download external image for local processing
+      return await downloadExternalImage(state, htmlfile, content);
+    if (typeof process === 'function')
+      // Custom processing for external image
+      return await process(content);
   }
 }
