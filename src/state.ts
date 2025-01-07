@@ -46,6 +46,10 @@ export class GlobalState {
   };
   summaryByExtension: Record<string, Summary> = {};
 
+  vfs?: typeof import('fs/promises');
+
+  onAnalysedFile?: (file: string) => void;
+
   reportIssue(sourceFile: string, issue: Issue) {
     let issueList = this.issues.get(sourceFile);
     if (issueList === undefined) {

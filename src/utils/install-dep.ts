@@ -1,4 +1,4 @@
-import * as fs from 'fs/promises';
+import * as fsp from 'fs/promises';
 import * as path from 'path';
 import { createRequire } from 'node:module';
 import { GlobalState } from '../state.js';
@@ -25,7 +25,7 @@ export async function install_dependency(
   const folder = `/_jampack/${options.destination.folder_name}`;
   const src_filename = options.source.filename;
   const url_loader = `${folder}/loader.js`;
-
+  const fs = state.vfs ?? fsp;
   // Install dependency in /_jampack if not done yet
   if (!state.installed_dependencies.has(options.source.npm_package_name)) {
     const quickLinkDestination = path.join(state.dir, folder, src_filename);
@@ -42,7 +42,12 @@ export async function install_dependency(
     const source = require.resolve(
       `${options.source.npm_package_name}${options.source.absolute_path_to_file}/${src_filename}`
     );
-    await fs.copyFile(source, quickLinkDestination);
+    if (state.vfs) {
+      await state.vfs.writeFile(quickLinkDestination, await fsp.readFile(source));
+    } else {
+      await fs.copyFile(source, quickLinkDestination);
+    }
+
 
     state.installed_dependencies.add(options.source.npm_package_name);
   }

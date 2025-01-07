@@ -1,6 +1,6 @@
 import { hashSync as hasha } from 'hasha';
 import path from 'path';
-import * as fs from 'fs/promises';
+import * as fsp from 'fs/promises';
 import { GlobalState } from './state.js';
 import { CACHE_VERSIONS } from './packagejson.js';
 
@@ -16,6 +16,7 @@ function getCacheFolder(state: GlobalState): string {
 
 async function cleanCache(state: GlobalState, full?: boolean) {
   const CACHE_FOLDER = getCacheFolder(state);
+  const fs = state.vfs ?? fsp;
 
   if (full) {
     try {
@@ -98,6 +99,7 @@ async function getFromCache(
   if (state.args.nocache) {
     return undefined;
   }
+  const fs = state.vfs ?? fsp;
 
   const location = getLocation(state, hash, category);
 
@@ -124,6 +126,7 @@ async function addToCache(
   if (state.args.nocache) {
     return;
   }
+  const fs = state.vfs ?? fsp;
 
   const location = getLocation(state, hash, category);
   await fs.mkdir(location, { recursive: true });

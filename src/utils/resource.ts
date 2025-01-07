@@ -1,9 +1,10 @@
 import * as url from 'url';
 import * as path from 'path';
-import * as fs from 'fs/promises';
+import * as fsp from 'fs/promises';
 import { fileTypeFromBuffer, FileExtension, MimeType } from 'file-type';
 import sharp from 'sharp';
 import { AllImageFormat, ImageFormat } from '../compressors/images.js';
+import { GlobalState } from '../state.js';
 
 type ImageMeta = {
   width: number | undefined;
@@ -17,21 +18,17 @@ type ImageMeta = {
  * File extension, mime and data are loaded only on demand, then cached.
  */
 export class Resource {
-  public readonly src: string;
-  public readonly filePathAbsolute: string;
   private ext: FileExtension | 'svg' | undefined;
   private mime: MimeType | 'image/svg+xml' | undefined;
   private data: Buffer | undefined;
   private image_meta: ImageMeta | null | undefined;
 
-  constructor(src: string, filePathAbsolute: string) {
-    this.src = src;
-    this.filePathAbsolute = filePathAbsolute;
+  constructor(private state: GlobalState, public readonly src: string, public readonly filePathAbsolute: string) {
   }
 
   public async getData(): Promise<Buffer> {
     if (this.data === undefined) {
-      this.data = await fs.readFile(this.filePathAbsolute);
+      this.data = await (this.state.vfs ?? fsp).readFile(this.filePathAbsolute);
     }
 
     return this.data;
@@ -125,7 +122,7 @@ export class Resource {
   }
 
   static async loadResource(
-    projectRoot: string,
+    state: GlobalState,
     relativeFile: string,
     src: string
   ): Promise<Resource | undefined> {
@@ -140,14 +137,14 @@ export class Resource {
     }
 
     const relativePath = path.join(
-      projectRoot,
+      state.dir,
       src.startsWith('/') ? '' : path.dirname(relativeFile),
       u.pathname
     );
     let absolutePath = path.resolve(relativePath);
 
-    if (await fileExists(absolutePath)) {
-      return new Resource(src, absolutePath);
+    if (await fileExists(state, absolutePath)) {
+      return new Resource(state, src, absolutePath);
     }
 
     return undefined;
@@ -159,9 +156,9 @@ export function isLocal(src: string) {
   return !u.host;
 }
 
-export async function fileExists(path: string): Promise<boolean> {
+async function fileExists(state: GlobalState, path: string): Promise<boolean> {
   try {
-    await fs.stat(path);
+    await (state.vfs??fsp).stat(path);
   } catch (e) {
     return false;
   }

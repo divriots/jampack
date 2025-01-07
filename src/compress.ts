@@ -1,5 +1,5 @@
 import { Stats } from 'fs';
-import * as fs from 'fs/promises';
+import * as fsp from 'fs/promises';
 import * as path from 'path';
 import { formatBytes } from './utils.js';
 import { GlobalState, ReportItem } from './state.js';
@@ -16,6 +16,7 @@ const processFile = async (
   stats: Stats
 ): Promise<void> => {
   let writeData: Buffer | string | undefined = undefined;
+  const fs = state.vfs ?? fsp;
 
   try {
     const ext = path.extname(file);
@@ -85,6 +86,7 @@ export async function compressFolder(
   state: GlobalState,
   exclude?: string
 ): Promise<void> {
+  const fs = state.vfs ?? fsp;
   const spinner = ora(getProgressText(state)).start();
 
   const globs = ['**/**', '!_jampack/**']; // Exclude jampack folder because already compressed
