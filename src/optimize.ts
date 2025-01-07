@@ -1,3 +1,4 @@
+import type { Options } from './config-types.js';
 import { globby } from 'globby';
 import * as path from 'path';
 import * as fsp from 'fs/promises';
@@ -310,14 +311,20 @@ async function processImage(
    * Check for external images
    */
 
-  try {
-    const external_src = await externalImage(attrib_src, state, htmlfile);
-    if (external_src) img.attr('src', (attrib_src = external_src));
-  } catch (e: any) {
-    return state.reportIssue(htmlfile, {
-      type: 'warn',
-      msg: `Failed to process external image: ${attrib_src} - ${e.message}`,
-    }); // No more processing
+  const { external } = state.options.image;
+  if (isExternalImage(attrib_src, external)) {
+    if (external.process === 'off')
+      // Don't process external images
+      return;
+    try {
+      const external_src = await externalImage(attrib_src, state, htmlfile);
+      if (external_src) img.attr('src', (attrib_src = external_src));
+    } catch (e: any) {
+      return state.reportIssue(htmlfile, {
+        type: 'warn',
+        msg: `Failed to process external image: ${attrib_src} - ${e.message}`,
+      }); // No more processing
+    }
   }
 
   switch (config.image.cdn.process) {
@@ -678,21 +685,25 @@ async function processMetaImage(
     });
 
   // Setup to ignore
-  const { src_exclude, src_include, cdn } = state.options.image;
+  const { src_exclude, src_include, cdn, external } = state.options.image;
   if (!isIncluded(content, src_include, src_exclude)) return;
 
   /*
    * Check for external images
    */
-
-  try {
-    const external_content = await externalImage(content, state, htmlfile);
-    if (external_content) meta.attr(attribute, (content = external_content));
-  } catch (e: any) {
-    return state.reportIssue(htmlfile, {
-      type: 'warn',
-      msg: `Failed to process external image: ${attribute} - ${e.message}`,
-    }); // No more processing
+  if (isExternalImage(content, external)) {
+    if (external.process === 'off')
+      // Don't process external images
+      return;
+    try {
+      const external_content = await externalImage(content, state, htmlfile);
+      if (external_content) meta.attr(attribute, (content = external_content));
+    } catch (e: any) {
+      return state.reportIssue(htmlfile, {
+        type: 'warn',
+        msg: `Failed to process external image: ${attribute} - ${e.message}`,
+      }); // No more processing
+    }
   }
 
   const propName = meta.attr('property') ? 'property' : 'name';
@@ -1149,21 +1160,23 @@ async function processTag(
   }
 }
 
+const isExternalImage = (
+  content: string,
+  external: Options['image']['external']
+) =>
+  !isLocal(content) &&
+  isIncluded(content, external.src_include, external.src_exclude);
+
 async function externalImage(
   content: string,
   state: GlobalState,
   htmlfile: string
 ): Promise<string | undefined> {
-  const { src_exclude, src_include, process } = state.options.image.external;
-  if (!isLocal(content) && isIncluded(content, src_include, src_exclude)) {
-    if (process === 'off')
-      // Don't process external images
-      return;
-    if (process === 'download')
-      // Download external image for local processing
-      return await downloadExternalImage(state, htmlfile, content);
-    if (typeof process === 'function')
-      // Custom processing for external image
-      return await process(content);
-  }
+  const { process } = state.options.image.external;
+  if (process === 'download')
+    // Download external image for local processing
+    return await downloadExternalImage(state, htmlfile, content);
+  if (typeof process === 'function')
+    // Custom processing for external image
+    return await process(content);
 }
