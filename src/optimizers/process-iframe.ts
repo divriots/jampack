@@ -9,11 +9,9 @@ export async function processIframe(
   isAboveTheFold: boolean,
   appendToBody: Record<string, string>
 ): Promise<void> {
-  // Reset loading attribute
-  iframe.removeAttr('loading');
-
   const lazyloadOptions = state.options.iframe.lazyload;
-  if (lazyloadOptions.when === 'never') {
+  if (lazyloadOptions.when === 'never' || iframe.attr('loading') === 'earger') {
+    // If lazy loading is set to 'never' or 'eager', do not modify the iframe
     return;
   }
 
