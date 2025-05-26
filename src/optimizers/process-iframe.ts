@@ -10,7 +10,7 @@ export async function processIframe(
   appendToBody: Record<string, string>
 ): Promise<void> {
   const lazyloadOptions = state.options.iframe.lazyload;
-  if (lazyloadOptions.when === 'never' || iframe.attr('loading') === 'earger') {
+  if (lazyloadOptions.when === 'never' || iframe.attr('loading') === 'eager') {
     // If lazy loading is set to 'never' or 'eager', do not modify the iframe
     return;
   }
