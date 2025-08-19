@@ -1109,7 +1109,7 @@ async function processTag(
   state: GlobalState,
   file: string,
   $: cheerio.CheerioAPI,
-  tag: 'img' | 'iframe' | 'video' | 'meta',
+  tag: 'img' | 'iframe' | 'video' | 'meta' | 'script',
   attribute_to_log: string,
   processor: (
     state: GlobalState,
