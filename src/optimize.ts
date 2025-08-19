@@ -21,6 +21,7 @@ import { prefetch_links_in_viewport } from './optimizers/prefetch-links.js';
 import { GlobalState } from './state.js';
 import { processIframe } from './optimizers/process-iframe.js';
 import { processVideo } from './optimizers/process-video.js';
+import { processScript } from './optimizers/process-script.js';
 
 const UNPIC_DEFAULT_HOST_REGEX = /^https:\/\/n\//g;
 const ABOVE_FOLD_DATA_ATTR = 'data-abovethefold';
@@ -86,6 +87,16 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
     'meta[property$=":image"], meta[name$=":image"]' as 'meta',
     'content',
     processMetaImage,
+    theFold,
+    appendToBody
+  );
+  await processTag(
+    state,
+    file,
+    $,
+    'script',
+    'src',
+    processScript,
     theFold,
     appendToBody
   );
