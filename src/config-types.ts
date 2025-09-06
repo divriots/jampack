@@ -11,7 +11,6 @@ export type Options = {
     browserslist: string; // browserslist query string
   };
   html: {
-    add_css_reset_as: 'inline' | 'off'; // 'inline': adds "<style>:where(img){height:auto}</style>" on top of the <head>
     sort_attributes: boolean;
   };
   js: {
@@ -31,16 +30,16 @@ export type Options = {
     src_exclude: RegExp | null;
     external: {
       process:
-        | 'off' // Default
-        | 'download' // Experimental
-        | ((attrib_src: string) => Promise<string>); // Experimental
+      | 'off' // Default
+      | 'download' // Experimental
+      | ((attrib_src: string) => Promise<string>); // Experimental
       src_include: RegExp;
       src_exclude: RegExp | null;
     };
     cdn: {
       process:
-        | 'off' //default
-        | 'optimize';
+      | 'off' //default
+      | 'optimize';
       src_include: RegExp | null;
       src_exclude: RegExp | null;
       transformer?: UrlTransformer; // Custom 'unpic' cdn url transformer, if not present it will be determined by 'unpic' based on original url
@@ -70,11 +69,11 @@ export type Options = {
     lazyload: {
       when: // Default: 'below-the-fold'
       | 'never' // All iframes are loaded eagerly
-        | 'below-the-fold' // Iframe are lazy loaded only if they are below the fold
-        | 'always'; // Not recommended, but if you want to lazy load all iframes
+      | 'below-the-fold' // Iframe are lazy loaded only if they are below the fold
+      | 'always'; // Not recommended, but if you want to lazy load all iframes
       how: // Default: 'native'
       | 'native' // Using `loading="lazy" attribue on iframe tag
-        | 'js'; // Using IntersectionObserver. Requires ~1Ko of JS but is more precise than native lazyload
+      | 'js'; // Using IntersectionObserver. Requires ~1Ko of JS but is more precise than native lazyload
     };
   };
   video: {
@@ -82,8 +81,8 @@ export type Options = {
       // Only for videos with autoplay
       when: // Default: 'below-the-fold'
       | 'never' // All video are loaded eagerly
-        | 'below-the-fold' // videos are lazy loaded only if they are below the fold
-        | 'always'; // Not recommended
+      | 'below-the-fold' // videos are lazy loaded only if they are below the fold
+      | 'always'; // Not recommended
       how: 'js'; // Using IntersectionObserver. Requires ~1Ko of JS
     };
   };

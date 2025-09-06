@@ -105,9 +105,10 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
   const wasCharsetFirst = !charsetElements$.prev().length;
 
   const { options } = state;
-  if (options.html.add_css_reset_as === 'inline') {
-    prependToHead += `<style>:where(img){height:auto;}</style>`;
-  }
+
+  // Add a CSS reset for images that have been sized by jampack
+  prependToHead += `<style>:where(img[jampack-sized]){max-width:100%;height:auto;}</style>`;
+
   if (prependToHead || appendToHead) {
     if (prependToHead) heads.prepend(prependToHead);
     if (appendToHead) heads.append(appendToHead);
@@ -421,7 +422,7 @@ async function processImage(
     // Let's go to avif -> avif , webp -> webp, else * -> webp
     srcToFormat =
       (await originalImage.getMime()) === 'image/avif' ||
-      (await originalImage.getMime()) === 'image/webp'
+        (await originalImage.getMime()) === 'image/webp'
         ? 'unchanged'
         : 'webp';
   }
@@ -444,7 +445,7 @@ async function processImage(
     const newSrc = path.join(
       path.dirname(attrib_src),
       path.basename(attrib_src, path.extname(attrib_src)) +
-        `.${newImage.format}`
+      `.${newImage.format}`
     );
 
     if (!state.compressedFiles.has(newFilename) && !state.args.nowrite) {
@@ -511,9 +512,8 @@ async function processImage(
         case 'webp':
         case 'jpg':
         case 'png':
-          datauri = `data:image/${
-            ifmt === 'jpg' ? 'jpeg' : ifmt
-          };base64,${imageToEmbed.data.toString('base64')}`;
+          datauri = `data:image/${ifmt === 'jpg' ? 'jpeg' : ifmt
+            };base64,${imageToEmbed.data.toString('base64')}`;
           break;
       }
 
@@ -663,9 +663,8 @@ async function processImage(
         continue;
       }
 
-      const source = `<source ${
-        sizes ? `sizes="${sizes}"` : ''
-      } srcset="${srcset}" type="${s.mime}">`;
+      const source = `<source ${sizes ? `sizes="${sizes}"` : ''
+        } srcset="${srcset}" type="${s.mime}">`;
       img.before(source); // Append before this way existing sources are always top priority
     }
   }
@@ -854,10 +853,9 @@ async function generateSrcSet(
   const ext = path.extname(originalImage.src);
   const fullbasename = originalImage.src.slice(0, -ext.length);
   const imageSrc = (addition: string) =>
-    `${fullbasename}${addition}${
-      options.toFormat === 'unchanged'
-        ? ext
-        : `.${options.toFormat?.split('+')[0]}`
+    `${fullbasename}${addition}${options.toFormat === 'unchanged'
+      ? ext
+      : `.${options.toFormat?.split('+')[0]}`
     }`;
 
   const meta = await originalImage.getImageMeta();
@@ -1070,6 +1068,7 @@ async function setImageSize(
     const result_h = Math.round(height_new);
     img.attr('width', result_w.toFixed(0));
     img.attr('height', result_h.toFixed(0));
+    img.attr('jampack-sized', 'true');
     return [result_w, result_h];
   }
 
