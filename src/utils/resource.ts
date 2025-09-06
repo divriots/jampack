@@ -136,10 +136,12 @@ export class Resource {
       throw new Error(`Invalid src format "${src}"`);
     }
 
+    const pathname = decodeURIComponent(u.pathname);
+
     const relativePath = path.join(
       state.dir,
       src.startsWith('/') ? '' : path.dirname(relativeFile),
-      u.pathname
+      pathname,
     );
     let absolutePath = path.resolve(relativePath);
 
