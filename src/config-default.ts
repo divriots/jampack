@@ -5,7 +5,6 @@ const default_options: Options = {
     browserslist: 'defaults', // defaults = '> 0.5%, last 2 versions, Firefox ESR, not dead'
   },
   html: {
-    add_css_reset_as: 'off',
     sort_attributes: false,
   },
   css: {
