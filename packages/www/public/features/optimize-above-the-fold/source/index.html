@@ -1,43 +1,50 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <style>
-      img {
-        max-width: 200px;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Above the fold optimizations</h1>
 
-    <p>You want images above the fold to arrive as soon as possible.</p>
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    :root {
+      background-color: white;
+    }
 
-    <h2>Non-progressive JPEG</h2>
-    <img src="./redpanda_500x335.jpg" alt="Red panada in the bush" />
+    img {
+      max-width: 200px;
+    }
+  </style>
+</head>
 
-    <h2>Transparent PNG</h2>
-    <img src="./music_500x447.png" alt="Girl listening to music" />
+<body>
+  <h1>Above the fold optimizations</h1>
 
-    <h2>Non-transparent PNG</h2>
-    <img src="./html.to.design.png" alt="html.to.design banner" />
+  <p>You want images above the fold to arrive as soon as possible.</p>
 
-    <h2>JPEG above the fold</h2>
-    <picture>
-      <img src="./water.jpg" alt="Beach" />
-    </picture>
+  <h2>Non-progressive JPEG</h2>
+  <img src="./redpanda_500x335.jpg" alt="Red panada in the bush" />
 
-    <div>
-      <hr />
-      The fold is marked here.<br />
-      Everything after that is "below the fold"
-      <the-fold></the-fold>
-      <hr />
-    </div>
+  <h2>Transparent PNG</h2>
+  <img src="./music_500x447.png" alt="Girl listening to music" />
 
-    <h2>JPEG below the fold</h2>
-    <picture>
-      <img src="./water.jpg" alt="Beach" />
-    </picture>
-  </body>
+  <h2>Non-transparent PNG</h2>
+  <img src="./html.to.design.png" alt="html.to.design banner" />
+
+  <h2>JPEG above the fold</h2>
+  <picture>
+    <img src="./water.jpg" alt="Beach" />
+  </picture>
+
+  <div>
+    <hr />
+    The fold is marked here.<br />
+    Everything after that is "below the fold"
+    <the-fold></the-fold>
+    <hr />
+  </div>
+
+  <h2>JPEG below the fold</h2>
+  <picture>
+    <img src="./water.jpg" alt="Beach" />
+  </picture>
+</body>
+
 </html>
