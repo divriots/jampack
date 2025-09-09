@@ -160,7 +160,7 @@ export function isLocal(src: string) {
 
 async function fileExists(state: GlobalState, path: string): Promise<boolean> {
   try {
-    await (state.vfs??fsp).stat(path);
+    await (state.vfs ?? fsp).stat(path);
   } catch (e) {
     return false;
   }
