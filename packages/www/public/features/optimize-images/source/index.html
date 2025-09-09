@@ -1,57 +1,59 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <style>
-      img {
-        max-width: 80%;
-      }
-    </style>
-  </head>
-  <body>
-    
-    <the-fold></the-fold>
 
-    <h1>Responsive images generation</h1>
-    <p>
-      The right image size will be used by the browser based on the device of
-      the user.
-    </p>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    img {
+      max-width: 80%;
+    }
+  </style>
+</head>
 
-    <h2>PICTURE tag</h2>
+<body>
 
-    <h3>picture_redpanda.jpg</h3>
+  <the-fold></the-fold>
 
-    <p>WebP and AVIF image sources with srcset created.</p>
+  <h1>Responsive images generation</h1>
+  <p>
+    The right image size will be used by the browser based on the device of
+    the user.
+  </p>
 
-    <picture>
-      <img src="./picture_redpanda.jpg" alt="Red panda" />
-    </picture>
+  <h2>PICTURE tag</h2>
 
-    <h3>picture_music.png</h3>
+  <h3>picture_redpanda.jpg</h3>
 
-    <p>image too small -> no srcset</p>
+  <p>WebP and AVIF image sources with srcset created.</p>
 
-    <picture>
-      <img src="./picture_music.png" alt="Girl listening to music" />
-    </picture>
+  <picture>
+    <img src="./picture_redpanda.jpg" alt="Red panda" />
+  </picture>
 
-    <h3>picture_screenshot.png</h3>
+  <h3>picture_music.png</h3>
 
-    <picture>
-      <img src="./picture_screenshot.png" alt="Girl listening to music" />
-    </picture>
+  <p>image too small -> no srcset</p>
 
-    <h3>Picture tag with media sources</h3>
+  <picture>
+    <img src="./picture_music.png" alt="Girl listening to music" />
+  </picture>
 
-    <picture>
-      <source srcset="./long-cat.jpg" media="(width > 800px)">
-      <img src="./tall-cat.jpg" alt="Image">
-    </picture>
+  <h3>picture_screenshot.png</h3>
 
-    <h2>IMG tag</h2>
+  <picture>
+    <img src="./picture_screenshot.png" alt="Girl listening to music" />
+  </picture>
 
-    <h3>JPEG image</h2>
+  <h3>Picture tag with media sources</h3>
+
+  <picture>
+    <source srcset="./long-cat.jpg" media="(width > 800px)">
+    <img src="./tall-cat.jpg" alt="Image">
+  </picture>
+
+  <h2>IMG tag</h2>
+
+  <h3>JPEG image</h2>
 
     <img src="./img_water.jpg" alt="beach" />
 
@@ -74,5 +76,9 @@
 
     <h3>Image with EXIF rotation should output correctly</h3>
     <img src="./plane.jpg" alt="Plane seats" />
-  </body>
+
+    <h3>File name with special characters</h3>
+    <img src="./img_avatar-kerer%C5%AB.jpg" alt="Avatar" />
+</body>
+
 </html>

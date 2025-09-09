@@ -136,10 +136,12 @@ export class Resource {
       throw new Error(`Invalid src format "${src}"`);
     }
 
+    const pathname = decodeURIComponent(u.pathname);
+
     const relativePath = path.join(
       state.dir,
       src.startsWith('/') ? '' : path.dirname(relativeFile),
-      u.pathname
+      pathname,
     );
     let absolutePath = path.resolve(relativePath);
 
@@ -158,7 +160,7 @@ export function isLocal(src: string) {
 
 async function fileExists(state: GlobalState, path: string): Promise<boolean> {
   try {
-    await (state.vfs??fsp).stat(path);
+    await (state.vfs ?? fsp).stat(path);
   } catch (e) {
     return false;
   }
