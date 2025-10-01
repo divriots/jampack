@@ -44,7 +44,7 @@
     "lightningcss": "^1.25.1",
     "lozad": "^1.16.0",
     "mini-svg-data-uri": "^1.4.4",
-    "ora": "^8.0.1",
+    "ora": "^8.2.0",
     "quicklink": "^2.3.0",
     "sharp": "^0.33.3",
     "svgo": "^3.2.0",
