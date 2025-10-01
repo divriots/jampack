@@ -32,7 +32,7 @@
     "add": "^2.0.6",
     "browserslist": "^4.23.0",
     "commander": "^12.0.0",
-    "critters": "^0.0.22",
+    "critters": "^0.0.25",
     "deepmerge": "^4.3.1",
     "esbuild": "^0.20.2",
     "escalade": "^3.2.0",
