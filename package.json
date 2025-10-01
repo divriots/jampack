@@ -55,7 +55,7 @@
   "devDependencies": {
     "@types/html-minifier-terser": "^7.0.2",
     "@types/node": "^20.12.7",
-    "shx": "^0.3.3",
+    "shx": "^0.4.0",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.2",
     "typescript": "^5.4.5"
