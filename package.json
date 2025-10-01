@@ -58,7 +58,7 @@
     "shx": "^0.3.3",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "watch": "pnpm build --watch",
