@@ -27,7 +27,7 @@ const ABOVE_FOLD_DATA_ATTR = 'data-abovethefold';
 
 function getIntAttr(
   img: cheerio.Cheerio<cheerio.Element>,
-  attr: string
+  attr: string,
 ): number | undefined {
   const stringValue = img.attr(attr);
   if (!stringValue) return;
@@ -57,7 +57,7 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
     'src',
     processImage,
     theFold,
-    appendToBody
+    appendToBody,
   );
   await processTag(
     state,
@@ -67,7 +67,7 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
     'src',
     processIframe,
     theFold,
-    appendToBody
+    appendToBody,
   );
   await processTag(
     state,
@@ -77,7 +77,7 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
     'src',
     processVideo,
     theFold,
-    appendToBody
+    appendToBody,
   );
   await processTag(
     state,
@@ -87,7 +87,7 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
     'content',
     processMetaImage,
     theFold,
-    appendToBody
+    appendToBody,
   );
 
   // Remove the fold
@@ -107,7 +107,7 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
   const { options } = state;
 
   // Add a CSS reset for images that have been sized by jampack
-  prependToHead += `<style>:where(img[jampack-sized]){max-width:100%;height:auto;}</style>`;
+  prependToHead += `<style>@layer __jampack__ { :where(img[jampack-sized]){max-width:100%;height:auto;} }</style>`;
 
   if (prependToHead || appendToHead) {
     if (prependToHead) heads.prepend(prependToHead);
@@ -178,7 +178,7 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
 function isElementAboveTheFold(
   cheerio: cheerio.Cheerio<cheerio.Element>,
   element: cheerio.Element,
-  theFold: number
+  theFold: number,
 ) {
   const aboveTheFoldAttr: string | number | undefined =
     cheerio.attr(ABOVE_FOLD_DATA_ATTR);
@@ -222,7 +222,7 @@ async function processImage(
   state: GlobalState,
   htmlfile: string,
   img: cheerio.Cheerio<cheerio.Element>,
-  isAboveTheFold: boolean
+  isAboveTheFold: boolean,
 ): Promise<void> {
   /*
    * Attribute 'src'
@@ -335,7 +335,7 @@ async function processImage(
       let cdnTransformer = config.image.cdn.transformer;
       if (cdnTransformer && !config.image.cdn.src_include) {
         throw new Error(
-          'config.image.cdn.src_include is required when specifying a config.image.cdn.transformer'
+          'config.image.cdn.src_include is required when specifying a config.image.cdn.transformer',
         );
       }
 
@@ -349,7 +349,7 @@ async function processImage(
         !isIncluded(
           attrib_src,
           config.image.cdn.src_include || /.*/,
-          config.image.cdn.src_exclude
+          config.image.cdn.src_exclude,
         )
       )
         break;
@@ -375,7 +375,7 @@ async function processImage(
         attrib_src,
         cdnTransformer,
         attrib_width,
-        attrib_height
+        attrib_height,
       );
 
       if (new_srcset !== null) {
@@ -395,7 +395,7 @@ async function processImage(
   const originalImage = await Resource.loadResource(
     state,
     htmlfile,
-    attrib_src
+    attrib_src,
   );
 
   // No file -> give up
@@ -422,7 +422,7 @@ async function processImage(
     // Let's go to avif -> avif , webp -> webp, else * -> webp
     srcToFormat =
       (await originalImage.getMime()) === 'image/avif' ||
-        (await originalImage.getMime()) === 'image/webp'
+      (await originalImage.getMime()) === 'image/webp'
         ? 'unchanged'
         : 'webp';
   }
@@ -439,13 +439,13 @@ async function processImage(
       path.dirname(originalImage.filePathAbsolute),
       path.basename(
         originalImage.filePathAbsolute,
-        path.extname(originalImage.filePathAbsolute)
-      ) + `.${newImage.format}`
+        path.extname(originalImage.filePathAbsolute),
+      ) + `.${newImage.format}`,
     );
     const newSrc = path.join(
       path.dirname(attrib_src),
       path.basename(attrib_src, path.extname(attrib_src)) +
-      `.${newImage.format}`
+        `.${newImage.format}`,
     );
 
     if (!state.compressedFiles.has(newFilename) && !state.args.nowrite) {
@@ -512,8 +512,9 @@ async function processImage(
         case 'webp':
         case 'jpg':
         case 'png':
-          datauri = `data:image/${ifmt === 'jpg' ? 'jpeg' : ifmt
-            };base64,${imageToEmbed.data.toString('base64')}`;
+          datauri = `data:image/${
+            ifmt === 'jpg' ? 'jpeg' : ifmt
+          };base64,${imageToEmbed.data.toString('base64')}`;
           break;
       }
 
@@ -577,7 +578,7 @@ async function processImage(
       originalImage,
       img.attr('src'),
       imageLengthToBeatInSrcSet,
-      { toFormat: srcToFormat }
+      { toFormat: srcToFormat },
     );
 
     if (new_srcset !== null) {
@@ -639,7 +640,7 @@ async function processImage(
 
     for (const s of sourcesToGenerate.reverse()) {
       const sourceWithThisMimeType = picture.children(
-        `source[type="${s.mime}"]`
+        `source[type="${s.mime}"]`,
       );
       if (sourceWithThisMimeType.length > 0) {
         // Ignore the creation of sources that already exist
@@ -654,7 +655,7 @@ async function processImage(
         undefined,
         {
           toFormat: s.format,
-        }
+        },
       );
 
       if (!srcset) {
@@ -663,8 +664,9 @@ async function processImage(
         continue;
       }
 
-      const source = `<source ${sizes ? `sizes="${sizes}"` : ''
-        } srcset="${srcset}" type="${s.mime}">`;
+      const source = `<source ${
+        sizes ? `sizes="${sizes}"` : ''
+      } srcset="${srcset}" type="${s.mime}">`;
       img.before(source); // Append before this way existing sources are always top priority
     }
   }
@@ -673,7 +675,7 @@ async function processImage(
 async function processMetaImage(
   state: GlobalState,
   htmlfile: string,
-  meta: cheerio.Cheerio<cheerio.Element>
+  meta: cheerio.Cheerio<cheerio.Element>,
 ): Promise<void> {
   const attribute = 'content';
   let content = meta.attr(attribute);
@@ -715,7 +717,7 @@ async function processMetaImage(
       let cdnTransformer = cdn.transformer;
       if (cdnTransformer && !cdn.src_include) {
         throw new Error(
-          'config.image.cdn.src_include is required when specifying a config.image.cdn.transformer'
+          'config.image.cdn.src_include is required when specifying a config.image.cdn.transformer',
         );
       }
       if (!cdnTransformer) {
@@ -735,7 +737,7 @@ async function processMetaImage(
         cdnTransformer({ url: content, width: +width })
           ?.toString()
           // unpic adds a default host to absolute paths, remove it
-          ?.replace(UNPIC_DEFAULT_HOST_REGEX, '/')
+          ?.replace(UNPIC_DEFAULT_HOST_REGEX, '/'),
       );
       return;
   }
@@ -766,16 +768,16 @@ async function processMetaImage(
       attribute,
       path.join(
         path.dirname(content),
-        path.basename(content, path.extname(content)) + `.${newImage.format}`
-      )
+        path.basename(content, path.extname(content)) + `.${newImage.format}`,
+      ),
     );
 
     const newFilename = path.join(
       path.dirname(originalImage.filePathAbsolute),
       path.basename(
         originalImage.filePathAbsolute,
-        path.extname(originalImage.filePathAbsolute)
-      ) + `.${newImage.format}`
+        path.extname(originalImage.filePathAbsolute),
+      ) + `.${newImage.format}`,
     );
 
     if (!state.compressedFiles.has(newFilename)) {
@@ -799,7 +801,7 @@ async function processMetaImage(
 const isIncluded = (
   src: string,
   includeConf: RegExp,
-  excludeConf: RegExp | null
+  excludeConf: RegExp | null,
 ) => !!src.match(includeConf) && (!excludeConf || !src.match(excludeConf));
 
 async function _generateSrcSet(
@@ -808,8 +810,8 @@ async function _generateSrcSet(
   imageWidth: number | undefined,
   imageHeight: number | undefined,
   transformSrc: (
-    valueW: number
-  ) => string | Promise<string | undefined> | undefined
+    valueW: number,
+  ) => string | Promise<string | undefined> | undefined,
 ): Promise<string | null> {
   // Start from original image
   let new_srcset = '';
@@ -848,14 +850,15 @@ async function generateSrcSet(
   originalImage: Resource,
   startSrc: string | undefined,
   startSrcLength: number | undefined,
-  options: ImageOutputOptions
+  options: ImageOutputOptions,
 ): Promise<string | null> {
   const ext = path.extname(originalImage.src);
   const fullbasename = originalImage.src.slice(0, -ext.length);
   const imageSrc = (addition: string) =>
-    `${fullbasename}${addition}${options.toFormat === 'unchanged'
-      ? ext
-      : `.${options.toFormat?.split('+')[0]}`
+    `${fullbasename}${addition}${
+      options.toFormat === 'unchanged'
+        ? ext
+        : `.${options.toFormat?.split('+')[0]}`
     }`;
 
   const meta = await originalImage.getImageMeta();
@@ -875,7 +878,7 @@ async function generateSrcSet(
       const absoluteFilename = translateSrc(
         state.dir,
         path.dirname(htmlfile),
-        src
+        src,
       );
 
       // Don't generate srcset file twice
@@ -883,7 +886,7 @@ async function generateSrcSet(
         const compressedImage = await compressImage(
           state,
           await originalImage.getData(),
-          { ...options, resize: { width: valueW } }
+          { ...options, resize: { width: valueW } },
         );
 
         if (
@@ -898,7 +901,7 @@ async function generateSrcSet(
           if (!state.args.nowrite) {
             await (state.vfs ?? fsp).writeFile(
               absoluteFilename,
-              compressedImage.data
+              compressedImage.data,
             );
           }
 
@@ -910,7 +913,7 @@ async function generateSrcSet(
         }
       }
       return src;
-    }
+    },
   );
 }
 
@@ -919,7 +922,7 @@ async function generateSrcSetForCdn(
   startSrc: string,
   cdnTransformer: UrlTransformer,
   imageWidth: number | undefined,
-  imageHeight: number | undefined
+  imageHeight: number | undefined,
 ): Promise<string | null> {
   return _generateSrcSet(state, '', imageWidth, imageHeight, (valueW: number) =>
     cdnTransformer({
@@ -928,7 +931,7 @@ async function generateSrcSetForCdn(
     })
       ?.toString()
       // unpic adds a default host to absolute paths, remove it
-      ?.replace(UNPIC_DEFAULT_HOST_REGEX, '/')
+      ?.replace(UNPIC_DEFAULT_HOST_REGEX, '/'),
   );
 }
 
@@ -936,7 +939,7 @@ async function setImageSize(
   state: GlobalState,
   htmlfile: string,
   img: cheerio.Cheerio<cheerio.Element>,
-  image: Resource
+  image: Resource,
 ): Promise<number[]> {
   let width = img.attr('width');
   let height = img.attr('height');
@@ -972,13 +975,13 @@ async function setImageSize(
   const meta = await image.getImageMeta();
   if (!meta) {
     throw new Error(
-      `Can't get image meta information of "${image.src}" - some optimizations are not possible without this information.`
+      `Can't get image meta information of "${image.src}" - some optimizations are not possible without this information.`,
     );
   }
 
   if (meta.width === undefined && meta.height === undefined) {
     throw new Error(
-      `Can't get image width and height of "${image.src}" - some optimizations are not possible without this information.`
+      `Can't get image width and height of "${image.src}" - some optimizations are not possible without this information.`,
     );
   }
 
@@ -1079,7 +1082,7 @@ async function setImageSize(
 export async function optimize(
   state: GlobalState,
   include?: string,
-  exclude?: string
+  exclude?: string,
 ): Promise<void> {
   const glob = include ? [include] : ['**/*.{htm,html}'];
   if (exclude) glob.push('!' + exclude);
@@ -1104,10 +1107,10 @@ async function processTag(
     file: string,
     tag: cheerio.Cheerio<cheerio.Element>,
     isAboveTheFold: boolean,
-    appendToBody: Record<string, string>
+    appendToBody: Record<string, string>,
   ) => Promise<void>,
   theFold: number,
-  appendToBody: Record<string, string>
+  appendToBody: Record<string, string>,
 ) {
   const previous_issues = state.issues.get(file);
 
@@ -1124,8 +1127,8 @@ async function processTag(
 
     spinnerImg.text = kleur.dim(
       `<${tag}> [${i + 1}/${tagsArray.length}] ${$(tagElement).attr(
-        attribute_to_log
-      )}`
+        attribute_to_log,
+      )}`,
     );
 
     const el = $(tagElement);
@@ -1146,7 +1149,7 @@ async function processTag(
 
   // Reset spinner
   spinnerImg.text = kleur.dim(
-    `<${tag}> [${tagsArray.length}/${tagsArray.length}]`
+    `<${tag}> [${tagsArray.length}/${tagsArray.length}]`,
   );
 
   // Notify issues
@@ -1161,7 +1164,7 @@ async function processTag(
 
 const isExternalImage = (
   content: string,
-  external: Options['image']['external']
+  external: Options['image']['external'],
 ) =>
   !isLocal(content) &&
   isIncluded(content, external.src_include, external.src_exclude);
@@ -1169,7 +1172,7 @@ const isExternalImage = (
 async function externalImage(
   content: string,
   state: GlobalState,
-  htmlfile: string
+  htmlfile: string,
 ): Promise<string | undefined> {
   const { process } = state.options.image.external;
   if (process === 'download')
