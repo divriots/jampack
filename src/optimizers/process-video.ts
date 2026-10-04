@@ -31,7 +31,7 @@ export async function processVideo(
     (lazyloadOptions.when === 'below-the-fold' && !isAboveTheFold)
   ) {
     if (lazyloadOptions.how === 'js') {
-      video.attr('class', 'jampack-lozad');
+      video.addClass('jampack-lozad');
       const src = video.attr('src');
       if (src) {
         video.attr('data-src', src);
