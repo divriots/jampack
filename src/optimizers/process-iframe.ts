@@ -24,7 +24,7 @@ export async function processIframe(
     } else if (lazyloadOptions.how === 'js') {
       const src = iframe.attr('src');
       if (src) {
-        iframe.attr('class', 'jampack-lozad');
+        iframe.addClass('jampack-lozad');
         iframe.attr('data-src', src);
         iframe.removeAttr('src');
         await install_lozad(state, htmlfile, appendToBody);
