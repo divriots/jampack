@@ -1,5 +1,6 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
+import type { MarkdownInstance } from 'astro';
 import path from 'path';
 import { execSync } from 'child_process';
 import Convert from 'ansi-to-html';
@@ -18,7 +19,8 @@ const { feature } = Astro.params;
 // Loading the feature description
 // (this loading is complex because it's a dynamic import)
 //
-const content = (await Astro.glob('../../../public/features/*/index.md')).find(m => m.file === path.resolve(`public/features/${feature}/index.md`));
+const content = Object.values(import.meta.glob<MarkdownInstance<Record<string, any>>>('../../../public/features/*/index.md', { eager: true })).find(m => m.file === path.resolve(`public/features/${feature}/index.md`))!;
+const contentHtml = await content.compiledContent();
 
 // Setup paths
 //
@@ -44,7 +46,7 @@ const iframePacked = `/features/${feature}/packed/index.html`;
 ---
 <MainLayout frontmatter={{ title: content.frontmatter.title, description: content.frontmatter.description, layout: undefined}} headings={content.getHeadings()}>
 
-  <section set:html={ content.compiledContent() }>
+  <section set:html={ contentHtml }>
   </section>
 
   <h2>Demo</h2>

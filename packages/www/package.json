@@ -3,6 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "private": true,
+  "packageManager": "pnpm@10.33.4",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
@@ -15,24 +16,30 @@
   },
   "dependencies": {
     "@algolia/client-search": "^4.23.3",
-    "@astrojs/mdx": "2.3.1",
-    "@astrojs/preact": "^3.2.0",
-    "@astrojs/react": "^3.3.0",
+    "@astrojs/mdx": "8.1.1",
+    "@astrojs/preact": "^6.1.1",
+    "@astrojs/react": "^7.1.1",
     "@docsearch/css": "^3.6.0",
     "@docsearch/react": "^3.6.0",
-    "@types/node": "^20.12.7",
+    "@types/node": "^20.19.43",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.25",
     "ansi-to-html": "^0.7.2",
-    "astro": "^4.6.3",
+    "astro": "^7.4.2",
     "dir-compare": "^4.2.0",
     "front-matter": "^4.0.2",
-    "preact": "^10.20.2",
+    "preact": "^10.29.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "sass": "^1.75.0"
+    "sass": "^1.106.1"
   },
   "devDependencies": {
     "ultrahtml": "^1.5.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [],
+    "ignoredBuiltDependencies": [
+      "@parcel/watcher"
+    ]
   }
 }
