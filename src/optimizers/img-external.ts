@@ -39,8 +39,11 @@ export async function downloadExternalImage(
     const maxAge = cacheControl['max-age'];
     const expires = dataFromCache?.meta?.Expires;
     let expireTime = NaN;
-    if (date && maxAge) {
-      expireTime = Date.parse(date) + maxAge * 1000;
+    if (cacheControl['no-cache'] || cacheControl['no-store']) {
+      // Must revalidate every time (can be set by a 304 refresh)
+    } else if (maxAge !== undefined) {
+      // max-age takes precedence over Expires, and 0 means already stale
+      if (date) expireTime = Date.parse(date) + maxAge * 1000;
     } else if (expires) {
       expireTime = Date.parse(expires);
     } else {
