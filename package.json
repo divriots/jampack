@@ -69,7 +69,7 @@
     "cleanAllDotJampack": "find -s . | grep '.jampack$' | xargs rm -fr"
   },
   "engines": {
-    "node": ">=20.9.0"
+    "node": ">=20.10.0"
   },
   "bugs": "https://github.com/divriots/jampack/issues",
   "keywords": [],
