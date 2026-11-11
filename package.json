@@ -74,9 +74,14 @@
   "bugs": "https://github.com/divriots/jampack/issues",
   "keywords": [],
   "types": "dist/index.d.ts",
+  "packageManager": "pnpm@10.33.4",
   "pnpm": {
     "overrides": {
       "@divriots/cheerio>undici": "^6.29.1"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@swc/core",
+      "esbuild"
+    ]
   }
 }
