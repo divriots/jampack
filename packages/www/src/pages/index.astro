@@ -8,7 +8,7 @@ import * as CONFIG from '../config';
 
 // Clean content of <h1> because already created by the layout
 // Clean <div> to remove the ‹div›RIOTS banner
-const content = compiledContent();
+const content = await compiledContent();
 const output = await transform(content, [
   swap({
     a: (props, children) => {

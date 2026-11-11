@@ -9,4 +9,7 @@ export default defineConfig({
     mdx(),
   ],
   site: `https://jampack.divRIOTS.com`,
+  // Astro 7 changed the default to 'jsx', which strips whitespace between
+  // inline elements. Keep the previous behavior.
+  compressHTML: true,
 });

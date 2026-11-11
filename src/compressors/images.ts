@@ -1,11 +1,14 @@
-import sharp from 'sharp';
+import sharp, {
+  type ResizeOptions,
+  type WebpOptions as SharpWebpOptions,
+} from 'sharp';
 import { optimize as svgo } from 'svgo';
 import { getFromCache, addToCache, computeCacheHash } from '../cache.js';
 import { WebpOptions } from '../config-types.js';
-import { MimeType } from 'file-type';
 import { GlobalState } from '../state.js';
 
-export type ImageMimeType = MimeType | 'image/svg+xml';
+// file-type >= 20 types mime as a plain string
+export type ImageMimeType = string;
 
 export const AllImageFormat = ['webp', 'svg', 'jpg', 'png', 'avif'];
 export type ImageFormat = (typeof AllImageFormat)[number] | undefined;
@@ -16,11 +19,13 @@ export type Image = {
 };
 
 export type ImageOutputOptions = {
-  resize?: sharp.ResizeOptions;
+  resize?: ResizeOptions;
   toFormat?: 'webp' | 'avif' | 'png' | 'jpeg' | 'unchanged';
 };
 
-function createWebpOptions(opt: WebpOptions | undefined): sharp.WebpOptions {
+function createWebpOptions(
+  opt: WebpOptions | undefined
+): SharpWebpOptions {
   return {
     nearLossless: opt!.mode === 'lossless',
     quality: opt!.quality,
@@ -60,7 +65,7 @@ export async function compressImage(
 
   let outputFormat: ImageFormat;
   // Second encoding to try; kept only if at least 10% smaller than the first one
-  let alternativeWebpOptions: sharp.WebpOptions | undefined;
+  let alternativeWebpOptions: SharpWebpOptions | undefined;
   const imageOptions = state.options.image;
   // Special case for svg
   if (meta.format === 'svg') {
@@ -99,8 +104,7 @@ export async function compressImage(
         sharpFile = sharpFile.png(imageOptions.png.options || {});
         outputFormat = 'png';
         break;
-      case 'jpeg':
-      case 'jpg':
+      case 'jpeg': // sharp reports JPEG as 'jpeg', never 'jpg'
         sharpFile = sharpFile.jpeg(imageOptions.jpeg.options || {});
         outputFormat = 'jpg';
         break;
@@ -110,8 +114,7 @@ export async function compressImage(
         );
         outputFormat = 'webp';
         break;
-      case 'heif':
-      case 'avif':
+      case 'heif': // sharp reports AVIF as 'heif'
         sharpFile = sharpFile.avif({ effort: 4, quality: 50 }); // TODO create config for avif
         outputFormat = 'avif';
         break;
