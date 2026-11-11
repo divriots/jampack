@@ -30,13 +30,13 @@
     "@divriots/cheerio": "1.0.0-rc.12",
     "@swc/core": "^1.4.16",
     "add": "^2.0.6",
-    "browserslist": "^4.23.0",
+    "browserslist": "^4.28.7",
     "commander": "^12.0.0",
     "critters": "^0.0.22",
     "deepmerge": "^4.3.1",
-    "esbuild": "^0.20.2",
+    "esbuild": "^0.25.12",
     "escalade": "^3.2.0",
-    "file-type": "^19.0.0",
+    "file-type": "^21.3.4",
     "globby": "^14.0.1",
     "hasha": "^6.0.0",
     "html-minifier-terser": "^7.2.0",
@@ -46,10 +46,10 @@
     "mini-svg-data-uri": "^1.4.4",
     "ora": "^8.0.1",
     "quicklink": "^2.3.0",
-    "sharp": "^0.33.3",
-    "svgo": "^3.2.0",
+    "sharp": "^0.35.5",
+    "svgo": "^3.3.5",
     "table": "^6.8.2",
-    "undici": "^6.13.0",
+    "undici": "^6.29.1",
     "unpic": "^3.18.0"
   },
   "devDependencies": {
@@ -69,9 +69,14 @@
     "cleanAllDotJampack": "find -s . | grep '.jampack$' | xargs rm -fr"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=20.9.0"
   },
   "bugs": "https://github.com/divriots/jampack/issues",
   "keywords": [],
-  "types": "dist/index.d.ts"
+  "types": "dist/index.d.ts",
+  "pnpm": {
+    "overrides": {
+      "@divriots/cheerio>undici": "^6.29.1"
+    }
+  }
 }

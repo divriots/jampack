@@ -1,10 +1,14 @@
 import * as url from 'url';
 import * as path from 'path';
 import * as fsp from 'fs/promises';
-import { fileTypeFromBuffer, FileExtension, MimeType } from 'file-type';
+import { fileTypeFromBuffer } from 'file-type';
 import sharp from 'sharp';
 import { AllImageFormat, ImageFormat } from '../compressors/images.js';
 import { GlobalState } from '../state.js';
+
+// file-type >= 20 types ext and mime as plain strings
+type FileExtension = string;
+type MimeType = string;
 
 type ImageMeta = {
   width: number | undefined;
