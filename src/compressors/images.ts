@@ -31,7 +31,7 @@ function createWebpOptions(opt: WebpOptions | undefined): sharp.WebpOptions {
 // PNG -> WebP: near-lossless suits flat graphics (logos, icons, UI) but
 // photo-like PNGs (gradients, photos saved as PNG, typical blog heroes) come
 // out 2-12x bigger than lossy and barely shrink when resized. We encode both
-// and keep lossy only when it is clearly smaller, so graphics where the gain
+// and keep lossy only when it is at least 10% smaller, so graphics where the gain
 // would be marginal keep their crisp edges.
 const PNG_TO_WEBP_LOSSY_MAX_RATIO = 0.9;
 
@@ -59,7 +59,7 @@ export async function compressImage(
   }
 
   let outputFormat: ImageFormat;
-  // Second encoding to try; kept only if clearly smaller than the first one
+  // Second encoding to try; kept only if at least 10% smaller than the first one
   let alternativeWebpOptions: sharp.WebpOptions | undefined;
   const imageOptions = state.options.image;
   // Special case for svg
@@ -177,7 +177,7 @@ export async function compressImage(
       sharpFile.clone().webp(alternativeWebpOptions).toBuffer(),
     ]);
     outputData =
-      alternative.length < primary.length * PNG_TO_WEBP_LOSSY_MAX_RATIO
+      alternative.length <= primary.length * PNG_TO_WEBP_LOSSY_MAX_RATIO
         ? alternative
         : primary;
   } else {
