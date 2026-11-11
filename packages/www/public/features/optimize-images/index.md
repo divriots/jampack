@@ -30,8 +30,8 @@ becomes
 
 ### `src` image is compressed
 
-- `JPEG` images are compressed into lossly `WebP` using [`sharp`](https://sharp.pixelplumbing.com).
-- `PNG` images are compressed into near lossless `WebP` using the [near_lossless option of the sharp library](https://sharp.pixelplumbing.com/api-output#webp).
+- `JPEG` images are compressed into lossy `WebP` using [`sharp`](https://sharp.pixelplumbing.com).
+- `PNG` images are compressed into `WebP` twice, near lossless (using the [near_lossless option of the sharp library](https://sharp.pixelplumbing.com/api-output#webp)) and lossy. The lossy version is kept only if it is at least 10% smaller: photo-like PNGs get much smaller files, while logos, icons and screenshots with text stay near lossless.
 - `AVIF` images are compressed using [`sharp`](https://sharp.pixelplumbing.com).
 - `SVG` images are compressed using [svgo](https://github.com/svg/svgo)
 
@@ -103,9 +103,9 @@ will become
 ```
 
 If the original image is lossless (`PNG` or `WebP lossless`) then:
-- The `WebP` image set will be compressed with [near_lossless option](https://sharp.pixelplumbing.com/api-output#webp).
+- For `PNG`, each image of the `WebP` image set will be compressed with the [near_lossless option](https://sharp.pixelplumbing.com/api-output#webp), or lossy if that is at least 10% smaller.
 - No `AVIF` image set will be created because AVIF lossless is not very good [(1)](https://www.reddit.com/r/jpegxl/comments/l9ta2u/how_does_lossless_jpegxl_compared_to_png/) [2](https://twitter.com/jonsneyers/status/1346389917816008704?s=19).
 
-If the original image is lossly (`JPEG` or `WebP lossly`) then:
+If the original image is lossy (`JPEG` or `WebP lossy`) then:
 - The `AVIF` image set will be compressed with normal quality settings.
-- The `WebP` image set will be lossly compressed.
+- The `WebP` image set will be lossy compressed.
