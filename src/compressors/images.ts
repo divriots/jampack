@@ -28,6 +28,13 @@ function createWebpOptions(opt: WebpOptions | undefined): sharp.WebpOptions {
   };
 }
 
+// PNG -> WebP: near-lossless suits flat graphics (logos, icons, UI) but
+// photo-like PNGs (gradients, photos saved as PNG, typical blog heroes) come
+// out 2-12x bigger than lossy and barely shrink when resized. We encode both
+// and keep lossy only when it is clearly smaller, so graphics where the gain
+// would be marginal keep their crisp edges.
+const PNG_TO_WEBP_LOSSY_MAX_RATIO = 0.9;
+
 export async function compressImage(
   state: GlobalState,
   data: Buffer,
@@ -52,6 +59,8 @@ export async function compressImage(
   }
 
   let outputFormat: ImageFormat;
+  // Second encoding to try; kept only if clearly smaller than the first one
+  let alternativeWebpOptions: sharp.WebpOptions | undefined;
   const imageOptions = state.options.image;
   // Special case for svg
   if (meta.format === 'svg') {
@@ -119,13 +128,18 @@ export async function compressImage(
         outputFormat = 'png';
         break;
       case 'webp':
-        sharpFile = sharpFile.webp(
-          createWebpOptions(
-            meta.format === 'png'
-              ? imageOptions.webp.options_lossless
-              : imageOptions.webp.options_lossly
-          )
-        );
+        if (meta.format === 'png') {
+          sharpFile = sharpFile.webp(
+            createWebpOptions(imageOptions.webp.options_lossless)
+          );
+          alternativeWebpOptions = createWebpOptions(
+            imageOptions.webp.options_lossly
+          );
+        } else {
+          sharpFile = sharpFile.webp(
+            createWebpOptions(imageOptions.webp.options_lossly)
+          );
+        }
         outputFormat = 'webp';
         break;
       case 'avif':
@@ -155,10 +169,25 @@ export async function compressImage(
   // Output image processed
   //
 
+  let outputData: Buffer;
+  if (alternativeWebpOptions) {
+    // See PNG_TO_WEBP_LOSSY_MAX_RATIO
+    const [primary, alternative] = await Promise.all([
+      sharpFile.clone().toBuffer(),
+      sharpFile.clone().webp(alternativeWebpOptions).toBuffer(),
+    ]);
+    outputData =
+      alternative.length < primary.length * PNG_TO_WEBP_LOSSY_MAX_RATIO
+        ? alternative
+        : primary;
+  } else {
+    outputData = await sharpFile.toBuffer();
+  }
+
   // Add to cache
   const outputImage: Image = {
     format: outputFormat,
-    data: await sharpFile.toBuffer(),
+    data: outputData,
   };
 
   await addToCache(state, 'img', cacheHash, {
